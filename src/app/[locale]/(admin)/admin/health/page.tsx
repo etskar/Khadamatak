@@ -43,7 +43,7 @@ export default async function AdminHealthPage({
   const [health, perf] = await Promise.all([getSystemHealth(), getPerformanceMetrics()]);
 
   const cards = [
-    { label: t("health.database"), value: health.database.ok ? t("health.ok") : t("health.down"), icon: <Database className="h-5 w-5" />, hint: health.database.fileSizeBytes ? `${Math.round(health.database.fileSizeBytes / 1024)} KB` : undefined },
+    { label: t("health.database"), value: health.database.ok ? t("health.ok") : t("health.down"), icon: <Database className="h-5 w-5" />, hint: health.database.ok ? health.database.provider : undefined },
     { label: t("health.totalUsers"), value: health.users.total.toLocaleString(localeFmt), icon: <Users className="h-5 w-5" />, hint: `${t("dashboard.pendingVerifications")}: ${health.users.pendingVerifications}` },
     { label: t("health.failedLogins24h"), value: health.security.failedLogins24h.toLocaleString(localeFmt), icon: <ShieldAlert className="h-5 w-5" /> },
     { label: t("health.queuedEmails"), value: health.email.queuedEmails.toLocaleString(localeFmt), icon: <Mail className="h-5 w-5" />, hint: `${t("health.failedEmails24h")}: ${health.email.failedEmails24h}` },

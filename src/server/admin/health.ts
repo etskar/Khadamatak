@@ -1,17 +1,7 @@
 import "server-only";
-import fs from "node:fs";
-import path from "node:path";
 import { db } from "@/lib/db";
 
 export async function getSystemHealth() {
-  const dbFile = path.join(process.cwd(), "prisma", "dev.db");
-  let dbSizeBytes: number | null = null;
-  try {
-    if (fs.existsSync(dbFile)) dbSizeBytes = fs.statSync(dbFile).size;
-  } catch {
-    dbSizeBytes = null;
-  }
-
   const [
     dbOk,
     userCount,
@@ -43,7 +33,7 @@ export async function getSystemHealth() {
   ]);
 
   return {
-    database: { ok: dbOk, fileSizeBytes: dbSizeBytes },
+    database: { ok: dbOk, provider: "postgresql" },
     users: { total: userCount, pendingVerifications },
     security: { failedLogins24h },
     email: { queuedEmails, failedEmails24h },

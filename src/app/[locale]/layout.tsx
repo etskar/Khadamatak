@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { notFound } from "next/navigation";
 import { NextIntlClientProvider, hasLocale } from "next-intl";
 import { getMessages, getTranslations, setRequestLocale } from "next-intl/server";
@@ -62,9 +62,12 @@ export async function generateMetadata({
       index: true,
       follow: true,
     },
-    themeColor: "#0d9488",
   };
 }
+
+export const viewport: Viewport = {
+  themeColor: "#0d9488",
+};
 
 export default async function LocaleLayout({
   children,
