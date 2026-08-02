@@ -1,36 +1,81 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Khadamatak (خدماتك)
 
-## Getting Started
+Production-ready foundation for a large-scale services marketplace and social platform.
 
-First, run the development server:
+## Stack
+
+- **Next.js 16** (App Router) + React 19 + TypeScript
+- **Tailwind CSS v4** design system
+- **next-intl** — Arabic (RTL) & Dutch (LTR)
+- **Zustand** UI state
+- **Framer Motion** ready / CSS motion tokens
+- **Lucide** icons
+
+## Getting started
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) — locale proxy redirects to `/ar` or `/nl`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Scripts
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Command        | Description              |
+| -------------- | ------------------------ |
+| `npm run dev`  | Development server       |
+| `npm run build`| Production build         |
+| `npm run start`| Start production server  |
+| `npm run lint` | ESLint                   |
 
-## Learn More
+## Routes
 
-To learn more about Next.js, take a look at the following resources:
+| Path                 | Description        |
+| -------------------- | ------------------ |
+| `/[locale]`          | Home feed          |
+| `/[locale]/login`    | Login              |
+| `/[locale]/register` | Register           |
+| `/[locale]/forgot-password` | Password recovery |
+| `/[locale]/search`   | Search             |
+| `/[locale]/products` | Products           |
+| `/[locale]/groups`   | Groups             |
+| `/[locale]/messages` | Messages           |
+| `/[locale]/notifications` | Notifications |
+| `/[locale]/profile`  | Profile             |
+| `/[locale]/settings` | Settings + language|
+| `/[locale]/wallet`   | Wallet (shell)     |
+| `/[locale]/deals`    | Deals (shell)      |
+| `/[locale]/admin`    | Admin panel shell  |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Architecture
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```
+src/
+  app/[locale]/     # Locale-aware routes (auth, main, admin)
+  components/
+    ui/             # Design system primitives
+    layout/         # Sidebar, top nav, bottom nav, shell
+    feed/           # Home feed UI
+    auth/           # Auth UI shells/forms
+    shared/         # Logo, page header, feature shell
+  config/           # Site + navigation config
+  i18n/             # Routing, navigation helpers, request config
+  types/            # User, roles, permissions foundation
+  stores/           # Client UI stores
+messages/           # ar.json, nl.json
+```
 
-## Deploy on Vercel
+## Foundation scope
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+This phase delivers:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Scalable folder structure & routing
+- Premium mobile-first UI + design system
+- Full AR/NL i18n with RTL/LTR
+- Navigation (desktop sidebar + mobile bottom nav)
+- Home feed structure (no mock data)
+- User/role/permission type foundation
+- Connected real pages (no fake links)
+
+Not included yet (by design): auth logic, wallet, marketplace, messaging, notifications logic, deals, admin business logic.

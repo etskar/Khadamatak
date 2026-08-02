@@ -1,0 +1,54 @@
+import { getTranslations, setRequestLocale } from "next-intl/server";
+import { auth } from "@/lib/auth";
+import { redirect } from "next/navigation";
+import { getProfileByUserId } from "@/server/users/profile-service";
+import { SettingsClient } from "@/components/settings/settings-client";
+import { logoutAction } from "@/server/actions/auth-actions";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "settings" });
+  return { title: t("title") };
+}
+
+export default async function SettingsPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+  const session = await auth();
+  if (!session?.user?.id) {
+    redirect(`/${locale}/login?callbackUrl=/${locale}/settings`);
+  }
+
+  const profile = await getProfileByUserId(session.user.id);
+  if (!profile) redirect(`/${locale}`);
+
+  return (
+    <SettingsClient
+      locale={locale}
+      profile={{
+        displayName: profile.displayName,
+        bio: profile.bio ?? "",
+        country: profile.country ?? "",
+        city: profile.city ?? "",
+        work: profile.work ?? "",
+        education: profile.education ?? "",
+        hobbies: profile.hobbies ?? "",
+        languages: profile.languages ?? "",
+        website: profile.website ?? "",
+        contactEmail: profile.contactEmail ?? "",
+        contactPhone: profile.contactPhone ?? "",
+        theme: profile.user.theme,
+        notificationsOn: profile.user.notificationsOn,
+      }}
+      logoutAction={logoutAction.bind(null, locale)}
+    />
+  );
+}
