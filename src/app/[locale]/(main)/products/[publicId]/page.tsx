@@ -78,20 +78,16 @@ export default async function ProductDetailPage({
         publishedAt: product.publishedAt?.toISOString() ?? product.createdAt.toISOString(),
       }}
       labels={{
-        buyNow: t("buyNow"),
         contact: t("contactSeller"),
         save: t("save"),
         share: t("share"),
         report: t("report"),
-        offer: t("makeOffer"),
-        startDeal: t("startDeal"),
         verified: t("verified"),
         views: t("views"),
         condition: t("condition"),
         location: t("location"),
         seller: t("seller"),
         loginRequired: t("loginRequired"),
-        verificationRequired: t("verificationRequired"),
         noMedia: t("noMedia"),
       }}
     />

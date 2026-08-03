@@ -23,6 +23,7 @@ type FiltersDrawerProps = {
 
 export function FiltersDrawer({ basePath, categories, initial }: FiltersDrawerProps) {
   const t = useTranslations("marketplace");
+  const tCommon = useTranslations("common");
   const router = useRouter();
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
@@ -107,7 +108,7 @@ export function FiltersDrawer({ basePath, categories, initial }: FiltersDrawerPr
               type="button"
               onClick={() => setOpen(false)}
               className="rounded-xl p-2 text-muted-foreground hover:bg-muted"
-              aria-label={t("close")}
+              aria-label={tCommon("close")}
             >
               <X className="h-5 w-5" />
             </button>
