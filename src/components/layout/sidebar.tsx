@@ -1,9 +1,9 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { ChevronLeft, ChevronRight, Shield } from "lucide-react";
+import { ChevronLeft, ChevronRight, LogOut, Shield } from "lucide-react";
 import { useLocale } from "next-intl";
-import { useSession } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import { Link, usePathname } from "@/i18n/navigation";
 import { adminNavItems, mainNavItems } from "@/config/navigation";
 import { Logo } from "@/components/shared/logo";
@@ -150,6 +150,16 @@ export function Sidebar() {
               ? session.user.name ?? t("profile")
               : t("login")}
         </Link>
+        {session?.user && !collapsed ? (
+          <button
+            type="button"
+            onClick={() => signOut({ callbackUrl: `/${locale}/login` })}
+            className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-sm font-semibold text-muted-foreground transition hover:bg-muted hover:text-foreground"
+          >
+            <LogOut className="h-4 w-4" />
+            {t("logout")}
+          </button>
+        ) : null}
       </div>
     </aside>
   );

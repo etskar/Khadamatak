@@ -1,8 +1,9 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useSession } from "next-auth/react";
-import { Bell, Menu, MessageCircle, Search } from "lucide-react";
+import { useLocale } from "next-intl";
+import { signOut, useSession } from "next-auth/react";
+import { Bell, LogOut, Menu, MessageCircle, Search } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { Logo } from "@/components/shared/logo";
 import { IconButton } from "@/components/ui/icon-button";
@@ -20,6 +21,7 @@ export function TopNav({ className }: TopNavProps) {
   const tA11y = useTranslations("a11y");
   const setMobileMenuOpen = useUiStore((s) => s.setMobileMenuOpen);
   const { data: session } = useSession();
+  const locale = useLocale();
 
   return (
     <header
@@ -79,22 +81,33 @@ export function TopNav({ className }: TopNavProps) {
           </Link>
 
           {session?.user ? (
-            <Link
-              href="/profile"
-              className="ms-1 inline-flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-brand-500 to-brand-700 text-sm font-bold text-white shadow-sm ring-2 ring-card"
-              aria-label={t("profile")}
-            >
-              {session.user.image ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={session.user.image}
-                  alt=""
-                  className="h-full w-full object-cover"
-                />
-              ) : (
-                (session.user.name?.[0] ?? "K").toUpperCase()
-              )}
-            </Link>
+            <>
+              <IconButton
+                label={t("logout")}
+                className="hidden sm:inline-flex"
+                onClick={() =>
+                  signOut({ callbackUrl: `/${locale}/login` })
+                }
+              >
+                <LogOut className="h-5 w-5" />
+              </IconButton>
+              <Link
+                href="/profile"
+                className="ms-1 inline-flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-brand-500 to-brand-700 text-sm font-bold text-white shadow-sm ring-2 ring-card"
+                aria-label={t("profile")}
+              >
+                {session.user.image ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={session.user.image}
+                    alt=""
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  (session.user.name?.[0] ?? "K").toUpperCase()
+                )}
+              </Link>
+            </>
           ) : (
             <Link
               href="/login"

@@ -2,7 +2,9 @@
 
 import { useEffect } from "react";
 import { useTranslations } from "next-intl";
-import { X, Shield } from "lucide-react";
+import { useLocale } from "next-intl";
+import { signOut, useSession } from "next-auth/react";
+import { X, LogOut, Shield } from "lucide-react";
 import { Link, usePathname } from "@/i18n/navigation";
 import { adminNavItems, mainNavItems } from "@/config/navigation";
 import { Logo } from "@/components/shared/logo";
@@ -22,6 +24,8 @@ export function MobileDrawer() {
   const pathname = usePathname();
   const open = useUiStore((s) => s.mobileMenuOpen);
   const setOpen = useUiStore((s) => s.setMobileMenuOpen);
+  const { data: session } = useSession();
+  const locale = useLocale();
 
   useEffect(() => {
     setOpen(false);
@@ -109,12 +113,23 @@ export function MobileDrawer() {
             {tCommon("language")}
           </p>
           <LanguageSwitcher variant="full" />
-          <Link
-            href="/login"
-            className="flex h-11 items-center justify-center rounded-xl bg-primary text-sm font-semibold text-primary-foreground"
-          >
-            {t("login")}
-          </Link>
+          {session?.user ? (
+            <button
+              type="button"
+              onClick={() => signOut({ callbackUrl: `/${locale}/login` })}
+              className="flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-primary text-sm font-semibold text-primary-foreground"
+            >
+              <LogOut className="h-4 w-4" />
+              {t("logout")}
+            </button>
+          ) : (
+            <Link
+              href="/login"
+              className="flex h-11 items-center justify-center rounded-xl bg-primary text-sm font-semibold text-primary-foreground"
+            >
+              {t("login")}
+            </Link>
+          )}
         </div>
       </div>
     </div>

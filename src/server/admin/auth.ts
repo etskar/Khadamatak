@@ -136,22 +136,28 @@ export async function adminLogin(input: {
 
   const token = generateSecureToken(32);
   const deviceHash = input.req.deviceHash ?? hashDevice(input.userAgent);
+  const twoFactorEnabled = Boolean(
+    admin.twoFactorEnabled && admin.twoFactorSecret,
+  );
 
   const session = await db.adminSession.create({
     data: {
       adminUserId: admin.id,
       tokenHash: hashToken(token),
-      status: "pending_2fa",
+      // When 2FA is disabled the session is active immediately; when enabled
+      // it stays pending until the second factor is verified.
+      status: twoFactorEnabled ? "pending_2fa" : "active",
       ipAddress: input.req.ipAddress,
       userAgent: input.req.userAgent,
       deviceHash,
       country: input.req.country,
       city: input.req.city,
+      lastSeenAt: new Date(),
       expiresAt: new Date(Date.now() + SESSION_MAX_AGE_MS),
     },
   });
 
-  if (admin.twoFactorEnabled && admin.twoFactorSecret) {
+  if (twoFactorEnabled) {
     // TOTP 2FA — no email OTP needed
     await logLoginAttempt({
       adminUserId: admin.id,
@@ -160,7 +166,6 @@ export async function adminLogin(input: {
       req: input.req,
     });
   } else {
-    await sendEmailOtp(admin.id, admin.email);
     await logLoginAttempt({
       adminUserId: admin.id,
       email,
@@ -169,7 +174,7 @@ export async function adminLogin(input: {
     });
   }
 
-  return { ok: true as const, token, sessionId: session.id, totpRequired: Boolean(admin.twoFactorEnabled && admin.twoFactorSecret) };
+  return { ok: true as const, token, sessionId: session.id, totpRequired: twoFactorEnabled };
 }
 
 export async function resendLoginOtp(sessionToken: string, _req: RequestInfo) {
