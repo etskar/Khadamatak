@@ -1,8 +1,9 @@
-import { BadgeCheck, Heart, MapPin, Star } from "lucide-react";
+import { Heart, MapPin, Star } from "lucide-react";
 import Image from "next/image";
 import { Link } from "@/i18n/navigation";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { VerificationBadge } from "@/components/shared/verification-badge";
 import { formatMoney } from "@/lib/money";
 import { cn } from "@/lib/utils";
 
@@ -70,8 +71,10 @@ export function ListingCard({
               {title}
             </h3>
             {verified ? (
-              <BadgeCheck className="h-4 w-4 shrink-0 text-brand-600" />
-            ) : null}
+              <VerificationBadge verified compact />
+            ) : (
+              <VerificationBadge verified={false} compact />
+            )}
           </div>
           {priceLabel ? (
             <p className="text-sm font-bold text-brand-700 dark:text-brand-300">

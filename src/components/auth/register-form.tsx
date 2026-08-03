@@ -21,7 +21,6 @@ type FieldErrors = {
   username?: string;
   email?: string;
   password?: string;
-  confirmPassword?: string;
 };
 
 export function RegisterForm() {
@@ -37,7 +36,6 @@ export function RegisterForm() {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
 
   function validate(): boolean {
@@ -48,7 +46,6 @@ export function RegisterForm() {
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim()))
       errors.email = t("errors.invalidEmail");
     if (password.length < 8) errors.password = t("errors.weakPassword");
-    if (confirmPassword !== password) errors.confirmPassword = t("errors.mismatch");
     setFieldErrors(errors);
     return Object.keys(errors).length === 0;
   }
@@ -137,18 +134,6 @@ export function RegisterForm() {
         value={password}
         onChange={(e) => setPassword(e.target.value)}
         error={fieldErrors.password}
-        required
-        minLength={8}
-      />
-      <PasswordInput
-        name="confirmPassword"
-        autoComplete="new-password"
-        label={t("confirmPassword")}
-        placeholder={t("passwordPlaceholder")}
-        leftIcon={<Lock className="h-4 w-4" />}
-        value={confirmPassword}
-        onChange={(e) => setConfirmPassword(e.target.value)}
-        error={fieldErrors.confirmPassword}
         required
         minLength={8}
       />

@@ -1,8 +1,8 @@
-import "server-only";
+﻿import "server-only";
 import { db } from "@/lib/db";
 import { createProductPublicId } from "@/lib/ids";
 import { writeAuditLog } from "@/lib/audit";
-import { assertVerifiedSeller } from "./guards";
+
 import { boundingBox, haversineKm } from "./location";
 
 export async function listProducts(input: {
@@ -160,7 +160,6 @@ export async function createProduct(input: {
   groupId?: string | null;
   status?: "draft" | "active";
 }) {
-  await assertVerifiedSeller(input.sellerId);
   if (!input.title.trim() || input.priceCents < 1) throw new Error("INVALID_INPUT");
 
   const product = await db.product.create({
@@ -262,3 +261,5 @@ export async function getSellerProducts(sellerId: string) {
     include: { media: true, category: true, _count: { select: { favorites: true } } },
   });
 }
+
+

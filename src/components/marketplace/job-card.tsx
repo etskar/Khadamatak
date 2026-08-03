@@ -1,7 +1,8 @@
-import { BadgeCheck, MapPin } from "lucide-react";
+import { MapPin } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { VerificationBadge } from "@/components/shared/verification-badge";
 import { formatMoney } from "@/lib/money";
 import { cn } from "@/lib/utils";
 
@@ -90,9 +91,7 @@ export function JobCard({
             <h3 className="line-clamp-1 text-sm font-semibold leading-snug sm:text-base">
               {title}
             </h3>
-            {verified ? (
-              <BadgeCheck className="h-4 w-4 shrink-0 text-brand-600" />
-            ) : null}
+            <VerificationBadge verified={Boolean(verified)} compact />
           </div>
           <p className="line-clamp-1 text-xs text-muted-foreground sm:text-sm">
             {company}

@@ -1,8 +1,8 @@
-import "server-only";
+﻿import "server-only";
 import { db } from "@/lib/db";
 import { createJobPublicId } from "@/lib/ids";
 import { writeAuditLog } from "@/lib/audit";
-import { assertVerifiedSeller } from "./guards";
+
 import { boundingBox, haversineKm } from "./location";
 
 export async function listJobs(input: {
@@ -155,7 +155,6 @@ export async function createJob(input: {
   groupId?: string | null;
   status?: "draft" | "active";
 }) {
-  await assertVerifiedSeller(input.employerId);
   if (!input.title.trim() || !input.company.trim()) throw new Error("INVALID_INPUT");
 
   const job = await db.job.create({
@@ -222,3 +221,5 @@ export async function updateJobStatus(
     },
   });
 }
+
+

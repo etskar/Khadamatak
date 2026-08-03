@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { LanguageSwitcher } from "./language-switcher";
 import { useUiStore } from "@/stores/ui-store";
 import { cn } from "@/lib/utils";
+import { canAccessAdmin } from "@/lib/permissions";
 
 function isActivePath(pathname: string, href: string) {
   if (href === "/") return pathname === "/";
@@ -88,24 +89,26 @@ export function MobileDrawer() {
 
           <div className="my-2 border-t border-border" />
 
-          {adminNavItems.map((item) => {
-            const active = isActivePath(pathname, item.href);
-            return (
-              <Link
-                key={item.key}
-                href={item.href}
-                className={cn(
-                  "flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium",
-                  active
-                    ? "bg-brand-50 text-brand-700 dark:bg-brand-800/25"
-                    : "hover:bg-muted",
-                )}
-              >
-                <Shield className="h-5 w-5" />
-                {t(item.key)}
-              </Link>
-            );
-          })}
+          {session?.user?.role && canAccessAdmin(session.user.role)
+            ? adminNavItems.map((item) => {
+                const active = isActivePath(pathname, item.href);
+                return (
+                  <Link
+                    key={item.key}
+                    href={item.href}
+                    className={cn(
+                      "flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium",
+                      active
+                        ? "bg-brand-50 text-brand-700 dark:bg-brand-800/25"
+                        : "hover:bg-muted",
+                    )}
+                  >
+                    <Shield className="h-5 w-5" />
+                    {t(item.key)}
+                  </Link>
+                );
+              })
+            : null}
         </nav>
 
         <div className="space-y-3 border-t border-border p-4">

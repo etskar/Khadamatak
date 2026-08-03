@@ -4,7 +4,6 @@ import { useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 import {
-  BadgeCheck,
   Flag,
   Heart,
   MapPin,
@@ -15,6 +14,7 @@ import { useRouter } from "@/i18n/navigation";
 import { Link } from "@/i18n/navigation";
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { VerificationBadge } from "@/components/shared/verification-badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "@/components/ui/toast";
@@ -188,12 +188,7 @@ export function ProductDetailClient({ product, labels }: Props) {
               />
               <div>
                 <p className="font-semibold">{product.seller.name}</p>
-                {product.seller.verified ? (
-                  <Badge variant="success" className="gap-1">
-                    <BadgeCheck className="h-3 w-3" />
-                    {labels.verified}
-                  </Badge>
-                ) : null}
+                <VerificationBadge verified={product.seller.verified} compact />
               </div>
             </Link>
 

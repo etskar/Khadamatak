@@ -3,7 +3,6 @@
 import { useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
 import {
-  BadgeCheck,
   Building2,
   Clock,
   Flag,
@@ -15,6 +14,7 @@ import {
 import { useRouter } from "@/i18n/navigation";
 import { Link } from "@/i18n/navigation";
 import { Avatar } from "@/components/ui/avatar";
+import { VerificationBadge } from "@/components/shared/verification-badge";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -142,12 +142,7 @@ export function JobDetailClient({ job, labels }: Props) {
             <div>
               <div className="flex flex-wrap items-center gap-2">
                 <h1 className="text-2xl font-bold">{job.title}</h1>
-                {job.employer.verified ? (
-                  <Badge variant="success" className="gap-1">
-                    <BadgeCheck className="h-3 w-3" />
-                    {labels.verified}
-                  </Badge>
-                ) : null}
+                <VerificationBadge verified={job.employer.verified} />
               </div>
               <p className="mt-1 flex items-center gap-1.5 text-sm text-muted-foreground">
                 <Building2 className="h-4 w-4" />

@@ -1,10 +1,11 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { BadgeCheck, Heart, MapPin, MessageCircle, Star } from "lucide-react";
+import { Heart, MapPin, MessageCircle, Star } from "lucide-react";
 import { useRouter, Link } from "@/i18n/navigation";
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { VerificationBadge } from "@/components/shared/verification-badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "@/components/ui/toast";
@@ -140,12 +141,7 @@ export function ServiceDetailClient({
               <Avatar src={service.provider.avatarUrl} fallback={service.provider.name} size="lg" />
               <div>
                 <p className="font-semibold">{service.provider.name}</p>
-                {service.provider.verified ? (
-                  <Badge variant="success" className="gap-1">
-                    <BadgeCheck className="h-3 w-3" />
-                    {labels.verified}
-                  </Badge>
-                ) : null}
+                <VerificationBadge verified={service.provider.verified} compact />
               </div>
             </Link>
 

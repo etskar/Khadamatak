@@ -10,6 +10,7 @@ import { Logo } from "@/components/shared/logo";
 import { Button } from "@/components/ui/button";
 import { useUiStore } from "@/stores/ui-store";
 import { cn } from "@/lib/utils";
+import { canAccessAdmin } from "@/lib/permissions";
 import type { AppLocale } from "@/i18n/routing";
 
 function isActivePath(pathname: string, href: string) {
@@ -108,32 +109,34 @@ export function Sidebar() {
 
         <div className="my-3 border-t border-border" />
 
-        {adminNavItems.map((item) => {
-          const active = isActivePath(pathname, item.href);
-          return (
-            <Link
-              key={item.key}
-              href={item.href}
-              className={cn(
-                "group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all",
-                active
-                  ? "bg-brand-50 text-brand-700 dark:bg-brand-800/25 dark:text-brand-200"
-                  : "text-muted-foreground hover:bg-muted hover:text-foreground",
-                collapsed && "justify-center px-0",
-              )}
-              title={t(item.key)}
-            >
-              <Shield
-                className={cn(
-                  "h-5 w-5 shrink-0",
-                  active && "text-brand-600 dark:text-brand-300",
-                )}
-                strokeWidth={active ? 2.25 : 1.85}
-              />
-              {!collapsed ? <span>{t(item.key)}</span> : null}
-            </Link>
-          );
-        })}
+        {session?.user?.role && canAccessAdmin(session.user.role)
+          ? adminNavItems.map((item) => {
+              const active = isActivePath(pathname, item.href);
+              return (
+                <Link
+                  key={item.key}
+                  href={item.href}
+                  className={cn(
+                    "group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all",
+                    active
+                      ? "bg-brand-50 text-brand-700 dark:bg-brand-800/25 dark:text-brand-200"
+                      : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                    collapsed && "justify-center px-0",
+                  )}
+                  title={t(item.key)}
+                >
+                  <Shield
+                    className={cn(
+                      "h-5 w-5 shrink-0",
+                      active && "text-brand-600 dark:text-brand-300",
+                    )}
+                    strokeWidth={active ? 2.25 : 1.85}
+                  />
+                  {!collapsed ? <span>{t(item.key)}</span> : null}
+                </Link>
+              );
+            })
+          : null}
       </nav>
 
       <div className="border-t border-border p-3">

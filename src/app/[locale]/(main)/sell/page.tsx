@@ -3,8 +3,9 @@ import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { getSellerDashboard } from "@/server/marketplace/dashboard-service";
 import { PageHeader } from "@/components/shared/page-header";
-import { Link } from "@/i18n/navigation";
 import { Card, CardContent } from "@/components/ui/card";
+import { PrimaryAction } from "@/components/ui/primary-action";
+import { PackagePlus, Wrench, Building2 } from "lucide-react";
 import { SellerListingsClient } from "@/components/marketplace/seller-listings-client";
 
 export default async function SellDashboardPage({
@@ -33,25 +34,10 @@ export default async function SellDashboardPage({
         title={t("sellerDashboard")}
         description={t("sellerDashboardSubtitle")}
         actions={
-          <div className="flex gap-2">
-            <Link
-              href="/sell/product"
-              className="inline-flex h-10 items-center rounded-xl bg-primary px-3 text-xs font-semibold text-primary-foreground"
-            >
-              {t("sellProduct")}
-            </Link>
-            <Link
-              href="/sell/service"
-              className="inline-flex h-10 items-center rounded-xl border px-3 text-xs font-semibold"
-            >
-              {t("offerService")}
-            </Link>
-            <Link
-              href="/sell/job"
-              className="inline-flex h-10 items-center rounded-xl border px-3 text-xs font-semibold"
-            >
-              {t("postJob")}
-            </Link>
+          <div className="flex flex-wrap gap-2">
+            <PrimaryAction href="/sell/product" icon={PackagePlus} label={t("sellProduct")} />
+            <PrimaryAction href="/sell/service" icon={Wrench} label={t("offerService")} variant="outline" />
+            <PrimaryAction href="/sell/job" icon={Building2} label={t("postJob")} variant="outline" />
           </div>
         }
       />

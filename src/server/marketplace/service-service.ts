@@ -1,8 +1,8 @@
-import "server-only";
+﻿import "server-only";
 import { db } from "@/lib/db";
 import { createServicePublicId } from "@/lib/ids";
 import { writeAuditLog } from "@/lib/audit";
-import { assertVerifiedSeller } from "./guards";
+
 import { boundingBox, haversineKm } from "./location";
 
 export async function listServices(input: {
@@ -140,7 +140,6 @@ export async function createService(input: {
   groupId?: string | null;
   status?: "draft" | "active";
 }) {
-  await assertVerifiedSeller(input.providerId);
   if (!input.title.trim()) throw new Error("INVALID_INPUT");
 
   const service = await db.service.create({
@@ -210,3 +209,5 @@ export async function getProviderServices(providerId: string) {
     include: { media: true, category: true, _count: { select: { favorites: true } } },
   });
 }
+
+

@@ -16,9 +16,6 @@ export default async function SellJobPage({
   if (!session?.user?.id) {
     redirect(`/${locale}/login?callbackUrl=/${locale}/sell/job`);
   }
-  if (session.user.verificationStatus !== "verified") {
-    redirect(`/${locale}/verification`);
-  }
   await ensureCategories();
   const t = await getTranslations("marketplace");
   const categories = await db.category.findMany({

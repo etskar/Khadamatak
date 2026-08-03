@@ -2,13 +2,13 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { BadgeCheck, MapPin, Briefcase, GraduationCap } from "lucide-react";
+import { MapPin, Briefcase, GraduationCap, Settings2, ShieldCheck } from "lucide-react";
 import { Avatar } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { PageHeader } from "@/components/shared/page-header";
+import { PrimaryAction } from "@/components/ui/primary-action";
+import { VerificationBadge } from "@/components/shared/verification-badge";
 import { PostCard, type FeedPost } from "@/components/feed/post-card";
-import { Link } from "@/i18n/navigation";
 import { startConversationAction } from "@/server/actions/social-actions";
 import { useRouter } from "@/i18n/navigation";
 import { toast } from "@/components/ui/toast";
@@ -64,19 +64,27 @@ export function ProfileView({
         title={isOwner ? t("title") : profile.displayName}
         actions={
           isOwner ? (
-            <div className="flex gap-2">
-              <Link
+            <div className="flex flex-wrap gap-2">
+              <PrimaryAction
                 href="/settings"
-                className="inline-flex h-9 items-center rounded-lg border border-border px-3 text-xs font-semibold"
-              >
-                {t("editProfile")}
-              </Link>
-              <Link
-                href="/verification"
-                className="inline-flex h-9 items-center rounded-lg bg-primary px-3 text-xs font-semibold text-primary-foreground"
-              >
-                {t("verify")}
-              </Link>
+                icon={Settings2}
+                label={t("editProfile")}
+                variant="outline"
+              />
+              {profile.verificationStatus === "verified" ? (
+                <PrimaryAction
+                  href="/verification"
+                  icon={ShieldCheck}
+                  label={t("verified")}
+                  variant="outline"
+                />
+              ) : (
+                <PrimaryAction
+                  href="/verification"
+                  icon={ShieldCheck}
+                  label={t("verify")}
+                />
+              )}
             </div>
           ) : profile.userId ? (
             <button
@@ -116,22 +124,10 @@ export function ProfileView({
                 className="h-20 w-20 ring-4 ring-card sm:h-24 sm:w-24"
               />
               <div className="pb-1">
-                <div className="flex flex-wrap items-center gap-2">
-                  <h2 className="text-xl font-bold">{profile.displayName}</h2>
-                  <Badge
-                    variant={
-                      profile.verificationStatus === "verified"
-                        ? "success"
-                        : "secondary"
-                    }
-                    className="gap-1"
-                  >
-                    <BadgeCheck className="h-3.5 w-3.5" />
-                    {profile.verificationStatus === "verified"
-                      ? t("verified")
-                      : t("unverified")}
-                  </Badge>
-                </div>
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="text-xl font-bold">{profile.displayName}</h2>
+                <VerificationBadge verified={profile.verificationStatus === "verified"} compact />
+              </div>
                 <p className="text-sm text-muted-foreground">@{profile.username}</p>
               </div>
             </div>

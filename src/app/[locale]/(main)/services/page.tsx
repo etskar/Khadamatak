@@ -4,9 +4,9 @@ import { db } from "@/lib/db";
 import { listServices } from "@/server/marketplace/service-service";
 import { PageHeader } from "@/components/shared/page-header";
 import { ListingCard, priceCentsLabel } from "@/components/marketplace/listing-card";
-import { Link } from "@/i18n/navigation";
 import { EmptyState } from "@/components/ui/empty-state";
-import { Briefcase } from "lucide-react";
+import { Briefcase, PlusCircle } from "lucide-react";
+import { PrimaryAction } from "@/components/ui/primary-action";
 import { FiltersDrawer } from "@/components/marketplace/filters-drawer";
 
 export async function generateMetadata({
@@ -59,12 +59,7 @@ export default async function ServicesPage({
         title={t("services")}
         description={t("servicesSubtitle")}
         actions={
-          <Link
-            href="/sell/service"
-            className="inline-flex h-10 items-center rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground"
-          >
-            {t("offerService")}
-          </Link>
+          <PrimaryAction href="/sell/service" icon={PlusCircle} label={t("offerService")} />
         }
       />
       <FiltersDrawer

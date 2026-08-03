@@ -4,9 +4,9 @@ import { db } from "@/lib/db";
 import { listProducts } from "@/server/marketplace/product-service";
 import { PageHeader } from "@/components/shared/page-header";
 import { ListingCard, priceCentsLabel } from "@/components/marketplace/listing-card";
-import { Link } from "@/i18n/navigation";
 import { EmptyState } from "@/components/ui/empty-state";
-import { Package } from "lucide-react";
+import { Package, PlusCircle } from "lucide-react";
+import { PrimaryAction } from "@/components/ui/primary-action";
 import { FiltersDrawer } from "@/components/marketplace/filters-drawer";
 
 export async function generateMetadata({
@@ -59,12 +59,7 @@ export default async function ProductsPage({
         title={t("products")}
         description={t("productsSubtitle")}
         actions={
-          <Link
-            href="/sell/product"
-            className="inline-flex h-10 items-center rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground"
-          >
-            {t("sellProduct")}
-          </Link>
+          <PrimaryAction href="/sell/product" icon={PlusCircle} label={t("sellProduct")} />
         }
       />
 

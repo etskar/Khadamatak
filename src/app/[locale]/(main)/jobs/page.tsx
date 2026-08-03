@@ -3,9 +3,9 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { listJobs } from "@/server/marketplace/job-service";
 import { PageHeader } from "@/components/shared/page-header";
-import { Link } from "@/i18n/navigation";
 import { EmptyState } from "@/components/ui/empty-state";
-import { Briefcase } from "lucide-react";
+import { Briefcase, PlusCircle } from "lucide-react";
+import { PrimaryAction } from "@/components/ui/primary-action";
 import { JobCard } from "@/components/marketplace/job-card";
 import { JobsFilters } from "@/components/marketplace/jobs-filters";
 
@@ -60,12 +60,7 @@ export default async function JobsPage({
         title={t("jobs")}
         description={t("jobsSubtitle")}
         actions={
-          <Link
-            href="/sell/job"
-            className="inline-flex h-10 items-center rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground"
-          >
-            {t("postJob")}
-          </Link>
+          <PrimaryAction href="/sell/job" icon={PlusCircle} label={t("postJob")} />
         }
       />
       <JobsFilters

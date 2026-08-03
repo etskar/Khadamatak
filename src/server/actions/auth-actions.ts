@@ -23,8 +23,6 @@ export async function registerAction(
 ): Promise<ActionResult> {
   try {
     const password = String(formData.get("password") ?? "");
-    const confirm = String(formData.get("confirmPassword") ?? "");
-    if (password !== confirm) return { ok: false, error: "PASSWORD_MISMATCH" };
 
     const result = await registerUser({
       email: String(formData.get("email") ?? ""),
@@ -80,7 +78,11 @@ export async function loginAction(
     return { ok: true, data: { callbackUrl } };
   } catch (e) {
     if (e instanceof AuthError) {
-      const existing = await db.user.findUnique({ where: { email } });
+      const existing = await db.user.findFirst({
+        where: {
+          OR: [{ email }, { profile: { username: email } }],
+        },
+      });
       if (!existing) return { ok: false, error: "ACCOUNT_NOT_FOUND" };
       return { ok: false, error: "INVALID_PASSWORD" };
     }

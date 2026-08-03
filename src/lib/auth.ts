@@ -58,14 +58,16 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        const email = String(credentials?.email ?? "")
+        const identifier = String(credentials?.email ?? "")
           .toLowerCase()
           .trim();
         const password = String(credentials?.password ?? "");
-        if (!email || !password) return null;
+        if (!identifier || !password) return null;
 
-        const user = await db.user.findUnique({
-          where: { email },
+        const user = await db.user.findFirst({
+          where: {
+            OR: [{ email: identifier }, { profile: { username: identifier } }],
+          },
           include: { profile: true },
         });
         if (!user?.passwordHash) return null;

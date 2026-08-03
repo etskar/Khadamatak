@@ -33,9 +33,14 @@ export function LoginForm({ googleEnabled }: { googleEnabled: boolean }) {
 
   function validate(): boolean {
     const errors: { email?: string; password?: string } = {};
-    if (!email.trim()) errors.email = tCommon("errors.generic");
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim()))
-      errors.email = t("errors.invalidEmail");
+    const value = email.trim();
+    if (!value) errors.email = tCommon("errors.generic");
+    else if (value.includes("@")) {
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value))
+        errors.email = t("errors.invalidEmail");
+    } else if (!/^[a-z0-9_]{3,24}$/i.test(value)) {
+      errors.email = t("errors.invalidUsername");
+    }
     if (!password) errors.password = tCommon("errors.generic");
     setFieldErrors(errors);
     return Object.keys(errors).length === 0;
@@ -97,10 +102,10 @@ export function LoginForm({ googleEnabled }: { googleEnabled: boolean }) {
         <input type="hidden" name="callbackUrl" value={callbackUrl} />
         <Input
           name="email"
-          type="email"
-          autoComplete="email"
-          label={t("email")}
-          placeholder={t("emailPlaceholder")}
+          type="text"
+          autoComplete="username"
+          label={t("emailOrUsername")}
+          placeholder={t("emailOrUsernamePlaceholder")}
           leftIcon={<Mail className="h-4 w-4" />}
           value={email}
           onChange={(e) => setEmail(e.target.value)}
