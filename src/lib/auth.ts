@@ -5,7 +5,8 @@ import { PrismaAdapter } from "@auth/prisma-adapter";
 import type { Adapter } from "next-auth/adapters";
 import { db } from "@/lib/db";
 import { verifyPassword } from "@/lib/crypto";
-import { ROLE_PERMISSIONS, type UserRole } from "@/types/user";
+import { requireAuthSecret } from "@/lib/env";
+import { type UserRole } from "@/types/user";
 import { ensureWalletForUser } from "@/server/finance/wallet-service";
 
 export type AppJWT = {
@@ -215,11 +216,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     },
   },
   trustHost: true,
-  secret: process.env.AUTH_SECRET,
+  secret: requireAuthSecret(),
 });
-
-export function getSessionPermissions(role: UserRole) {
-  return ROLE_PERMISSIONS[role] ?? ROLE_PERMISSIONS.user;
-}
 
 export { googleConfigured };

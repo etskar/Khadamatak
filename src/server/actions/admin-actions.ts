@@ -1,8 +1,9 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
+import { getLocale } from "next-intl/server";
+import { redirect } from "@/i18n/navigation";
 
 import {
   ADMIN_SESSION_COOKIE,
@@ -62,7 +63,10 @@ async function withPermission<T>(
   } catch (e) {
     if (isRedirectError(e)) throw e;
     const error = e instanceof Error ? e.message : "ACTION_FAILED";
-    if (error === "ADMIN_AUTH_REQUIRED") redirect("/admin/login");
+    if (error === "ADMIN_AUTH_REQUIRED") {
+      const locale = await getLocale();
+      redirect({ href: "/admin/login", locale });
+    }
     return { ok: false, error };
   }
 }
@@ -141,7 +145,9 @@ export async function adminLogoutAction(): Promise<AdminActionResult> {
   const token = cookieStore.get(ADMIN_SESSION_COOKIE)?.value;
   if (token) await adminAuth.adminLogout(token);
   cookieStore.delete(ADMIN_SESSION_COOKIE);
-  redirect("/admin/login");
+  const locale = await getLocale();
+  redirect({ href: "/admin/login", locale });
+  return { ok: true };
 }
 
 // ─── Users ────────────────────────────────────────────────────

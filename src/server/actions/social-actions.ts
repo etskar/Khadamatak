@@ -22,6 +22,7 @@ import {
   sendPaymentCardToChat,
 } from "@/server/social/message-service";
 import { db } from "@/lib/db";
+import { siteConfig } from "@/config/site";
 
 async function requireUser() {
   const session = await auth();
@@ -68,7 +69,7 @@ export async function savePostAction(postId: string) {
 export async function sharePostAction(postId: string) {
   const user = await requireUser();
   await sharePost(user.id, postId);
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+  const appUrl = siteConfig.url;
   return { ok: true as const, url: `${appUrl}/?post=${postId}` };
 }
 

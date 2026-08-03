@@ -68,9 +68,12 @@ export function AdminShell({
           />
           <div className="absolute inset-y-0 start-0 flex w-[280px] flex-col bg-card">
             <div className="flex h-16 items-center justify-between border-b border-border px-4">
-              <span className="text-sm font-bold text-foreground">
-                {t("admin")}
-              </span>
+              <div className="flex items-center gap-2.5">
+                <Logo size="sm" href="/admin" />
+                <span className="text-sm font-bold text-foreground">
+                  {t("admin")}
+                </span>
+              </div>
               <Button
                 type="button"
                 variant="ghost"

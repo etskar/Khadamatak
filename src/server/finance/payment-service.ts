@@ -1,5 +1,6 @@
 import "server-only";
 import { db } from "@/lib/db";
+import { siteConfig } from "@/config/site";
 import { createPaymentRequestPublicId, createShareToken } from "@/lib/ids";
 import { generateSecureToken } from "@/lib/crypto";
 import {
@@ -89,7 +90,7 @@ export async function startWalletTopUp(input: {
   const mollieKey = process.env.MOLLIE_API_KEY;
 
   if (mollieKey) {
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+    const appUrl = siteConfig.url;
     const res = await fetch("https://api.mollie.com/v2/payments", {
       method: "POST",
       headers: {

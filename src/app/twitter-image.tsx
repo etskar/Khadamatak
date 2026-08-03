@@ -1,7 +1,13 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { ImageResponse } from "next/og";
 
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
+
+const logoBase64 = `data:image/png;base64,${readFileSync(
+  join(process.cwd(), "public", "logo.png"),
+).toString("base64")}`;
 
 export default function TwitterImage() {
   return new ImageResponse(
@@ -32,23 +38,14 @@ export default function TwitterImage() {
             background: "rgba(45,212,191,0.16)",
           }}
         />
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            width: 120,
-            height: 120,
-            borderRadius: 32,
-            background:
-              "linear-gradient(135deg,#2dd4bf 0%,#14b8a6 50%,#0d9488 100%)",
-            fontSize: 76,
-            fontWeight: 800,
-            color: "#ffffff",
-          }}
-        >
-          K
-        </div>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={logoBase64}
+          alt=""
+          width={120}
+          height={120}
+          style={{ borderRadius: 32 }}
+        />
         <div
           style={{
             marginTop: 40,

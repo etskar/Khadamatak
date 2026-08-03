@@ -1,5 +1,7 @@
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { Link } from "@/i18n/navigation";
+import { siteConfig } from "@/config/site";
 
 type LogoProps = {
   className?: string;
@@ -9,9 +11,9 @@ type LogoProps = {
 };
 
 const sizeMap = {
-  sm: { mark: "h-8 w-8 text-sm", text: "text-base" },
-  md: { mark: "h-10 w-10 text-base", text: "text-lg" },
-  lg: { mark: "h-12 w-12 text-lg", text: "text-xl" },
+  sm: { mark: 32, text: "text-base" },
+  md: { mark: 40, text: "text-lg" },
+  lg: { mark: 48, text: "text-xl" },
 } as const;
 
 export function Logo({
@@ -25,20 +27,21 @@ export function Logo({
   return (
     <Link
       href={href}
+      aria-label={siteConfig.name}
       className={cn("inline-flex items-center gap-2.5", className)}
     >
-      <span
-        className={cn(
-          "inline-flex items-center justify-center rounded-2xl bg-gradient-to-br from-brand-500 via-brand-600 to-brand-800 font-bold text-white shadow-glow",
-          sizes.mark,
-        )}
-        aria-hidden
-      >
-        خ
-      </span>
+      <Image
+        src="/logo.png"
+        alt=""
+        width={sizes.mark}
+        height={sizes.mark}
+        className="shrink-0"
+      />
       {showWordmark ? (
         <span className={cn("font-bold tracking-tight text-foreground", sizes.text)}>
-          <span className="text-brand-700 dark:text-brand-400">Khadamatak</span>
+          <span className="text-brand-700 dark:text-brand-400">
+            {siteConfig.name}
+          </span>
         </span>
       ) : null}
     </Link>

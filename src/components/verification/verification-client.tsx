@@ -13,7 +13,6 @@ import {
   submitVerificationAction,
   verifyPhoneOtpAction,
 } from "@/server/actions/profile-actions";
-import { verifyEmailAction } from "@/server/actions/auth-actions";
 import { toast } from "@/components/ui/toast";
 import { useRouter } from "@/i18n/navigation";
 
@@ -223,9 +222,6 @@ export function VerificationClient(props: Props) {
           </Card>
         </>
       )}
-
-      {/* keep verifyEmailAction referenced for future resend UI */}
-      <span className="hidden">{String(!!verifyEmailAction)}</span>
     </div>
   );
 }

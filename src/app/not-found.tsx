@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 
 export default function RootNotFound() {
@@ -15,6 +16,14 @@ export default function RootNotFound() {
         }}
       >
         <div style={{ textAlign: "center", padding: 24 }}>
+          <Image
+            src="/logo.png"
+            alt="Khadamatak"
+            width={96}
+            height={96}
+            priority
+            style={{ margin: "0 auto 16px" }}
+          />
           <h1 style={{ fontSize: 24, marginBottom: 8 }}>404</h1>
           <p style={{ color: "#64748b", marginBottom: 16 }}>Page not found</p>
           <Link

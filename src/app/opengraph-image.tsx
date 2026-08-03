@@ -1,8 +1,14 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { ImageResponse } from "next/og";
 import { siteConfig } from "@/config/site";
 
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
+
+const logoBase64 = `data:image/png;base64,${readFileSync(
+  join(process.cwd(), "public", "logo.png"),
+).toString("base64")}`;
 
 export default function OpenGraphImage() {
   return new ImageResponse(
@@ -43,24 +49,17 @@ export default function OpenGraphImage() {
             background: "rgba(251,146,60,0.12)",
           }}
         />
-        <div
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={logoBase64}
+          alt=""
+          width={140}
+          height={140}
           style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            width: 128,
-            height: 128,
             borderRadius: 36,
-            background:
-              "linear-gradient(135deg,#2dd4bf 0%,#14b8a6 50%,#0d9488 100%)",
             boxShadow: "0 24px 48px rgba(20,184,166,0.35)",
-            fontSize: 84,
-            fontWeight: 800,
-            color: "#ffffff",
           }}
-        >
-          K
-        </div>
+        />
         <div
           style={{
             display: "flex",

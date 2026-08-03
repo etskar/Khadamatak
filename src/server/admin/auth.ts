@@ -157,22 +157,12 @@ export async function adminLogin(input: {
     },
   });
 
-  if (twoFactorEnabled) {
-    // TOTP 2FA — no email OTP needed
-    await logLoginAttempt({
-      adminUserId: admin.id,
-      email,
-      status: "success",
-      req: input.req,
-    });
-  } else {
-    await logLoginAttempt({
-      adminUserId: admin.id,
-      email,
-      status: "success",
-      req: input.req,
-    });
-  }
+  await logLoginAttempt({
+    adminUserId: admin.id,
+    email,
+    status: "success",
+    req: input.req,
+  });
 
   return { ok: true as const, token, sessionId: session.id, totpRequired: twoFactorEnabled };
 }
@@ -207,6 +197,12 @@ export async function verifyAdminTwoFactor(input: {
 
   let verified = false;
   if (admin.twoFactorEnabled && admin.twoFactorSecret) {
+    const rl = await rateLimit(
+      `admin-2fa:${admin.id}`,
+      5,
+      15 * 60_000,
+    );
+    if (!rl.success) throw new Error("2FA_RATE_LIMITED");
     verified = verifyTotp(admin.twoFactorSecret, input.code);
   } else {
     const otp = await db.adminOtpCode.findFirst({

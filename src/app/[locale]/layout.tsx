@@ -52,11 +52,13 @@ export async function generateMetadata({
       description: t("description"),
       locale: locale === "ar" ? "ar_SA" : "nl_NL",
       url: `${siteConfig.url}/${locale}`,
+      images: [`${siteConfig.url}/opengraph-image`],
     },
     twitter: {
       card: "summary_large_image",
       title: t("title"),
       description: t("description"),
+      images: [`${siteConfig.url}/twitter-image`],
     },
     robots: {
       index: true,

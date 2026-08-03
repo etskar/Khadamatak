@@ -1,5 +1,6 @@
 import "server-only";
 import { db } from "@/lib/db";
+import { siteConfig } from "@/config/site";
 import { generateOtpCode, hashToken, hashPassword, verifyPassword } from "@/lib/crypto";
 import { writeAuditLog } from "@/lib/audit";
 import { rateLimit } from "@/lib/rate-limit";
@@ -267,7 +268,7 @@ export async function requestPasswordReset(email: string, locale: string) {
     },
   });
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+  const appUrl = siteConfig.url;
   console.info(`[password-reset] ${appUrl}/${locale}/reset-password?token=${raw}`);
 
   return {

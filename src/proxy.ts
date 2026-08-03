@@ -4,6 +4,12 @@ import { routing } from "./i18n/routing";
 
 const intlMiddleware = createMiddleware(routing);
 
+/**
+ * Must stay in sync with src/server/admin/rbac.ts ADMIN_SESSION_COOKIE.
+ * (Can't import it here — rbac.ts is server-only and pulls in Prisma.)
+ */
+const ADMIN_SESSION_COOKIE = "khadamatak_admin";
+
 const protectedPaths = [
   "/wallet",
   "/messages",
@@ -36,14 +42,31 @@ export default function proxy(request: NextRequest) {
   );
 
   if (isProtected) {
-    const sessionToken =
-      request.cookies.get("authjs.session-token")?.value ||
-      request.cookies.get("__Secure-authjs.session-token")?.value;
+    const isAdminRoute =
+      pathWithoutLocale === "/admin" || pathWithoutLocale.startsWith("/admin/");
+    const isAdminLogin = pathWithoutLocale === "/admin/login";
 
-    if (!sessionToken) {
-      const loginUrl = new URL(`/${locale}/login`, request.url);
-      loginUrl.searchParams.set("callbackUrl", pathname);
-      return NextResponse.redirect(loginUrl);
+    if (isAdminRoute && !isAdminLogin) {
+      // Admin panel is gated by its own session cookie — admins do not need a
+      // marketplace (NextAuth) session, and /admin/login must stay public so
+      // admins without a user account can reach the login form.
+      const adminToken = request.cookies.get(ADMIN_SESSION_COOKIE)?.value;
+      if (!adminToken) {
+        const loginUrl = new URL(`/${locale}/admin/login`, request.url);
+        loginUrl.searchParams.set("callbackUrl", pathname);
+        return NextResponse.redirect(loginUrl);
+      }
+    } else if (!isAdminLogin) {
+      // Marketplace routes are gated by the NextAuth user session cookie.
+      const sessionToken =
+        request.cookies.get("authjs.session-token")?.value ||
+        request.cookies.get("__Secure-authjs.session-token")?.value;
+
+      if (!sessionToken) {
+        const loginUrl = new URL(`/${locale}/login`, request.url);
+        loginUrl.searchParams.set("callbackUrl", pathname);
+        return NextResponse.redirect(loginUrl);
+      }
     }
   }
 

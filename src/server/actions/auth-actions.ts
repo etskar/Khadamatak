@@ -88,10 +88,6 @@ export async function loginAction(
   redirect(callbackUrl.startsWith("/") ? callbackUrl : `/${locale}`);
 }
 
-export async function googleSignInAction(locale: string) {
-  await signIn("google", { redirectTo: `/${locale}` });
-}
-
 export async function logoutAction(locale: string) {
   await signOut({ redirectTo: `/${locale}/login` });
 }

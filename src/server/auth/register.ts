@@ -1,6 +1,7 @@
 import "server-only";
 import { z } from "zod";
 import { db } from "@/lib/db";
+import { siteConfig } from "@/config/site";
 import { hashPassword, generateSecureToken, hashToken } from "@/lib/crypto";
 import { ensureWalletForUser } from "@/server/finance/wallet-service";
 import { slugifyUsername } from "@/lib/ids";
@@ -101,7 +102,7 @@ export async function registerUser(
   });
 
   // Dev: log verification link (replace with email provider in production)
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+  const appUrl = siteConfig.url;
   console.info(
     `[email-verification] ${appUrl}/${parsed.locale}/verify-email?token=${rawToken}`,
   );

@@ -1,3 +1,5 @@
+import { getSiteUrl } from "@/lib/env";
+
 export const siteConfig = {
   name: "Khadamatak",
   nameAr: "خدماتك",
@@ -5,7 +7,7 @@ export const siteConfig = {
     ar: "منصة الخدمات والمجتمع — اكتشف، تواصل، وأنجز.",
     nl: "Het platform voor diensten en community — ontdek, verbind en presteer.",
   },
-  url: process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000",
+  url: getSiteUrl(),
   defaultLocale: "ar" as const,
   locales: ["ar", "nl"] as const,
 } as const;
