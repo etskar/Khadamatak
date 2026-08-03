@@ -8,6 +8,44 @@ type NominatimResult = {
   type: string;
 };
 
+export type TravelInfo = {
+  distanceKm: number;
+  durationMinutes: number;
+};
+
+/**
+ * Estimates driving distance and travel time between two coordinates using
+ * the free OSRM public routing API (no API key). Returns null when routing is
+ * unavailable so callers can fall back to a straight-line estimate.
+ */
+export async function getTravelInfo(
+  fromLat: number,
+  fromLng: number,
+  toLat: number,
+  toLng: number,
+): Promise<TravelInfo | null> {
+  const url = `https://router.project-osrm.org/route/v1/driving/${fromLng},${fromLat};${toLng},${toLat}?overview=false&alternatives=false`;
+  try {
+    const res = await fetch(url, {
+      headers: { Accept: "application/json" },
+      signal: AbortSignal.timeout(6000),
+    });
+    if (!res.ok) return null;
+    const data = (await res.json()) as {
+      code?: string;
+      routes?: { distance?: number; duration?: number }[];
+    };
+    const route = data.routes?.[0];
+    if (data.code !== "Ok" || !route?.distance || !route?.duration) return null;
+    return {
+      distanceKm: route.distance / 1000,
+      durationMinutes: Math.round(route.duration / 60),
+    };
+  } catch {
+    return null;
+  }
+}
+
 /**
  * Address autocomplete backed by OpenStreetMap Nominatim (free, no API key).
  * Server-side only: keeps the client free of third-party calls and lets us

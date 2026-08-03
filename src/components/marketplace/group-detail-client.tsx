@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useRef, useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
@@ -23,6 +23,7 @@ import {
   joinGroupAction,
 } from "@/server/actions/marketplace-actions";
 import { toast } from "@/components/ui/toast";
+import { getFriendlyError } from "@/lib/friendly-errors";
 import { cn } from "@/lib/utils";
 
 type Tab = "posts" | "products" | "services" | "jobs" | "members" | "about";
@@ -131,7 +132,7 @@ export function GroupDetailClient(props: {
         router.refresh();
       } catch (e) {
         toast({
-          title: e instanceof Error ? e.message : tCommon("error"),
+          title: getFriendlyError(e, tCommon),
           variant: "danger",
         });
       }
@@ -385,7 +386,7 @@ export function GroupDetailClient(props: {
                     router.refresh();
                   } catch (e) {
                     toast({
-                      title: e instanceof Error ? e.message : tCommon("error"),
+                      title: getFriendlyError(e, tCommon),
                       variant: "danger",
                     });
                   }
@@ -476,7 +477,7 @@ export function GroupDetailClient(props: {
                         {props.labels.chooseListing}
                       </p>
                       {listingChoices.length === 0 ? (
-                        <p className="px-2 text-xs text-muted-foreground">—</p>
+                        <p className="px-2 text-xs text-muted-foreground">â€”</p>
                       ) : (
                         listingChoices.map((c) => (
                           <button
@@ -521,7 +522,7 @@ export function GroupDetailClient(props: {
                             ...m,
                             { type: "image", url: URL.createObjectURL(f) },
                           ]);
-                          uploadAndSend(f, "image", "📷");
+                          uploadAndSend(f, "image", "ðŸ“·");
                         }
                         e.target.value = "";
                       }}
@@ -538,7 +539,7 @@ export function GroupDetailClient(props: {
                             ...m,
                             { type: "video", url: URL.createObjectURL(f) },
                           ]);
-                          uploadAndSend(f, "video", "🎬");
+                          uploadAndSend(f, "video", "ðŸŽ¬");
                         }
                         e.target.value = "";
                       }}
@@ -555,7 +556,7 @@ export function GroupDetailClient(props: {
                             ...m,
                             { type: "audio", url: URL.createObjectURL(f) },
                           ]);
-                          uploadAndSend(f, "audio", "🎤");
+                          uploadAndSend(f, "audio", "ðŸŽ¤");
                         }
                         e.target.value = "";
                       }}
@@ -678,7 +679,7 @@ export function GroupDetailClient(props: {
                     <p className="font-semibold">{j.title}</p>
                     <p className="text-xs text-muted-foreground">
                       {j.company}
-                      {j.city ? ` · ${j.city}` : ""}
+                      {j.city ? ` Â· ${j.city}` : ""}
                     </p>
                   </div>
                 </CardContent>
@@ -709,10 +710,11 @@ export function GroupDetailClient(props: {
       {tab === "about" ? (
         <Card>
           <CardContent className="p-5 text-sm text-muted-foreground">
-            {props.description || "—"}
+            {props.description || "â€”"}
           </CardContent>
         </Card>
       ) : null}
     </div>
   );
 }
+

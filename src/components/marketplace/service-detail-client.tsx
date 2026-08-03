@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { BadgeCheck, Heart, MessageCircle, Star } from "lucide-react";
+import { BadgeCheck, Heart, MapPin, MessageCircle, Star } from "lucide-react";
 import { useRouter, Link } from "@/i18n/navigation";
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -12,6 +12,7 @@ import {
   contactSellerAction,
   toggleFavoriteAction,
 } from "@/server/actions/marketplace-actions";
+import { TravelInfo } from "./travel-info";
 
 export function ServiceDetailClient({
   service,
@@ -27,6 +28,9 @@ export function ServiceDetailClient({
     availability: string | null;
     workingHours: string | null;
     city: string | null;
+    country: string | null;
+    latitude: number | null;
+    longitude: number | null;
     ratingAvg: number;
     ratingCount: number;
     favorited: boolean;
@@ -39,6 +43,13 @@ export function ServiceDetailClient({
       verified: boolean;
     };
     isOwner: boolean;
+    travel: {
+      originLat: number;
+      originLng: number;
+      destLat: number;
+      destLng: number;
+      distanceKm: number;
+    } | null;
   };
   labels: Record<string, string>;
 }) {
@@ -85,6 +96,41 @@ export function ServiceDetailClient({
             ) : null}
           </CardContent>
         </Card>
+
+        {(service.latitude != null && service.longitude != null) || service.city ? (
+          <Card>
+            <CardContent className="p-5">
+              <h2 className="mb-2 font-semibold">{labels.location}</h2>
+              <p className="mb-3 flex items-center gap-1 text-sm text-muted-foreground">
+                <MapPin className="h-4 w-4" />
+                {[service.city, service.country].filter(Boolean).join(", ")}
+              </p>
+              {service.travel ? (
+                <TravelInfo
+                  originLat={service.travel.originLat}
+                  originLng={service.travel.originLng}
+                  destLat={service.travel.destLat}
+                  destLng={service.travel.destLng}
+                  distanceKm={service.travel.distanceKm}
+                  labels={{
+                    travelTime: labels.travelTime,
+                    directions: labels.directions,
+                    viewOnMap: labels.viewOnMap,
+                  }}
+                />
+              ) : null}
+              {service.latitude != null && service.longitude != null ? (
+                <iframe
+                  title="map"
+                  className="mt-3 h-56 w-full rounded-xl border border-border"
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                  src={`https://www.openstreetmap.org/export/embed.html?bbox=${service.longitude - 0.02}%2C${service.latitude - 0.02}%2C${service.longitude + 0.02}%2C${service.latitude + 0.02}&layer=mapnik&marker=${service.latitude}%2C${service.longitude}`}
+                />
+              ) : null}
+            </CardContent>
+          </Card>
+        ) : null}
       </div>
 
       <div className="space-y-3 lg:col-span-2">

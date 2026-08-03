@@ -12,10 +12,13 @@ import { salaryLabel } from "@/components/marketplace/job-card";
 
 export default async function MapPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>;
+  searchParams: Promise<Record<string, string | undefined>>;
 }) {
   const { locale } = await params;
+  const sp = await searchParams;
   setRequestLocale(locale);
   const t = await getTranslations("marketplace");
   const session = await auth();
@@ -23,10 +26,13 @@ export default async function MapPage({
     ? await db.userLocation.findUnique({ where: { userId: session.user.id } })
     : null;
 
+  const latParam = sp.lat ? Number(sp.lat) : null;
+  const lngParam = sp.lng ? Number(sp.lng) : null;
   const center = {
-    lat: userLoc?.latitude ?? 52.3676,
-    lng: userLoc?.longitude ?? 4.9041,
+    lat: Number.isFinite(latParam) ? latParam! : (userLoc?.latitude ?? 52.3676),
+    lng: Number.isFinite(lngParam) ? lngParam! : (userLoc?.longitude ?? 4.9041),
   };
+  const zoom = sp.zoom ? Number(sp.zoom) : undefined;
 
   const [products, services, jobs, groups] = await Promise.all([
     listProducts({
@@ -116,6 +122,7 @@ export default async function MapPage({
       <PageHeader title={t("map")} description={t("mapSubtitle")} />
       <MapExplorer
         center={center}
+        zoom={zoom}
         pins={pins}
         labels={{
           products: t("products"),
@@ -124,6 +131,9 @@ export default async function MapPage({
           groups: t("groups"),
           nearby: t("nearby"),
           viewDetails: t("viewDetails"),
+          useMyLocation: t("useMyLocation"),
+          locating: t("locating"),
+          locationError: t("locationError"),
         }}
       />
     </div>

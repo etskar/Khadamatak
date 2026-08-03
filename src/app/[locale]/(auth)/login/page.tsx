@@ -1,9 +1,11 @@
 import { Suspense } from "react";
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { redirect } from "next/navigation";
 import { Link } from "@/i18n/navigation";
 import { AuthShell } from "@/components/auth/auth-shell";
 import { LoginForm } from "@/components/auth/login-form";
 import { googleConfigured } from "@/lib/auth";
+import { auth } from "@/lib/auth";
 
 export async function generateMetadata({
   params,
@@ -23,6 +25,11 @@ export default async function LoginPage({
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("auth");
+
+  const session = await auth();
+  if (session?.user?.id) {
+    redirect(`/${locale}`);
+  }
 
   return (
     <AuthShell

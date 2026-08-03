@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
@@ -14,6 +14,7 @@ import {
   verifyPhoneOtpAction,
 } from "@/server/actions/profile-actions";
 import { toast } from "@/components/ui/toast";
+import { getFriendlyError } from "@/lib/friendly-errors";
 import { useRouter } from "@/i18n/navigation";
 
 type Props = {
@@ -160,7 +161,7 @@ export function VerificationClient(props: Props) {
                     router.refresh();
                   } catch (e) {
                     toast({
-                      title: e instanceof Error ? e.message : tCommon("error"),
+                      title: getFriendlyError(e, tCommon),
                       variant: "danger",
                     });
                   }
@@ -225,3 +226,4 @@ export function VerificationClient(props: Props) {
     </div>
   );
 }
+

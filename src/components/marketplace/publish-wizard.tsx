@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
@@ -13,6 +13,7 @@ import {
   createServiceAction,
 } from "@/server/actions/marketplace-actions";
 import { toast } from "@/components/ui/toast";
+import { getFriendlyError } from "@/lib/friendly-errors";
 import { CountryCitySelect } from "./country-city-select";
 import { AddressAutocomplete } from "./address-autocomplete";
 import { MediaUploader, type MediaItem } from "./media-uploader";
@@ -88,7 +89,7 @@ export function PublishWizard({ kind, categories }: Props) {
         router.push(`/${kind === "product" ? "products" : "services"}/${res.publicId}`);
       } catch (err) {
         toast({
-          title: err instanceof Error ? err.message : tCommon("error"),
+          title: getFriendlyError(err, tCommon),
           variant: "danger",
         });
       }
@@ -278,8 +279,8 @@ export function PublishWizard({ kind, categories }: Props) {
               <p className="mt-1 line-clamp-2 text-muted-foreground">{basics.description}</p>
               <p className="mt-1 text-xs text-muted-foreground">
                 {city}
-                {address ? ` · ${address}` : ""}
-                {lat != null && lng != null ? " · coords ✓" : ""}
+                {address ? ` Â· ${address}` : ""}
+                {lat != null && lng != null ? " Â· coords âœ“" : ""}
               </p>
             </div>
           </div>
@@ -310,3 +311,4 @@ export function PublishWizard({ kind, categories }: Props) {
     </Card>
   );
 }
+

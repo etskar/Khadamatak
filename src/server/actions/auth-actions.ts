@@ -2,6 +2,7 @@
 
 import { AuthError } from "next-auth";
 import { signIn, signOut } from "@/lib/auth";
+import { db } from "@/lib/db";
 import { registerUser } from "@/server/auth/register";
 import {
   requestPasswordReset,
@@ -57,10 +58,14 @@ export async function loginAction(
   _prev: ActionResult | null,
   formData: FormData,
 ): Promise<ActionResult> {
-  const email = String(formData.get("email") ?? "").toLowerCase();
+  const email = String(formData.get("email") ?? "").toLowerCase().trim();
   const password = String(formData.get("password") ?? "");
   const locale = String(formData.get("locale") ?? "ar");
   const callbackUrl = String(formData.get("callbackUrl") ?? `/${locale}`);
+
+  if (!email || !password) {
+    return { ok: false, error: "MISSING_FIELDS" };
+  }
 
   const rl = await rateLimit(`login:${email}`, 20, 15 * 60_000);
   if (!rl.success) return { ok: false, error: "RATE_LIMITED" };
@@ -75,7 +80,9 @@ export async function loginAction(
     return { ok: true, data: { callbackUrl } };
   } catch (e) {
     if (e instanceof AuthError) {
-      return { ok: false, error: "INVALID_CREDENTIALS" };
+      const existing = await db.user.findUnique({ where: { email } });
+      if (!existing) return { ok: false, error: "ACCOUNT_NOT_FOUND" };
+      return { ok: false, error: "INVALID_PASSWORD" };
     }
     // NEXT_REDIRECT
     if (e && typeof e === "object" && "digest" in e) throw e;

@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { Locate } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { Card, CardContent } from "@/components/ui/card";
+import { toast } from "@/components/ui/toast";
 import { cn } from "@/lib/utils";
 
 type Pin = {
@@ -19,6 +21,7 @@ type Pin = {
 
 type Props = {
   center: { lat: number; lng: number };
+  zoom?: number;
   pins: Pin[];
   labels: Record<string, string>;
 };
@@ -30,8 +33,9 @@ const KIND_COLORS: Record<Pin["kind"], string> = {
   group: "#8b5cf6",
 };
 
-export function MapExplorer({ center, pins, labels }: Props) {
+export function MapExplorer({ center, zoom, pins, labels }: Props) {
   const [filter, setFilter] = useState<"all" | Pin["kind"]>("all");
+  const [locating, setLocating] = useState(false);
   const mapRef = useRef<HTMLDivElement>(null);
   const [map, setMap] = useState<{
     L: typeof import("leaflet");
@@ -53,7 +57,7 @@ export function MapExplorer({ center, pins, labels }: Props) {
       if (cancelled || !mapRef.current) return;
       const instance = L.map(mapRef.current, {
         center: [center.lat, center.lng],
-        zoom: 11,
+        zoom: zoom && Number.isFinite(zoom) ? zoom : 11,
         scrollWheelZoom: true,
       });
       L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
@@ -66,7 +70,32 @@ export function MapExplorer({ center, pins, labels }: Props) {
     return () => {
       cancelled = true;
     };
-  }, [center, map]);
+  }, [center, map, zoom]);
+
+  // Re-center when the center prop changes after mount
+  useEffect(() => {
+    if (!map) return;
+    map.instance.setView([center.lat, center.lng], zoom && Number.isFinite(zoom) ? zoom : undefined);
+  }, [center, map, zoom]);
+
+  function useMyLocation() {
+    if (!navigator.geolocation) {
+      toast({ title: labels.locationError, variant: "warning" });
+      return;
+    }
+    setLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const { latitude, longitude } = pos.coords;
+        window.location.href = `/map?lat=${latitude.toFixed(5)}&lng=${longitude.toFixed(5)}&zoom=13`;
+      },
+      () => {
+        setLocating(false);
+        toast({ title: labels.locationError, variant: "warning" });
+      },
+      { enableHighAccuracy: true, timeout: 10000 },
+    );
+  }
 
   // Markers + clustering
   useEffect(() => {
@@ -168,6 +197,18 @@ export function MapExplorer({ center, pins, labels }: Props) {
               {label}
             </button>
           ))}
+          <button
+            type="button"
+            onClick={useMyLocation}
+            disabled={locating}
+            className={cn(
+              "ms-auto inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition",
+              "bg-brand-50 text-brand-700 hover:bg-brand-100 dark:bg-brand-900/30 dark:text-brand-300",
+            )}
+          >
+            <Locate className="h-3.5 w-3.5" />
+            {locating ? labels.locating : labels.useMyLocation}
+          </button>
         </div>
       </div>
       <div className="max-h-[500px] space-y-2 overflow-y-auto lg:col-span-2">

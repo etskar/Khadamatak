@@ -39,7 +39,38 @@
     "actions": "إجراءات",
     "loginRequired": "يلزم تسجيل الدخول",
     "error": "حدث خطأ",
-    "success": "تم بنجاح"
+    "success": "تم بنجاح",
+    "errors": {
+      "UNAUTHORIZED": "يجب تسجيل الدخول أولاً",
+      "FORBIDDEN": "ليس لديك صلاحية لهذا الإجراء",
+      "NOT_FOUND": "العنصر غير موجود",
+      "RATE_LIMITED": "محاولات كثيرة، حاول لاحقاً",
+      "FILE_TOO_LARGE": "حجم الملف كبير جداً",
+      "INVALID_FILE_TYPE": "نوع الملف غير مدعوم",
+      "FILE_REQUIRED": "الملف مطلوب",
+      "INVALID_INPUT": "البيانات المدخلة غير صحيحة",
+      "VERIFICATION_REQUIRED": "يجب توثيق حسابك أولاً",
+      "GROUP_NOT_FOUND": "المجموعة غير موجودة",
+      "NOT_A_MEMBER": "يجب الانضمام إلى المجموعة أولاً",
+      "TOKEN_INVALID": "الرابط غير صالح أو منتهي الصلاحية",
+      "WEAK_PASSWORD": "كلمة المرور يجب أن تكون 8 أحرف على الأقل",
+      "INVALID_PASSWORD": "كلمة المرور الحالية غير صحيحة",
+      "NO_PASSWORD": "لا يوجد كلمة مرور لهذا الحساب",
+      "PASSWORD_MISMATCH": "كلمتا المرور غير متطابقتين",
+      "EMAIL_TAKEN": "البريد الإلكتروني مستخدم بالفعل",
+      "USERNAME_TAKEN": "اسم المستخدم مستخدم بالفعل",
+      "INVALID_CREDENTIALS": "بيانات الدخول غير صحيحة",
+      "ACCOUNT_NOT_FOUND": "لا يوجد حساب بهذا البريد الإلكتروني",
+      "EMAIL_NOT_VERIFIED": "يرجى تأكيد بريدك الإلكتروني أولاً",
+      "PHONE_NOT_VERIFIED": "يرجى تأكيد رقم هاتفك أولاً",
+      "TERMS_REQUIRED": "يجب الموافقة على الشروط",
+      "OTP_INVALID": "رمز التحقق غير صحيح",
+      "OTP_LOCKED": "تم قفل رمز التحقق، اطلب رمزاً جديداً",
+      "ACTION_FAILED": "تعذر إكمال العملية، حاول مرة أخرى",
+      "REGISTER_FAILED": "تعذر إنشاء الحساب",
+      "LOGIN_FAILED": "تعذر تسجيل الدخول",
+      "generic": "تعذر إكمال العملية، حاول مرة أخرى"
+    }
   },
   "nav": {
     "home": "الرئيسية",
@@ -112,8 +143,13 @@
       "PASSWORD_MISMATCH": "كلمتا المرور غير متطابقتين",
       "TOKEN_INVALID": "الرمز غير صالح",
       "LOGIN_FAILED": "فشل تسجيل الدخول",
-      "REGISTER_FAILED": "فشل التسجيل"
-    }
+      "REGISTER_FAILED": "فشل التسجيل",
+      "invalidEmail": "يرجى إدخال بريد إلكتروني صحيح",
+      "invalidUsername": "اسم المستخدم يجب أن يكون 3-24 حرفاً (أحرف، أرقام، _)",
+      "weakPassword": "كلمة المرور يجب أن تكون 8 أحرف على الأقل",
+      "mismatch": "كلمتا المرور غير متطابقتين"
+    },
+    "loginSuccess": "مرحباً بعودتك!"
   },
   "home": {
     "title": "الرئيسية",
@@ -289,7 +325,8 @@
     "newPassword": "كلمة المرور الجديدة",
     "updatePassword": "تحديث كلمة المرور",
     "passwordChanged": "تم تغيير كلمة المرور",
-    "passwordError": "تعذر تغيير كلمة المرور"
+    "passwordError": "تعذر تغيير كلمة المرور",
+    "confirmPassword": "تأكيد كلمة المرور"
   },
   "admin": {
     "title": "لوحة الإدارة",
@@ -953,7 +990,9 @@
     "notifications": "الإشعارات",
     "search": "البحث",
     "createPost": "إنشاء منشور",
-    "closeDialog": "إغلاق النافذة"
+    "closeDialog": "إغلاق النافذة",
+    "showPassword": "إظهار كلمة المرور",
+    "hidePassword": "إخفاء كلمة المرور"
   },
   "verification": {
     "title": "التحقق من الهوية",
@@ -1101,6 +1140,13 @@
     "listing": "إعلان",
     "member": "عضو",
     "emptyChat": "لا توجد رسائل بعد — كن أول من يرسل!",
-    "joinToChat": "انضم إلى المجموعة للمشاركة في الدردشة"
+    "joinToChat": "انضم إلى المجموعة للمشاركة في الدردشة",
+    "travelTime": "وقت الوصول التقريبي",
+    "directions": "الاتجاهات",
+    "viewOnMap": "عرض على الخريطة",
+    "minutesShort": "د",
+    "useMyLocation": "موقعي الحالي",
+    "locating": "جاري تحديد الموقع…",
+    "locationError": "تعذر تحديد موقعك"
   }
 }

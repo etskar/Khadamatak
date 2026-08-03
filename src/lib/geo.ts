@@ -209,3 +209,9 @@ export function countryName(code: string, locale: "ar" | "nl" | "en" = "en"): st
   if (locale === "ar") return c.nameAr;
   return c.name;
 }
+
+/** A straight-line (haversine) fallback estimate when routing is unavailable. */
+export function estimateTravelTime(distanceKm: number): number {
+  // Average urban driving speed ~40 km/h
+  return Math.max(1, Math.round((distanceKm / 40) * 60));
+}

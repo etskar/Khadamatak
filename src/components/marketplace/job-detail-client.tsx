@@ -24,6 +24,7 @@ import {
   reportListingAction,
 } from "@/server/actions/marketplace-actions";
 import { salaryLabel } from "./job-card";
+import { TravelInfo } from "./travel-info";
 
 const EMPLOYMENT_TYPE_LABELS: Record<string, string> = {
   full_time: "Full-time",
@@ -58,6 +59,8 @@ type Props = {
     applyEmail: string | null;
     city: string | null;
     country: string | null;
+    latitude: number | null;
+    longitude: number | null;
     viewsCount: number;
     media: { id: string; type: string; url: string }[];
     employer: {
@@ -69,6 +72,13 @@ type Props = {
     };
     isOwner: boolean;
     publishedAt: string;
+    travel: {
+      originLat: number;
+      originLng: number;
+      destLat: number;
+      destLng: number;
+      distanceKm: number;
+    } | null;
   };
   labels: Record<string, string>;
 };
@@ -192,6 +202,41 @@ export function JobDetailClient({ job, labels }: Props) {
             </div>
           </CardContent>
         </Card>
+
+        {(job.latitude != null && job.longitude != null) || job.city ? (
+          <Card>
+            <CardContent className="p-5">
+              <h2 className="mb-2 font-semibold">{labels.location}</h2>
+              <p className="mb-3 flex items-center gap-1 text-sm text-muted-foreground">
+                <MapPin className="h-4 w-4" />
+                {[job.city, job.country].filter(Boolean).join(", ")}
+              </p>
+              {job.travel ? (
+                <TravelInfo
+                  originLat={job.travel.originLat}
+                  originLng={job.travel.originLng}
+                  destLat={job.travel.destLat}
+                  destLng={job.travel.destLng}
+                  distanceKm={job.travel.distanceKm}
+                  labels={{
+                    travelTime: labels.travelTime,
+                    directions: labels.directions,
+                    viewOnMap: labels.viewOnMap,
+                  }}
+                />
+              ) : null}
+              {job.latitude != null && job.longitude != null ? (
+                <iframe
+                  title="map"
+                  className="mt-3 h-56 w-full rounded-xl border border-border"
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                  src={`https://www.openstreetmap.org/export/embed.html?bbox=${job.longitude - 0.02}%2C${job.latitude - 0.02}%2C${job.longitude + 0.02}%2C${job.latitude + 0.02}&layer=mapnik&marker=${job.latitude}%2C${job.longitude}`}
+                />
+              ) : null}
+            </CardContent>
+          </Card>
+        ) : null}
       </div>
 
       <div className="space-y-3 lg:col-span-2">

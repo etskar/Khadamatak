@@ -1,13 +1,16 @@
-"use client";
+﻿"use client";
 
 import { useTransition } from "react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
+import { useSession } from "next-auth/react";
 import { PageHeader } from "@/components/shared/page-header";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { Avatar } from "@/components/ui/avatar";
 import { LanguageSwitcher } from "@/components/layout/language-switcher";
 import {
   changePasswordAction,
@@ -17,6 +20,8 @@ import {
   uploadCoverAction,
 } from "@/server/actions/profile-actions";
 import { toast } from "@/components/ui/toast";
+import { getFriendlyError } from "@/lib/friendly-errors";
+import { useState } from "react";
 
 type Props = {
   locale: string;
@@ -40,9 +45,23 @@ type Props = {
 
 export function SettingsClient({ locale, profile, logoutAction }: Props) {
   const t = useTranslations("settings");
+  const tCommon = useTranslations("common");
   const tNav = useTranslations("nav");
   const [pending, startTransition] = useTransition();
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const router = useRouter();
+  const { update } = useSession();
+
+  const handleUpload = async (action: (fd: FormData) => Promise<{ ok: boolean; url: string }>, fd: FormData) => {
+    try {
+      const res = await action(fd);
+      if (!res.ok) throw new Error("ACTION_FAILED");
+      return res.url;
+    } catch (e) {
+      toast({ title: getFriendlyError(e, tCommon), variant: "danger" });
+      return null;
+    }
+  };
 
   return (
     <div className="mx-auto max-w-2xl space-y-5 animate-in-up">
@@ -56,9 +75,13 @@ export function SettingsClient({ locale, profile, logoutAction }: Props) {
           action={(fd) => {
             fd.set("locale", locale);
             startTransition(async () => {
-              await updatePreferencesAction(fd);
-              toast({ title: t("saved"), variant: "success" });
-              router.refresh();
+              try {
+                await updatePreferencesAction(fd);
+                toast({ title: t("saved"), variant: "success" });
+                router.refresh();
+              } catch (e) {
+                toast({ title: getFriendlyError(e, tCommon), variant: "danger" });
+              }
             });
           }}
           className="space-y-3 border-t border-border pt-4"
@@ -89,53 +112,66 @@ export function SettingsClient({ locale, profile, logoutAction }: Props) {
 
       <Card className="space-y-4 p-5">
         <h2 className="font-semibold">{t("sections.account")}</h2>
-        <div className="flex gap-2">
-          <label className="inline-flex cursor-pointer items-center rounded-xl border px-3 py-2 text-sm">
-            {t("uploadAvatar")}
-            <input
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (!file) return;
-                const fd = new FormData();
-                fd.set("file", file);
-                startTransition(async () => {
-                  await uploadAvatarAction(fd);
-                  toast({ title: t("saved"), variant: "success" });
-                  router.refresh();
-                });
-              }}
-            />
-          </label>
-          <label className="inline-flex cursor-pointer items-center rounded-xl border px-3 py-2 text-sm">
-            {t("uploadCover")}
-            <input
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (!file) return;
-                const fd = new FormData();
-                fd.set("file", file);
-                startTransition(async () => {
-                  await uploadCoverAction(fd);
-                  toast({ title: t("saved"), variant: "success" });
-                  router.refresh();
-                });
-              }}
-            />
-          </label>
+        <div className="flex items-center gap-4">
+          <Avatar src={avatarPreview ?? undefined} fallback={profile.displayName.charAt(0) || "U"} size="lg" />
+          <div className="flex flex-wrap gap-2">
+            <label className="inline-flex cursor-pointer items-center rounded-xl border px-3 py-2 text-sm">
+              {t("uploadAvatar")}
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+                  const fd = new FormData();
+                  fd.set("file", file);
+                  startTransition(async () => {
+                    const url = await handleUpload(uploadAvatarAction, fd);
+                    if (url) {
+                      setAvatarPreview(url);
+                      await update();
+                      toast({ title: t("saved"), variant: "success" });
+                      router.refresh();
+                    }
+                  });
+                }}
+              />
+            </label>
+            <label className="inline-flex cursor-pointer items-center rounded-xl border px-3 py-2 text-sm">
+              {t("uploadCover")}
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+                  const fd = new FormData();
+                  fd.set("file", file);
+                  startTransition(async () => {
+                    const url = await handleUpload(uploadCoverAction, fd);
+                    if (url) {
+                      toast({ title: t("saved"), variant: "success" });
+                      router.refresh();
+                    }
+                  });
+                }}
+              />
+            </label>
+          </div>
         </div>
 
         <form
           action={(fd) => {
             startTransition(async () => {
-              await updateProfileAction(fd);
-              toast({ title: t("saved"), variant: "success" });
-              router.refresh();
+              try {
+                await updateProfileAction(fd);
+                toast({ title: t("saved"), variant: "success" });
+                router.refresh();
+              } catch (e) {
+                toast({ title: getFriendlyError(e, tCommon), variant: "danger" });
+              }
             });
           }}
           className="space-y-3"
@@ -165,17 +201,24 @@ export function SettingsClient({ locale, profile, logoutAction }: Props) {
           action={(fd) => {
             startTransition(async () => {
               try {
+                const newPassword = String(fd.get("newPassword") ?? "");
+                const confirm = String(fd.get("confirmPassword") ?? "");
+                if (newPassword !== confirm) {
+                  toast({ title: tCommon("errors.PASSWORD_MISMATCH", { defaultValue: tCommon("errors.generic") }), variant: "danger" });
+                  return;
+                }
                 await changePasswordAction(fd);
                 toast({ title: t("passwordChanged"), variant: "success" });
-              } catch {
-                toast({ title: t("passwordError"), variant: "danger" });
+              } catch (e) {
+                toast({ title: getFriendlyError(e, tCommon), variant: "danger" });
               }
             });
           }}
           className="space-y-3"
         >
-          <Input name="currentPassword" type="password" label={t("currentPassword")} required />
-          <Input name="newPassword" type="password" label={t("newPassword")} required minLength={8} />
+          <PasswordInput name="currentPassword" label={t("currentPassword")} required />
+          <PasswordInput name="newPassword" label={t("newPassword")} required minLength={8} />
+          <PasswordInput name="confirmPassword" label={t("confirmPassword")} required minLength={8} />
           <Button type="submit" loading={pending} variant="outline">
             {t("updatePassword")}
           </Button>
@@ -200,3 +243,4 @@ function safeDisplay(value: string) {
   }
   return value;
 }
+

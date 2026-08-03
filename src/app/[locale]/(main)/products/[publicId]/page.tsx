@@ -76,6 +76,16 @@ export default async function ProductDetailPage({
         distanceLabel: distanceKm != null ? `${distanceKm.toFixed(1)} km` : null,
         isOwner: session?.user?.id === product.sellerId,
         publishedAt: product.publishedAt?.toISOString() ?? product.createdAt.toISOString(),
+        travel:
+          distanceKm != null && userLoc?.latitude != null && userLoc.longitude != null
+            ? {
+                originLat: userLoc.latitude,
+                originLng: userLoc.longitude,
+                destLat: product.latitude ?? 0,
+                destLng: product.longitude ?? 0,
+                distanceKm,
+              }
+            : null,
       }}
       labels={{
         contact: t("contactSeller"),
@@ -89,6 +99,10 @@ export default async function ProductDetailPage({
         seller: t("seller"),
         loginRequired: t("loginRequired"),
         noMedia: t("noMedia"),
+        travelTime: t("travelTime"),
+        directions: t("directions"),
+        viewOnMap: t("viewOnMap"),
+        minutesShort: t("minutesShort"),
       }}
     />
   );

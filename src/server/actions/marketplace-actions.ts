@@ -13,7 +13,7 @@ import {
 } from "@/server/marketplace/group-service";
 import { reportTarget } from "@/server/social/post-service";
 import { startConversationAction } from "@/server/actions/social-actions";
-import { geocodeAddress, reverseGeocode } from "@/server/geo/geocode";
+import { geocodeAddress, reverseGeocode, getTravelInfo } from "@/server/geo/geocode";
 import { db } from "@/lib/db";
 import { writeFile, mkdir } from "node:fs/promises";
 import path from "node:path";
@@ -179,6 +179,15 @@ export async function geocodeAddressAction(query: string, countryCodes?: string[
 
 export async function reverseGeocodeAction(latitude: number, longitude: number) {
   return reverseGeocode(latitude, longitude);
+}
+
+export async function getTravelInfoAction(
+  fromLat: number,
+  fromLng: number,
+  toLat: number,
+  toLng: number,
+) {
+  return getTravelInfo(fromLat, fromLng, toLat, toLng);
 }
 
 export async function toggleFavoriteAction(

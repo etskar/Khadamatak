@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useTransition } from "react";
 import { useTranslations } from "next-intl";
@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { createJobAction } from "@/server/actions/marketplace-actions";
 import { toast } from "@/components/ui/toast";
+import { getFriendlyError } from "@/lib/friendly-errors";
 
 export function JobPublishForm({
   categories,
@@ -34,7 +35,7 @@ export function JobPublishForm({
                 router.push(`/jobs/${res.publicId}`);
               } catch (err) {
                 toast({
-                  title: err instanceof Error ? err.message : tCommon("error"),
+                  title: getFriendlyError(err, tCommon),
                   variant: "danger",
                 });
               }
@@ -96,7 +97,7 @@ export function JobPublishForm({
             </select>
             <Input name="applyEmail" label={t("applyEmail")} className="col-span-2" />
           </div>
-          <Input name="applyUrl" label={t("applyUrl")} placeholder="https://…" />
+          <Input name="applyUrl" label={t("applyUrl")} placeholder="https://â€¦" />
           <Input name="city" label={t("city")} />
           <Input name="country" label={t("country")} defaultValue="NL" />
           <Input name="addressLine" label={t("address")} />
@@ -116,3 +117,4 @@ export function JobPublishForm({
     </Card>
   );
 }
+

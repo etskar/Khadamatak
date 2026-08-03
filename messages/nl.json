@@ -39,7 +39,38 @@
     "actions": "Acties",
     "loginRequired": "Inloggen vereist",
     "error": "Er ging iets mis",
-    "success": "Gelukt"
+    "success": "Gelukt",
+    "errors": {
+      "UNAUTHORIZED": "U moet eerst inloggen",
+      "FORBIDDEN": "Geen toegang tot deze actie",
+      "NOT_FOUND": "Item niet gevonden",
+      "RATE_LIMITED": "Te veel pogingen, probeer later opnieuw",
+      "FILE_TOO_LARGE": "Bestand is te groot",
+      "INVALID_FILE_TYPE": "Bestandstype wordt niet ondersteund",
+      "FILE_REQUIRED": "Bestand is verplicht",
+      "INVALID_INPUT": "Ongeldige invoer",
+      "VERIFICATION_REQUIRED": "U moet eerst uw account verifiëren",
+      "GROUP_NOT_FOUND": "Groep niet gevonden",
+      "NOT_A_MEMBER": "U moet eerst lid worden van de groep",
+      "TOKEN_INVALID": "Link is ongeldig of verlopen",
+      "WEAK_PASSWORD": "Wachtwoord moet minimaal 8 tekens bevatten",
+      "INVALID_PASSWORD": "Huidig wachtwoord is onjuist",
+      "NO_PASSWORD": "Geen wachtwoord ingesteld voor dit account",
+      "PASSWORD_MISMATCH": "Wachtwoorden komen niet overeen",
+      "EMAIL_TAKEN": "E-mailadres is al in gebruik",
+      "USERNAME_TAKEN": "Gebruikersnaam is al bezet",
+      "INVALID_CREDENTIALS": "Ongeldige inloggegevens",
+      "ACCOUNT_NOT_FOUND": "Geen account gevonden met dit e-mailadres",
+      "EMAIL_NOT_VERIFIED": "Bevestig eerst uw e-mailadres",
+      "PHONE_NOT_VERIFIED": "Bevestig eerst uw telefoonnummer",
+      "TERMS_REQUIRED": "U moet akkoord gaan met de voorwaarden",
+      "OTP_INVALID": "Verificatiecode is onjuist",
+      "OTP_LOCKED": "Code vergrendeld, vraag een nieuwe aan",
+      "ACTION_FAILED": "Actie mislukt, probeer het opnieuw",
+      "REGISTER_FAILED": "Account aanmaken mislukt",
+      "LOGIN_FAILED": "Inloggen mislukt",
+      "generic": "Actie mislukt, probeer het opnieuw"
+    }
   },
   "nav": {
     "home": "Home",
@@ -112,8 +143,13 @@
       "PASSWORD_MISMATCH": "Wachtwoorden komen niet overeen",
       "TOKEN_INVALID": "Ongeldige token",
       "LOGIN_FAILED": "Inloggen mislukt",
-      "REGISTER_FAILED": "Registratie mislukt"
-    }
+      "REGISTER_FAILED": "Registratie mislukt",
+      "invalidEmail": "Voer een geldig e-mailadres in",
+      "invalidUsername": "Gebruikersnaam moet 3-24 tekens zijn (letters, cijfers, _)",
+      "weakPassword": "Wachtwoord moet minimaal 8 tekens bevatten",
+      "mismatch": "Wachtwoorden komen niet overeen"
+    },
+    "loginSuccess": "Welkom terug!"
   },
   "home": {
     "title": "Home",
@@ -289,7 +325,8 @@
     "newPassword": "Nieuw wachtwoord",
     "updatePassword": "Wachtwoord bijwerken",
     "passwordChanged": "Wachtwoord gewijzigd",
-    "passwordError": "Wachtwoord wijzigen mislukt"
+    "passwordError": "Wachtwoord wijzigen mislukt",
+    "confirmPassword": "Bevestig wachtwoord"
   },
   "admin": {
     "title": "Beheerderspaneel",
@@ -953,7 +990,9 @@
     "notifications": "Meldingen",
     "search": "Zoeken",
     "createPost": "Bericht plaatsen",
-    "closeDialog": "Dialoog sluiten"
+    "closeDialog": "Dialoog sluiten",
+    "showPassword": "Toon wachtwoord",
+    "hidePassword": "Verberg wachtwoord"
   },
   "verification": {
     "title": "Identiteitsverificatie",
@@ -1101,6 +1140,13 @@
     "listing": "Advertentie",
     "member": "Lid",
     "emptyChat": "Nog geen berichten — wees de eerste!",
-    "joinToChat": "Word lid om mee te chatten"
+    "joinToChat": "Word lid om mee te chatten",
+    "travelTime": "Geschatte reistijd",
+    "directions": "Routebeschrijving",
+    "viewOnMap": "Bekijk op kaart",
+    "minutesShort": "min",
+    "useMyLocation": "Mijn locatie",
+    "locating": "Locatie bepalen…",
+    "locationError": "Locatie niet beschikbaar"
   }
 }

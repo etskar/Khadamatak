@@ -23,6 +23,7 @@ import {
   reportListingAction,
   toggleFavoriteAction,
 } from "@/server/actions/marketplace-actions";
+import { TravelInfo } from "./travel-info";
 
 type Props = {
   product: {
@@ -51,6 +52,13 @@ type Props = {
     distanceLabel: string | null;
     isOwner: boolean;
     publishedAt: string;
+    travel: {
+      originLat: number;
+      originLng: number;
+      destLat: number;
+      destLng: number;
+      distanceKm: number;
+    } | null;
   };
   labels: Record<string, string>;
 };
@@ -138,10 +146,24 @@ export function ProductDetailClient({ product, labels }: Props) {
                 {[product.city, product.country].filter(Boolean).join(", ")}
                 {product.distanceLabel ? ` · ${product.distanceLabel}` : ""}
               </p>
+              {product.travel ? (
+                <TravelInfo
+                  originLat={product.travel.originLat}
+                  originLng={product.travel.originLng}
+                  destLat={product.travel.destLat}
+                  destLng={product.travel.destLng}
+                  distanceKm={product.travel.distanceKm}
+                  labels={{
+                    travelTime: labels.travelTime,
+                    directions: labels.directions,
+                    viewOnMap: labels.viewOnMap,
+                  }}
+                />
+              ) : null}
               {product.latitude != null && product.longitude != null ? (
                 <iframe
                   title="map"
-                  className="h-56 w-full rounded-xl border border-border"
+                  className="mt-3 h-56 w-full rounded-xl border border-border"
                   loading="lazy"
                   referrerPolicy="no-referrer-when-downgrade"
                   src={`https://www.openstreetmap.org/export/embed.html?bbox=${product.longitude - 0.02}%2C${product.latitude - 0.02}%2C${product.longitude + 0.02}%2C${product.latitude + 0.02}&layer=mapnik&marker=${product.latitude}%2C${product.longitude}`}
