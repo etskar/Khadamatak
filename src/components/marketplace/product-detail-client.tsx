@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
+import Image from "next/image";
 import {
   BadgeCheck,
   Flag,
@@ -65,7 +66,7 @@ export function ProductDetailClient({ product, labels }: Props) {
   return (
     <div className="grid gap-5 animate-in-up lg:grid-cols-5">
       <div className="space-y-3 lg:col-span-3">
-        <div className="overflow-hidden rounded-2xl border border-border bg-muted">
+        <div className="relative overflow-hidden rounded-2xl border border-border bg-muted">
           {media[active] ? (
             media[active].type === "video" ? (
               <video
@@ -74,11 +75,13 @@ export function ProductDetailClient({ product, labels }: Props) {
                 className="aspect-[4/3] w-full object-cover"
               />
             ) : (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
+              <Image
                 src={media[active].url}
                 alt=""
-                className="aspect-[4/3] w-full object-cover"
+                fill
+                sizes="(max-width: 1024px) 100vw, 60vw"
+                className="aspect-[4/3] object-cover"
+                priority
               />
             )
           ) : (
@@ -94,12 +97,11 @@ export function ProductDetailClient({ product, labels }: Props) {
                 key={m.id}
                 type="button"
                 onClick={() => setActive(i)}
-                className={`h-16 w-16 shrink-0 overflow-hidden rounded-xl border ${
+                className={`relative h-16 w-16 shrink-0 overflow-hidden rounded-xl border ${
                   i === active ? "border-brand-600" : "border-border"
                 }`}
               >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={m.url} alt="" className="h-full w-full object-cover" />
+                <Image src={m.url} alt="" fill sizes="64px" className="object-cover" />
               </button>
             ))}
           </div>

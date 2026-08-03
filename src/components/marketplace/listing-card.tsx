@@ -1,4 +1,5 @@
 import { BadgeCheck, Heart, MapPin, Star } from "lucide-react";
+import Image from "next/image";
 import { Link } from "@/i18n/navigation";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -39,11 +40,12 @@ export function ListingCard({
       <Card className="overflow-hidden transition duration-300 hover:-translate-y-0.5 hover:shadow-lg">
         <div className="relative aspect-[4/3] overflow-hidden bg-muted">
           {imageUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
+            <Image
               src={imageUrl}
               alt=""
-              className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+              fill
+              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+              className="object-cover transition duration-500 group-hover:scale-105"
             />
           ) : (
             <div className="flex h-full items-center justify-center text-xs text-muted-foreground">
