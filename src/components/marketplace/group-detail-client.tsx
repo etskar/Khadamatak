@@ -17,7 +17,7 @@ import {
 import { toast } from "@/components/ui/toast";
 import { cn } from "@/lib/utils";
 
-type Tab = "posts" | "products" | "services" | "members" | "about";
+type Tab = "posts" | "products" | "services" | "jobs" | "members" | "about";
 
 export function GroupDetailClient(props: {
   slug: string;
@@ -48,6 +48,18 @@ export function GroupDetailClient(props: {
     imageUrl: string | null;
     city: string | null;
   }[];
+  jobs: {
+    publicId: string;
+    title: string;
+    company: string;
+    city: string | null;
+    employmentType: string;
+    salaryMinCents: number | null;
+    salaryMaxCents: number | null;
+    currency: string;
+    salaryPeriod: string;
+    imageUrl: string | null;
+  }[];
   labels: Record<string, string>;
 }) {
   const [tab, setTab] = useState<Tab>("posts");
@@ -60,6 +72,7 @@ export function GroupDetailClient(props: {
     { key: "posts", label: props.labels.posts },
     { key: "products", label: props.labels.products },
     { key: "services", label: props.labels.services },
+    { key: "jobs", label: props.labels.jobs },
     { key: "members", label: props.labels.members },
     { key: "about", label: props.labels.about },
   ];
@@ -180,6 +193,29 @@ export function GroupDetailClient(props: {
               imageUrl={s.imageUrl}
               city={s.city}
             />
+          ))}
+        </div>
+      ) : null}
+
+      {tab === "jobs" ? (
+        <div className="space-y-2">
+          {props.jobs.map((j) => (
+            <Link key={j.publicId} href={`/jobs/${j.publicId}`}>
+              <Card>
+                <CardContent className="flex items-center gap-3 p-4">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-muted font-bold text-muted-foreground">
+                    {j.company.charAt(0).toUpperCase()}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="font-semibold">{j.title}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {j.company}
+                      {j.city ? ` · ${j.city}` : ""}
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
           ))}
         </div>
       ) : null}

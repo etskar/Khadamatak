@@ -1,7 +1,13 @@
 import "server-only";
 import { db } from "@/lib/db";
-import { createPaymentRequestPublicId } from "@/lib/ids";
 import { writeAdminAudit } from "@/server/admin/guard";
+
+function createTicketPublicId() {
+  const alphabet = "0123456789ABCDEFGHJKLMNPQRSTUVWXYZ";
+  let s = "";
+  for (let i = 0; i < 10; i++) s += alphabet[Math.floor(Math.random() * alphabet.length)];
+  return `KH-TK-${s}`;
+}
 
 export async function createSupportTicket(input: {
   userId?: string;
@@ -12,7 +18,7 @@ export async function createSupportTicket(input: {
 }) {
   const ticket = await db.supportTicket.create({
     data: {
-      publicId: createPaymentRequestPublicId().replace("KH-PR-", "KH-TK-"),
+      publicId: createTicketPublicId(),
       userId: input.userId ?? null,
       category: input.category,
       subject: input.subject,

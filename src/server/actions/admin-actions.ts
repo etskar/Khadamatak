@@ -212,7 +212,7 @@ export async function editUserAccountFlatAction(input: {
 // ─── Marketplace ──────────────────────────────────────────────
 
 export async function setListingStatusAction(input: {
-  kind: "product" | "service";
+  kind: "product" | "service" | "job";
   publicId: string;
   action: "hide" | "restore" | "delete" | "approve";
 }) {
@@ -222,7 +222,7 @@ export async function setListingStatusAction(input: {
 }
 
 export async function toggleListingFlagAction(input: {
-  kind: "product" | "service";
+  kind: "product" | "service" | "job";
   publicId: string;
   flag: "featured" | "pinned";
 }) {

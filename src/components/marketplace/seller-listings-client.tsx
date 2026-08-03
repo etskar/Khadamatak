@@ -10,6 +10,7 @@ import { setListingStatusAction } from "@/server/actions/marketplace-actions";
 export function SellerListingsClient({
   products,
   services,
+  jobs = [],
   labels,
 }: {
   products: {
@@ -26,6 +27,12 @@ export function SellerListingsClient({
     views: number;
     favorites: number;
   }[];
+  jobs: {
+    publicId: string;
+    title: string;
+    status: string;
+    views: number;
+  }[];
   labels: Record<string, string>;
 }) {
   const [pending, startTransition] = useTransition();
@@ -35,20 +42,26 @@ export function SellerListingsClient({
     kind,
     item,
   }: {
-    kind: "product" | "service";
-    item: (typeof products)[0];
+    kind: "product" | "service" | "job";
+    item: { publicId: string; title: string; status: string; views: number; favorites?: number };
   }) => (
     <Card className="mb-2">
       <CardContent className="flex flex-wrap items-center justify-between gap-2 p-3">
         <div>
           <Link
-            href={kind === "product" ? `/products/${item.publicId}` : `/services/${item.publicId}`}
+            href={
+              kind === "product"
+                ? `/products/${item.publicId}`
+                : kind === "service"
+                  ? `/services/${item.publicId}`
+                  : `/jobs/${item.publicId}`
+            }
             className="font-semibold hover:underline"
           >
             {item.title}
           </Link>
           <p className="text-xs text-muted-foreground">
-            {item.views} views · {item.favorites} fav
+            {item.views} views{item.favorites != null ? ` · ${item.favorites} fav` : ""}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -114,6 +127,12 @@ export function SellerListingsClient({
         <h2 className="mb-2 font-semibold">{labels.services}</h2>
         {services.map((s) => (
           <Row key={s.publicId} kind="service" item={s} />
+        ))}
+      </div>
+      <div className="lg:col-span-2">
+        <h2 className="mb-2 font-semibold">{labels.jobs}</h2>
+        {jobs.map((j) => (
+          <Row key={j.publicId} kind="job" item={j} />
         ))}
       </div>
     </div>

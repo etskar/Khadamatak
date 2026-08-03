@@ -46,6 +46,12 @@ export default async function SellDashboardPage({
             >
               {t("offerService")}
             </Link>
+            <Link
+              href="/sell/job"
+              className="inline-flex h-10 items-center rounded-xl border px-3 text-xs font-semibold"
+            >
+              {t("postJob")}
+            </Link>
           </div>
         }
       />
@@ -76,9 +82,16 @@ export default async function SellDashboardPage({
           views: s.viewsCount,
           favorites: s.favoritesCount,
         }))}
+        jobs={data.jobs.map((j) => ({
+          publicId: j.publicId,
+          title: j.title,
+          status: j.status,
+          views: j.viewsCount,
+        }))}
         labels={{
           products: t("products"),
           services: t("services"),
+          jobs: t("jobs"),
           pause: t("pause"),
           activate: t("activate"),
           delete: t("delete"),

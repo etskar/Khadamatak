@@ -16,12 +16,13 @@ import {
 } from "@/server/actions/admin-actions";
 import { formatMoney } from "@/lib/money";
 
-const KINDS = ["product", "service"] as const;
+const KINDS = ["product", "service", "job"] as const;
 type Kind = (typeof KINDS)[number];
 
 const KIND_STATUSES: Record<Kind, string[]> = {
   product: ["active", "paused", "sold", "deleted", "draft"],
   service: ["active", "paused", "deleted", "draft"],
+  job: ["active", "paused", "filled", "deleted", "draft"],
 };
 
 export async function generateMetadata({
@@ -110,12 +111,16 @@ export default async function AdminMarketplacePage({
             priceCents?: number | null;
             featured?: boolean;
             pinned?: boolean;
+            company?: string | null;
             seller?: { profile?: { displayName?: string | null; username?: string | null } | null } | null;
             provider?: { profile?: { displayName?: string | null; username?: string | null } | null } | null;
+            employer?: { profile?: { displayName?: string | null; username?: string | null } | null } | null;
           };
           const sellerName =
             (i.seller?.profile?.displayName ?? i.seller?.profile?.username) ||
             (i.provider?.profile?.displayName ?? i.provider?.profile?.username) ||
+            (i.employer?.profile?.displayName ?? i.employer?.profile?.username) ||
+            i.company ||
             "—";
           const priceCents = i.priceCents ?? 0;
           const featured = i.featured ?? false;
@@ -125,7 +130,13 @@ export default async function AdminMarketplacePage({
             <tr key={i.publicId}>
               <TableCell>
                 <Link
-                  href={kind === "product" ? `/products/${i.publicId}` : `/services/${i.publicId}`}
+                  href={
+                    kind === "product"
+                      ? `/products/${i.publicId}`
+                      : kind === "service"
+                        ? `/services/${i.publicId}`
+                        : `/jobs/${i.publicId}`
+                  }
                   className="font-medium hover:underline"
                 >
                   {i.title}
@@ -133,7 +144,7 @@ export default async function AdminMarketplacePage({
               </TableCell>
               <TableCell>{sellerName}</TableCell>
               <TableCell>
-                {formatMoney(priceCents, "EUR", localeFmt)}
+                {kind === "job" ? "—" : formatMoney(priceCents, "EUR", localeFmt)}
               </TableCell>
               <TableCell>
                 <StatusBadge status={i.status} />

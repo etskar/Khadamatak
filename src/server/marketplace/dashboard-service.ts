@@ -2,39 +2,53 @@ import "server-only";
 import { db } from "@/lib/db";
 
 export async function getSellerDashboard(userId: string) {
-  const [products, services, productViews, serviceViews] = await Promise.all([
-    db.product.findMany({
-      where: { sellerId: userId, status: { not: "deleted" } },
-      include: { media: true, _count: { select: { favorites: true } } },
-      orderBy: { createdAt: "desc" },
-    }),
-    db.service.findMany({
-      where: { providerId: userId, status: { not: "deleted" } },
-      include: { media: true, _count: { select: { favorites: true } } },
-      orderBy: { createdAt: "desc" },
-    }),
-    db.product.aggregate({
-      where: { sellerId: userId },
-      _sum: { viewsCount: true, favoritesCount: true },
-    }),
-    db.service.aggregate({
-      where: { providerId: userId },
-      _sum: { viewsCount: true, favoritesCount: true },
-    }),
-  ]);
+  const [products, services, jobs, productViews, serviceViews, jobViews] =
+    await Promise.all([
+      db.product.findMany({
+        where: { sellerId: userId, status: { not: "deleted" } },
+        include: { media: true, _count: { select: { favorites: true } } },
+        orderBy: { createdAt: "desc" },
+      }),
+      db.service.findMany({
+        where: { providerId: userId, status: { not: "deleted" } },
+        include: { media: true, _count: { select: { favorites: true } } },
+        orderBy: { createdAt: "desc" },
+      }),
+      db.job.findMany({
+        where: { employerId: userId, status: { not: "deleted" } },
+        include: { media: true },
+        orderBy: { createdAt: "desc" },
+      }),
+      db.product.aggregate({
+        where: { sellerId: userId },
+        _sum: { viewsCount: true, favoritesCount: true },
+      }),
+      db.service.aggregate({
+        where: { providerId: userId },
+        _sum: { viewsCount: true, favoritesCount: true },
+      }),
+      db.job.aggregate({
+        where: { employerId: userId },
+        _sum: { viewsCount: true },
+      }),
+    ]);
 
   return {
     products,
     services,
+    jobs,
     stats: {
       views:
-        (productViews._sum.viewsCount ?? 0) + (serviceViews._sum.viewsCount ?? 0),
+        (productViews._sum.viewsCount ?? 0) +
+        (serviceViews._sum.viewsCount ?? 0) +
+        (jobViews._sum.viewsCount ?? 0),
       favorites:
         (productViews._sum.favoritesCount ?? 0) +
         (serviceViews._sum.favoritesCount ?? 0),
       activeListings:
         products.filter((p) => p.status === "active").length +
-        services.filter((s) => s.status === "active").length,
+        services.filter((s) => s.status === "active").length +
+        jobs.filter((j) => j.status === "active").length,
     },
   };
 }

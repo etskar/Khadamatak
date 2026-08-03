@@ -42,6 +42,19 @@ export default async function GroupDetailPage({
     city: s.city,
   }));
 
+  const jobs = group.jobs.map((j) => ({
+    publicId: j.publicId,
+    title: j.title,
+    company: j.company,
+    city: j.city,
+    employmentType: j.employmentType,
+    salaryMinCents: j.salaryMinCents,
+    salaryMaxCents: j.salaryMaxCents,
+    currency: j.currency,
+    salaryPeriod: j.salaryPeriod,
+    imageUrl: j.media[0]?.url ?? null,
+  }));
+
   return (
     <GroupDetailClient
       slug={group.slug}
@@ -65,11 +78,13 @@ export default async function GroupDetailPage({
       }))}
       products={products}
       services={services}
+      jobs={jobs}
       labels={{
         join: t("joinGroup"),
         posts: t("tabPosts"),
         products: t("tabProducts"),
         services: t("tabServices"),
+        jobs: t("tabJobs"),
         members: t("tabMembers"),
         about: t("tabAbout"),
         writePost: t("writePost"),

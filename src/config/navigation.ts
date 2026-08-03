@@ -13,6 +13,7 @@ import {
   Store,
   Users,
   UserRound,
+  Building2,
 } from "lucide-react";
 
 export type NavItem = {
@@ -50,6 +51,13 @@ export const mainNavItems: NavItem[] = [
     key: "services",
     href: "/services",
     icon: Briefcase,
+    showInBottomNav: false,
+    showInSidebar: true,
+  },
+  {
+    key: "jobs",
+    href: "/jobs",
+    icon: Building2,
     showInBottomNav: false,
     showInSidebar: true,
   },

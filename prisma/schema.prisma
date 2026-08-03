@@ -51,6 +51,7 @@ model User {
   // Marketplace
   products          Product[]
   services          Service[]
+  jobs              Job[]
   favorites         Favorite[]
   groupMemberships  GroupMember[]
   groupsCreated     CityGroup[]            @relation("GroupCreator")
@@ -483,6 +484,7 @@ model Category {
   children  Category[] @relation("CategoryTree")
   products  Product[]
   services  Service[]
+  jobs      Job[]
 
   @@index([kind, sortOrder])
 }
@@ -571,18 +573,65 @@ model Service {
   @@index([city])
 }
 
+model Job {
+  id             String   @id @default(cuid())
+  publicId       String   @unique
+  employerId     String
+  categoryId     String?
+  title          String
+  company        String
+  description    String
+  requirements   String?
+  salaryMinCents Int?
+  salaryMaxCents Int?
+  currency       String   @default("EUR")
+  salaryPeriod   String   @default("monthly") // hourly | monthly | yearly | project
+  employmentType String   @default("full_time") // full_time | part_time | contract | freelance | internship
+  workHours      String? // e.g. "Mon-Fri, 9-17"
+  applyMethod    String   @default("message") // message | email | external
+  applyUrl       String?
+  applyEmail     String?
+  status         String   @default("active") // draft | active | paused | filled | deleted
+  hiddenAt       DateTime?
+  featured       Boolean  @default(false)
+  city           String?
+  country        String?  @default("NL")
+  addressLine    String?
+  latitude       Float?
+  longitude      Float?
+  viewsCount     Int      @default(0)
+  groupId        String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  publishedAt    DateTime?
+
+  employer User         @relation(fields: [employerId], references: [id], onDelete: Cascade)
+  category Category?    @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  group    CityGroup?   @relation(fields: [groupId], references: [id], onDelete: SetNull)
+  media    ListingMedia[]
+
+  @@index([employerId, status])
+  @@index([status, createdAt])
+  @@index([categoryId])
+  @@index([city])
+  @@index([latitude, longitude])
+}
+
 model ListingMedia {
   id        String  @id @default(cuid())
   productId String?
   serviceId String?
+  jobId     String?
   type      String // image | video
   url       String
   sortOrder Int     @default(0)
   product   Product? @relation(fields: [productId], references: [id], onDelete: Cascade)
   service   Service? @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  job       Job?     @relation(fields: [jobId], references: [id], onDelete: Cascade)
 
   @@index([productId])
   @@index([serviceId])
+  @@index([jobId])
 }
 
 model Favorite {
@@ -629,6 +678,7 @@ model CityGroup {
   groupPosts GroupPost[]
   products  Product[]
   services  Service[]
+  jobs      Job[]
   favorites Favorite[]
 
   @@index([city])

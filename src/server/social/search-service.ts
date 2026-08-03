@@ -20,6 +20,7 @@ export async function searchAll(input: {
       posts: [],
       products: [],
       services: [],
+      jobs: [],
       groups: [],
     };
   }
@@ -43,7 +44,7 @@ export async function searchAll(input: {
   const limit = input.limit ?? 12;
   const f = input.filters ?? {};
 
-  const [users, posts, products, services, groups] = await Promise.all([
+  const [users, posts, products, services, jobs, groups] = await Promise.all([
     db.profile.findMany({
       where: {
         OR: [
@@ -123,6 +124,23 @@ export async function searchAll(input: {
         category: true,
       },
     }),
+    db.job.findMany({
+      where: {
+        status: "active",
+        OR: [
+          { title: { contains: q } },
+          { description: { contains: q } },
+          { company: { contains: q } },
+          { city: { contains: q } },
+        ],
+      },
+      take: limit,
+      include: {
+        media: true,
+        employer: { include: { profile: true, verification: true } },
+        category: true,
+      },
+    }),
     db.cityGroup.findMany({
       where: {
         status: "active",
@@ -136,7 +154,7 @@ export async function searchAll(input: {
     }),
   ]);
 
-  return { users, posts, products, services, groups };
+  return { users, posts, products, services, jobs, groups };
 }
 
 export async function getRecentSearches(userId: string) {

@@ -187,6 +187,29 @@ export function SearchClient({
           </section>
 
           <section>
+            <h3 className="mb-2 text-sm font-semibold">{t("jobs")}</h3>
+            {result.jobs.length === 0 ? (
+              <p className="text-sm text-muted-foreground">—</p>
+            ) : (
+              <div className="space-y-2">
+                {result.jobs.map((j) => (
+                  <Link
+                    key={j.id}
+                    href={`/jobs/${j.publicId}`}
+                    className="block rounded-xl border px-3 py-2 text-sm hover:bg-muted/40"
+                  >
+                    <p className="font-semibold">{j.title}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {j.company}
+                      {j.city ? ` · ${j.city}` : ""}
+                    </p>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </section>
+
+          <section>
             <h3 className="mb-2 text-sm font-semibold">{t("groups")}</h3>
             {result.groups.length === 0 ? (
               <p className="text-sm text-muted-foreground">—</p>

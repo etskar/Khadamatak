@@ -57,7 +57,8 @@
     "services": "Diensten",
     "map": "Kaart",
     "sell": "Verkopen",
-    "favorites": "Favorieten"
+    "favorites": "Favorieten",
+    "jobs": "Vacatures"
   },
   "auth": {
     "welcomeBack": "Welkom terug",
@@ -164,7 +165,8 @@
     "products": "Producten",
     "services": "Diensten",
     "groups": "Groepen",
-    "futureReady": "toekomstklaar"
+    "futureReady": "toekomstklaar",
+    "jobs": "Vacatures"
   },
   "products": {
     "title": "Producten",
@@ -1058,6 +1060,25 @@
     "verifiedMembers": "Geverifieerde leden",
     "statViews": "Weergaven",
     "statFavorites": "Favorieten",
-    "statListings": "Actieve advertenties"
+    "statListings": "Actieve advertenties",
+    "jobs": "Vacatures",
+    "jobsSubtitle": "Vind uw volgende baan of plaats een vacature",
+    "postJob": "Plaats vacature",
+    "noJobs": "Nog geen vacatures",
+    "noJobsDesc": "Wees de eerste die een vacature plaatst in uw gemeenschap",
+    "jobTitle": "Functietitel",
+    "company": "Bedrijf",
+    "salary": "Salaris",
+    "salaryMin": "Minimaal salaris",
+    "salaryMax": "Maximaal salaris",
+    "employmentType": "Dienstverband",
+    "workHours": "Werkuren",
+    "requirements": "Vereisten",
+    "applyMethod": "Sollicitatiemethode",
+    "applyEmail": "Sollicitatie-e-mail",
+    "applyUrl": "Sollicitatielink",
+    "applyNow": "Solliciteer nu",
+    "contactEmployer": "Neem contact op",
+    "tabJobs": "Vacatures"
   }
 }

@@ -57,7 +57,8 @@
     "services": "الخدمات",
     "map": "الخريطة",
     "sell": "بيع",
-    "favorites": "المفضلة"
+    "favorites": "المفضلة",
+    "jobs": "الوظائف"
   },
   "auth": {
     "welcomeBack": "مرحباً بعودتك",
@@ -164,7 +165,8 @@
     "products": "المنتجات",
     "services": "الخدمات",
     "groups": "المجموعات",
-    "futureReady": "جاهز للمستقبل"
+    "futureReady": "جاهز للمستقبل",
+    "jobs": "الوظائف"
   },
   "products": {
     "title": "المنتجات",
@@ -1058,6 +1060,25 @@
     "verifiedMembers": "أعضاء موثقون",
     "statViews": "المشاهدات",
     "statFavorites": "المفضلة",
-    "statListings": "القوائم النشطة"
+    "statListings": "القوائم النشطة",
+    "jobs": "الوظائف",
+    "jobsSubtitle": "اعثر على وظيفتك التالية أو انشر وظيفة",
+    "postJob": "انشر وظيفة",
+    "noJobs": "لا توجد وظائف بعد",
+    "noJobsDesc": "كن أول من ينشر وظيفة في مجتمعك",
+    "jobTitle": "المسمى الوظيفي",
+    "company": "الشركة",
+    "salary": "الراتب",
+    "salaryMin": "الراتب الأدنى",
+    "salaryMax": "الراتب الأقصى",
+    "employmentType": "نوع التوظيف",
+    "workHours": "ساعات العمل",
+    "requirements": "المتطلبات",
+    "applyMethod": "طريقة التقديم",
+    "applyEmail": "بريد التقديم",
+    "applyUrl": "رابط التقديم",
+    "applyNow": "قدّم الآن",
+    "contactEmployer": "تواصل مع صاحب العمل",
+    "tabJobs": "الوظائف"
   }
 }

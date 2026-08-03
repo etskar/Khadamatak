@@ -3,7 +3,7 @@ import { db } from "@/lib/db";
 import { writeAdminAudit } from "@/server/admin/guard";
 
 export async function listMarketplaceItems(input: {
-  kind: "product" | "service";
+  kind: "product" | "service" | "job";
   query?: string;
   status?: string;
   page?: number;
@@ -29,31 +29,49 @@ export async function listMarketplaceItems(input: {
     return { items, total, page, pageSize };
   }
 
+  if (input.kind === "service") {
+    const where: Record<string, unknown> = {};
+    if (input.query) where.OR = [{ title: { contains: input.query } }, { description: { contains: input.query } }];
+    if (input.status) where.status = input.status;
+    const [items, total] = await Promise.all([
+      db.service.findMany({
+        where,
+        orderBy: { createdAt: "desc" },
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+        include: { provider: { include: { profile: { select: { displayName: true, username: true } } } }, media: true },
+      }),
+      db.service.count({ where }),
+    ]);
+    return { items, total, page, pageSize };
+  }
+
   const where: Record<string, unknown> = {};
-  if (input.query) where.OR = [{ title: { contains: input.query } }, { description: { contains: input.query } }];
+  if (input.query) where.OR = [{ title: { contains: input.query } }, { company: { contains: input.query } }, { description: { contains: input.query } }];
   if (input.status) where.status = input.status;
   const [items, total] = await Promise.all([
-    db.service.findMany({
+    db.job.findMany({
       where,
       orderBy: { createdAt: "desc" },
       skip: (page - 1) * pageSize,
       take: pageSize,
-      include: { provider: { include: { profile: { select: { displayName: true, username: true } } } }, media: true },
+      include: { employer: { include: { profile: { select: { displayName: true, username: true } } } }, media: true },
     }),
-    db.service.count({ where }),
+    db.job.count({ where }),
   ]);
   return { items, total, page, pageSize };
 }
 
 export async function setListingStatus(input: {
   adminId: string;
-  kind: "product" | "service";
+  kind: "product" | "service" | "job";
   publicId: string;
   action: "hide" | "restore" | "delete" | "approve";
 }) {
   const modelMap = {
     product: db.product,
     service: db.service,
+    job: db.job,
   } as const;
 
   const model = modelMap[input.kind] as unknown as {
@@ -81,10 +99,17 @@ export async function setListingStatus(input: {
 
   await model.update({ where: { id: existing.id as string }, data });
 
+  const entityType =
+    input.kind === "product"
+      ? "Product"
+      : input.kind === "service"
+        ? "Service"
+        : "Job";
+
   await writeAdminAudit({
     adminId: input.adminId,
     action: `marketplace.${input.kind}.${input.action}`,
-    entityType: input.kind === "product" ? "Product" : "Service",
+    entityType,
     entityId: existing.id as string,
     previousValue: existing.status,
     newValue: data,
@@ -94,13 +119,14 @@ export async function setListingStatus(input: {
 
 export async function toggleListingFlag(input: {
   adminId: string;
-  kind: "product" | "service";
+  kind: "product" | "service" | "job";
   publicId: string;
   flag: "featured" | "pinned";
 }) {
   const modelMap = {
     product: db.product,
     service: db.service,
+    job: db.job,
   } as const;
 
   const model = modelMap[input.kind] as unknown as {
@@ -126,10 +152,17 @@ export async function toggleListingFlag(input: {
     data: { [input.flag]: value },
   });
 
+  const entityType =
+    input.kind === "product"
+      ? "Product"
+      : input.kind === "service"
+        ? "Service"
+        : "Job";
+
   await writeAdminAudit({
     adminId: input.adminId,
     action: `marketplace.${input.kind}.${input.flag}`,
-    entityType: input.kind === "product" ? "Product" : "Service",
+    entityType,
     entityId: existing.id as string,
     previousValue: existing[input.flag] as boolean,
     newValue: value,

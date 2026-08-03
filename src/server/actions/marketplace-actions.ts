@@ -5,6 +5,7 @@ import { auth } from "@/lib/auth";
 import { parseAmountToCents } from "@/lib/money";
 import { createProduct, updateProductStatus } from "@/server/marketplace/product-service";
 import { createService, updateServiceStatus } from "@/server/marketplace/service-service";
+import { createJob, updateJobStatus } from "@/server/marketplace/job-service";
 import { toggleFavorite } from "@/server/marketplace/favorite-service";
 import {
   createGroupPost,
@@ -103,6 +104,45 @@ export async function createServiceAction(formData: FormData) {
   return { ok: true as const, publicId: service.publicId };
 }
 
+export async function createJobAction(formData: FormData) {
+  const user = await requireUser();
+  const media: { type: "image" | "video"; url: string }[] = [];
+  for (const f of formData.getAll("media")) {
+    if (f instanceof File && f.size > 0) media.push(await saveMedia(f, "jobs"));
+  }
+
+  const salaryMinRaw = String(formData.get("salaryMin") ?? "").trim();
+  const salaryMaxRaw = String(formData.get("salaryMax") ?? "").trim();
+
+  const job = await createJob({
+    employerId: user.id,
+    title: String(formData.get("title") ?? ""),
+    company: String(formData.get("company") ?? ""),
+    description: String(formData.get("description") ?? ""),
+    requirements: String(formData.get("requirements") ?? "") || undefined,
+    categoryId: String(formData.get("categoryId") ?? "") || null,
+    salaryMinCents: salaryMinRaw ? parseAmountToCents(salaryMinRaw) : null,
+    salaryMaxCents: salaryMaxRaw ? parseAmountToCents(salaryMaxRaw) : null,
+    salaryPeriod: String(formData.get("salaryPeriod") ?? "monthly"),
+    employmentType: String(formData.get("employmentType") ?? "full_time"),
+    workHours: String(formData.get("workHours") ?? "") || undefined,
+    applyMethod: String(formData.get("applyMethod") ?? "message"),
+    applyUrl: String(formData.get("applyUrl") ?? "") || undefined,
+    applyEmail: String(formData.get("applyEmail") ?? "") || undefined,
+    city: String(formData.get("city") ?? "") || undefined,
+    country: String(formData.get("country") ?? "NL"),
+    addressLine: String(formData.get("addressLine") ?? "") || undefined,
+    latitude: formData.get("latitude") ? Number(formData.get("latitude")) : null,
+    longitude: formData.get("longitude") ? Number(formData.get("longitude")) : null,
+    groupId: String(formData.get("groupId") ?? "") || null,
+    media,
+  });
+
+  revalidatePath("/jobs");
+  revalidatePath("/sell");
+  return { ok: true as const, publicId: job.publicId };
+}
+
 export async function toggleFavoriteAction(
   targetType: "product" | "service" | "post" | "group" | "seller",
   targetId: string,
@@ -132,13 +172,24 @@ export async function createGroupPostAction(formData: FormData) {
 }
 
 export async function setListingStatusAction(
-  kind: "product" | "service",
+  kind: "product" | "service" | "job",
   publicId: string,
-  status: "active" | "paused" | "deleted" | "draft",
+  status: "active" | "paused" | "deleted" | "draft" | "filled",
 ) {
   const user = await requireUser();
-  if (kind === "product") await updateProductStatus(user.id, publicId, status);
-  else await updateServiceStatus(user.id, publicId, status);
+  if (kind === "product")
+    await updateProductStatus(
+      user.id,
+      publicId,
+      status as "active" | "paused" | "deleted" | "draft",
+    );
+  else if (kind === "service")
+    await updateServiceStatus(
+      user.id,
+      publicId,
+      status as "active" | "paused" | "deleted" | "draft",
+    );
+  else await updateJobStatus(user.id, publicId, status);
   revalidatePath("/sell");
   return { ok: true as const };
 }
