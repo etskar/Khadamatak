@@ -1089,6 +1089,7 @@
     "dropImages": "Sleep afbeeldingen hierheen",
     "filters": "Filters",
     "category": "Categorie",
-    "reset": "Reset"
+    "reset": "Reset",
+    "viewDetails": "Bekijk details"
   }
 }

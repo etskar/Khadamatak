@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "@/i18n/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
@@ -11,67 +11,146 @@ type Pin = {
   lat: number;
   lng: number;
   href: string;
-  kind: "product" | "service" | "group";
+  kind: "product" | "service" | "job" | "group";
+  priceLabel?: string | null;
+  imageUrl?: string | null;
+  company?: string | null;
 };
 
-export function MapExplorer({
-  center,
-  products,
-  services,
-  groups,
-  labels,
-}: {
+type Props = {
   center: { lat: number; lng: number };
-  products: Pin[];
-  services: Pin[];
-  groups: Pin[];
+  pins: Pin[];
   labels: Record<string, string>;
-}) {
-  const [filter, setFilter] = useState<"all" | "product" | "service" | "group">(
-    "all",
+};
+
+const KIND_COLORS: Record<Pin["kind"], string> = {
+  product: "#0d9488",
+  service: "#f97316",
+  job: "#3b82f6",
+  group: "#8b5cf6",
+};
+
+export function MapExplorer({ center, pins, labels }: Props) {
+  const [filter, setFilter] = useState<"all" | Pin["kind"]>("all");
+  const mapRef = useRef<HTMLDivElement>(null);
+  const [map, setMap] = useState<{
+    L: typeof import("leaflet");
+    instance: import("leaflet").Map;
+  } | null>(null);
+
+  const visible = useMemo(
+    () => (filter === "all" ? pins : pins.filter((p) => p.kind === filter)),
+    [pins, filter],
   );
 
-  const pins = useMemo(() => {
-    const all = [...products, ...services, ...groups];
-    return filter === "all" ? all : all.filter((p) => p.kind === filter);
-  }, [products, services, groups, filter]);
-
-  const bbox = useMemo(() => {
-    if (pins.length === 0) {
-      return {
-        minLng: center.lng - 0.08,
-        minLat: center.lat - 0.05,
-        maxLng: center.lng + 0.08,
-        maxLat: center.lat + 0.05,
-      };
-    }
-    const lats = pins.map((p) => p.lat);
-    const lngs = pins.map((p) => p.lng);
-    return {
-      minLng: Math.min(...lngs) - 0.02,
-      minLat: Math.min(...lats) - 0.02,
-      maxLng: Math.max(...lngs) + 0.02,
-      maxLat: Math.max(...lats) + 0.02,
+  // Init map once
+  useEffect(() => {
+    if (!mapRef.current || map) return;
+    let cancelled = false;
+    (async () => {
+      const L = (await import("leaflet")).default;
+      await import("leaflet.markercluster");
+      if (cancelled || !mapRef.current) return;
+      const instance = L.map(mapRef.current, {
+        center: [center.lat, center.lng],
+        zoom: 11,
+        scrollWheelZoom: true,
+      });
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution:
+          '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+        maxZoom: 19,
+      }).addTo(instance);
+      setMap({ L, instance });
+    })();
+    return () => {
+      cancelled = true;
     };
-  }, [pins, center]);
+  }, [center, map]);
 
-  const src = `https://www.openstreetmap.org/export/embed.html?bbox=${bbox.minLng}%2C${bbox.minLat}%2C${bbox.maxLng}%2C${bbox.maxLat}&layer=mapnik&marker=${center.lat}%2C${center.lng}`;
+  // Markers + clustering
+  useEffect(() => {
+    if (!map) return;
+    const { L, instance } = map;
+    const clusterGroup = L.markerClusterGroup({
+      maxClusterRadius: 55,
+      showCoverageOnHover: false,
+    });
+
+    for (const pin of visible) {
+      const icon = L.divIcon({
+        className: "",
+        html: `<div style="width:26px;height:26px;border-radius:9999px;background:${KIND_COLORS[pin.kind]};border:2px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff;font-weight:700">${
+          pin.kind === "job" ? "J" : pin.kind === "product" ? "P" : pin.kind === "service" ? "S" : "G"
+        }</div>`,
+        iconSize: [26, 26],
+        iconAnchor: [13, 13],
+        popupAnchor: [0, -16],
+      });
+
+      const marker = L.marker([pin.lat, pin.lng], { icon });
+      const popup = L.popup({ maxWidth: 260, offset: [0, -8] });
+      const preview = document.createElement("div");
+      preview.className = "khadamatak-marker-preview";
+      preview.innerHTML = `
+        <div style="display:flex;gap:10px;align-items:flex-start">
+          ${
+            pin.imageUrl
+              ? `<img src="${pin.imageUrl}" alt="" style="width:52px;height:52px;border-radius:10px;object-fit:cover;flex-shrink:0" loading="lazy"/>`
+              : `<div style="width:52px;height:52px;border-radius:10px;background:#f1f5f9;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-weight:700;color:#64748b">${
+                  (pin.company ?? pin.title).charAt(0).toUpperCase()
+                }</div>`
+          }
+          <div style="min-width:0">
+            <p style="margin:0;font-size:13px;font-weight:700;color:#0f172a;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${pin.title}</p>
+            ${
+              pin.priceLabel
+                ? `<p style="margin:2px 0 0;font-size:12px;font-weight:700;color:#0d9488">${pin.priceLabel}</p>`
+                : pin.company
+                  ? `<p style="margin:2px 0 0;font-size:11px;color:#64748b">${pin.company}</p>`
+                  : ""
+            }
+            <a href="${pin.href}" style="display:inline-flex;margin-top:6px;font-size:11px;font-weight:700;color:#0d9488;text-decoration:none">${labels.viewDetails} →</a>
+          </div>
+        </div>`;
+      popup.setContent(preview);
+      marker.bindPopup(popup);
+      clusterGroup.addLayer(marker);
+    }
+
+    instance.addLayer(clusterGroup);
+    if (visible.length > 1) {
+      instance.fitBounds(clusterGroup.getBounds(), { padding: [24, 24], maxZoom: 14 });
+    } else if (visible.length === 1) {
+      instance.setView([visible[0].lat, visible[0].lng], 13);
+    }
+
+    return () => {
+      instance.removeLayer(clusterGroup);
+    };
+  }, [map, visible, labels]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      map?.instance.remove();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div className="grid gap-4 lg:grid-cols-5">
       <div className="lg:col-span-3">
-        <iframe
-          title="map"
-          className="h-[420px] w-full rounded-2xl border border-border"
-          src={src}
-          loading="lazy"
-        />
-        <div className="mt-3 flex gap-2">
+        <div className="overflow-hidden rounded-2xl border border-border">
+          <div ref={mapRef} className="h-[440px] w-full" />
+        </div>
+        <div className="mt-3 flex flex-wrap gap-2">
           {(
             [
               ["all", labels.nearby],
               ["product", labels.products],
               ["service", labels.services],
+              ["job", labels.jobs],
               ["group", labels.groups],
             ] as const
           ).map(([key, label]) => (
@@ -80,10 +159,10 @@ export function MapExplorer({
               type="button"
               onClick={() => setFilter(key)}
               className={cn(
-                "rounded-full px-3 py-1.5 text-xs font-semibold",
+                "rounded-full px-3 py-1.5 text-xs font-semibold transition",
                 filter === key
                   ? "bg-primary text-primary-foreground"
-                  : "bg-muted text-muted-foreground",
+                  : "bg-muted text-muted-foreground hover:bg-muted/70",
               )}
             >
               {label}
@@ -91,19 +170,31 @@ export function MapExplorer({
           ))}
         </div>
       </div>
-      <div className="max-h-[480px] space-y-2 overflow-y-auto lg:col-span-2">
-        {pins.map((p) => (
-          <Link key={`${p.kind}-${p.id}`} href={p.href as "/"}>
-            <Card className="mb-2 transition hover:shadow-md">
-              <CardContent className="p-3">
-                <p className="text-[10px] uppercase text-muted-foreground">
-                  {p.kind}
-                </p>
-                <p className="font-semibold">{p.title}</p>
-              </CardContent>
-            </Card>
-          </Link>
-        ))}
+      <div className="max-h-[500px] space-y-2 overflow-y-auto lg:col-span-2">
+        {visible.length === 0 ? (
+          <p className="text-sm text-muted-foreground">—</p>
+        ) : (
+          visible.map((p) => (
+            <Link key={`${p.kind}-${p.id}`} href={p.href as "/"}>
+              <Card className="mb-2 transition hover:shadow-md">
+                <CardContent className="flex items-center gap-3 p-3">
+                  <span
+                    className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[10px] font-bold text-white"
+                    style={{ background: KIND_COLORS[p.kind] }}
+                  >
+                    {p.kind === "job" ? "J" : p.kind === "product" ? "P" : p.kind === "service" ? "S" : "G"}
+                  </span>
+                  <div className="min-w-0">
+                    <p className="text-[10px] uppercase text-muted-foreground">
+                      {p.kind}
+                    </p>
+                    <p className="truncate font-semibold">{p.title}</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
+          ))
+        )}
       </div>
     </div>
   );
