@@ -119,6 +119,7 @@ export async function submitVerificationAction(formData: FormData) {
     city: String(formData.get("city") ?? ""),
     country: String(formData.get("country") ?? ""),
     postalCode: String(formData.get("postalCode") ?? ""),
+    nationalId: String(formData.get("nationalId") ?? "") || undefined,
     governmentIdUrl,
     selfieUrl,
     termsAccepted: formData.get("termsAccepted") === "on",

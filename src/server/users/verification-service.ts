@@ -17,6 +17,7 @@ export async function submitVerification(input: {
   city: string;
   country: string;
   postalCode: string;
+  nationalId?: string;
   governmentIdUrl: string;
   selfieUrl?: string;
   termsAccepted: boolean;
@@ -42,6 +43,7 @@ export async function submitVerification(input: {
       city: input.city,
       country: input.country,
       postalCode: input.postalCode,
+      nationalId: input.nationalId,
       governmentIdUrl: input.governmentIdUrl,
       selfieUrl: input.selfieUrl,
       emailConfirmed: true,
@@ -57,6 +59,7 @@ export async function submitVerification(input: {
       city: input.city,
       country: input.country,
       postalCode: input.postalCode,
+      nationalId: input.nationalId,
       governmentIdUrl: input.governmentIdUrl,
       selfieUrl: input.selfieUrl,
       emailConfirmed: true,

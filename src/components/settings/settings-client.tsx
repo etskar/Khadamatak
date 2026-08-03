@@ -11,8 +11,8 @@ import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/password-input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Avatar } from "@/components/ui/avatar";
 import { LanguageSwitcher } from "@/components/layout/language-switcher";
+import { ImageUploadField } from "@/components/ui/image-upload-field";
 import { CountryCitySelect } from "@/components/marketplace/country-city-select";
 import { MultiSelectCombobox } from "@/components/ui/multi-select-combobox";
 import { AutocompleteInput } from "@/components/ui/autocomplete-input";
@@ -145,62 +145,53 @@ export function SettingsClient({ locale, profile, logoutAction }: Props) {
         <CardHeader>
           <CardTitle>{t("sections.profile")}</CardTitle>
         </CardHeader>
-        <CardContent className="flex flex-wrap items-center gap-4">
-          <Avatar
-            src={avatarPreview ?? profile.avatarUrl ?? undefined}
-            fallback={profile.displayName.charAt(0) || "U"}
-            size="xl"
-            className="h-20 w-20"
-          />
-          <div className="flex flex-col gap-2">
-            <div className="flex flex-wrap gap-2">
-              <label className="inline-flex cursor-pointer items-center rounded-xl border px-3 py-2 text-sm transition hover:bg-muted">
-                {t("uploadAvatar")}
-                <input
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (!file) return;
-                    const fd = new FormData();
-                    fd.set("file", file);
-                    startTransition(async () => {
-                      const url = await handleUpload(uploadAvatarAction, fd);
-                      if (url) {
-                        setAvatarPreview(url);
-                        await update();
-                        toast({ title: t("saved"), variant: "success" });
-                        router.refresh();
-                      }
-                    });
-                  }}
-                />
-              </label>
-              <label className="inline-flex cursor-pointer items-center rounded-xl border px-3 py-2 text-sm transition hover:bg-muted">
-                {t("uploadCover")}
-                <input
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (!file) return;
-                    const fd = new FormData();
-                    fd.set("file", file);
-                    startTransition(async () => {
-                      const url = await handleUpload(uploadCoverAction, fd);
-                      if (url) {
-                        toast({ title: t("saved"), variant: "success" });
-                        router.refresh();
-                      }
-                    });
-                  }}
-                />
-              </label>
+        <CardContent className="space-y-4">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <p className="mb-2 text-sm font-medium">{t("uploadAvatar")}</p>
+              <ImageUploadField
+                label={t("uploadAvatar")}
+                aspect={1}
+                circular
+                previewUrl={avatarPreview ?? profile.avatarUrl}
+                onFile={(file) => {
+                  if (!file) return;
+                  const fd = new FormData();
+                  fd.set("file", file);
+                  startTransition(async () => {
+                    const url = await handleUpload(uploadAvatarAction, fd);
+                    if (url) {
+                      setAvatarPreview(url);
+                      await update();
+                      toast({ title: t("saved"), variant: "success" });
+                      router.refresh();
+                    }
+                  });
+                }}
+              />
             </div>
-            <VerificationBadge verified={profile.verificationStatus === "verified"} />
+            <div>
+              <p className="mb-2 text-sm font-medium">{t("uploadCover")}</p>
+              <ImageUploadField
+                label={t("uploadCover")}
+                aspect={3 / 1}
+                previewUrl={profile.coverUrl}
+                onFile={(file) => {
+                  if (!file) return;
+                  const fd = new FormData();
+                  fd.set("file", file);
+                  startTransition(async () => {
+                    const url = await handleUpload(uploadCoverAction, fd);
+                    if (url) {
+                      toast({ title: t("saved"), variant: "success" });
+                      router.refresh();
+                    }
+                  });
+                }}
+              />
+            </div>
           </div>
+          <VerificationBadge verified={profile.verificationStatus === "verified"} />
         </CardContent>
       </Card>
 

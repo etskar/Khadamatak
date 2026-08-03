@@ -196,6 +196,7 @@ model IdentityVerification {
   city            String?
   country         String?
   postalCode      String?
+  nationalId      String? // e.g. BSN in the Netherlands
   governmentIdUrl String?
   selfieUrl       String? // architecture ready
   emailConfirmed  Boolean  @default(false)

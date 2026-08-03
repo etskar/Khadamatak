@@ -70,7 +70,9 @@
       "REGISTER_FAILED": "Account aanmaken mislukt",
       "LOGIN_FAILED": "Inloggen mislukt",
       "generic": "Actie mislukt, probeer het opnieuw"
-    }
+    },
+    "replace": "Vervangen",
+    "remove": "Verwijderen"
   },
   "nav": {
     "home": "Home",
@@ -1043,7 +1045,12 @@
     "selfieHint": "Optioneel nu — selfie-flow is voorbereid.",
     "terms": "Ik ga akkoord met de voorwaarden, privacy en gegevensbescherming.",
     "submit": "Indienen ter verificatie",
-    "submitted": "Verificatie ingediend"
+    "submitted": "Verificatie ingediend",
+    "resendIn": "Opnieuw verzenden in",
+    "allCountries": "Alle landen",
+    "allCities": "Alle steden",
+    "nationalId": "Nationaal identificatienummer",
+    "nationalIdPlaceholder": "Bijv. BSN 123456789"
   },
   "marketplace": {
     "products": "Producten",
