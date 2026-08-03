@@ -13,6 +13,7 @@ import {
 } from "@/server/marketplace/group-service";
 import { reportTarget } from "@/server/social/post-service";
 import { startConversationAction } from "@/server/actions/social-actions";
+import { geocodeAddress, reverseGeocode } from "@/server/geo/geocode";
 import { db } from "@/lib/db";
 import { writeFile, mkdir } from "node:fs/promises";
 import path from "node:path";
@@ -141,6 +142,14 @@ export async function createJobAction(formData: FormData) {
   revalidatePath("/jobs");
   revalidatePath("/sell");
   return { ok: true as const, publicId: job.publicId };
+}
+
+export async function geocodeAddressAction(query: string, countryCodes?: string[]) {
+  return geocodeAddress(query, countryCodes);
+}
+
+export async function reverseGeocodeAction(latitude: number, longitude: number) {
+  return reverseGeocode(latitude, longitude);
 }
 
 export async function toggleFavoriteAction(

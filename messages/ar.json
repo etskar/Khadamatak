@@ -1079,6 +1079,10 @@
     "applyUrl": "رابط التقديم",
     "applyNow": "قدّم الآن",
     "contactEmployer": "تواصل مع صاحب العمل",
-    "tabJobs": "الوظائف"
+    "tabJobs": "الوظائف",
+    "allCountries": "كل الدول",
+    "allCities": "كل المدن",
+    "addressPlaceholder": "اكتب العنوان لاقتراحات تلقائية…",
+    "dropImages": "أسقط الصور هنا"
   }
 }

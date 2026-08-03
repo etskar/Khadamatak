@@ -3,7 +3,7 @@ import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { ensureCategories } from "@/server/marketplace/dashboard-service";
-import { ListingForm } from "@/components/marketplace/listing-form";
+import { PublishWizard } from "@/components/marketplace/publish-wizard";
 
 export default async function SellServicePage({
   params,
@@ -29,7 +29,7 @@ export default async function SellServicePage({
   return (
     <div className="mx-auto max-w-xl animate-in-up">
       <h1 className="mb-4 text-2xl font-bold">{t("offerService")}</h1>
-      <ListingForm
+      <PublishWizard
         kind="service"
         categories={categories.map((c) => ({
           id: c.id,

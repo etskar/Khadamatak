@@ -1079,6 +1079,10 @@
     "applyUrl": "Sollicitatielink",
     "applyNow": "Solliciteer nu",
     "contactEmployer": "Neem contact op",
-    "tabJobs": "Vacatures"
+    "tabJobs": "Vacatures",
+    "allCountries": "Alle landen",
+    "allCities": "Alle steden",
+    "addressPlaceholder": "Typ een adres voor suggesties…",
+    "dropImages": "Sleep afbeeldingen hierheen"
   }
 }
