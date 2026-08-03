@@ -1083,6 +1083,9 @@
     "allCountries": "كل الدول",
     "allCities": "كل المدن",
     "addressPlaceholder": "اكتب العنوان لاقتراحات تلقائية…",
-    "dropImages": "أسقط الصور هنا"
+    "dropImages": "أسقط الصور هنا",
+    "filters": "الفلاتر",
+    "category": "الفئة",
+    "reset": "إعادة تعيين"
   }
 }

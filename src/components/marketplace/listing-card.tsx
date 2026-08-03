@@ -35,19 +35,24 @@ export function ListingCard({
   noImageLabel,
 }: ListingCardProps) {
   return (
-    <Link href={href as "/"} className={cn("block", className)}>
-      <Card className="overflow-hidden transition hover:shadow-md">
-        <div className="relative aspect-[4/3] bg-muted">
+    <Link href={href as "/"} className={cn("group block", className)}>
+      <Card className="overflow-hidden transition duration-300 hover:-translate-y-0.5 hover:shadow-lg">
+        <div className="relative aspect-[4/3] overflow-hidden bg-muted">
           {imageUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={imageUrl} alt="" className="h-full w-full object-cover" />
+            <img
+              src={imageUrl}
+              alt=""
+              className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+            />
           ) : (
             <div className="flex h-full items-center justify-center text-xs text-muted-foreground">
               {noImageLabel ?? "No image"}
             </div>
           )}
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/10 to-transparent opacity-0 transition group-hover:opacity-100" />
           {badge ? (
-            <Badge className="absolute start-2 top-2" variant="secondary">
+            <Badge className="absolute start-2 top-2 backdrop-blur-md" variant="secondary">
               {badge}
             </Badge>
           ) : null}
@@ -59,7 +64,9 @@ export function ListingCard({
         </div>
         <div className="space-y-1 p-3">
           <div className="flex items-start justify-between gap-2">
-            <h3 className="line-clamp-2 text-sm font-semibold leading-snug">{title}</h3>
+            <h3 className="line-clamp-2 text-sm font-semibold leading-snug transition-colors group-hover:text-brand-700 dark:group-hover:text-brand-300">
+              {title}
+            </h3>
             {verified ? (
               <BadgeCheck className="h-4 w-4 shrink-0 text-brand-600" />
             ) : null}

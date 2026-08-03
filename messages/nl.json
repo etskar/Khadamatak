@@ -1083,6 +1083,9 @@
     "allCountries": "Alle landen",
     "allCities": "Alle steden",
     "addressPlaceholder": "Typ een adres voor suggesties…",
-    "dropImages": "Sleep afbeeldingen hierheen"
+    "dropImages": "Sleep afbeeldingen hierheen",
+    "filters": "Filters",
+    "category": "Categorie",
+    "reset": "Reset"
   }
 }

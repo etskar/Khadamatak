@@ -7,7 +7,7 @@ import { ListingCard, priceCentsLabel } from "@/components/marketplace/listing-c
 import { Link } from "@/i18n/navigation";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Package } from "lucide-react";
-import { ProductsFilters } from "@/components/marketplace/products-filters";
+import { FiltersDrawer } from "@/components/marketplace/filters-drawer";
 
 export async function generateMetadata({
   params,
@@ -68,7 +68,8 @@ export default async function ProductsPage({
         }
       />
 
-      <ProductsFilters
+      <FiltersDrawer
+        basePath="/products"
         categories={categories.map((c) => ({
           id: c.id,
           label: locale === "ar" ? c.nameAr : c.nameNl,
