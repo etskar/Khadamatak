@@ -37,6 +37,9 @@ export function salaryLabel(
   locale = "nl-NL",
   period = "monthly",
 ) {
+  if (period === "negotiable" && minCents == null && maxCents == null) {
+    return "Negotiable";
+  }
   if (minCents == null && maxCents == null) return null;
   const fmt = (c: number) => formatMoney(c, currency, locale);
   const range =
@@ -48,11 +51,17 @@ export function salaryLabel(
   const per =
     period === "hourly"
       ? "/h"
-      : period === "yearly"
-        ? "/yr"
-        : period === "project"
-          ? "/project"
-          : "/mo";
+      : period === "daily"
+        ? "/day"
+        : period === "weekly"
+          ? "/wk"
+          : period === "yearly"
+            ? "/yr"
+            : period === "project"
+              ? "/project"
+              : period === "negotiable"
+                ? " (negotiable)"
+                : "/mo";
   return `${range}${per}`;
 }
 

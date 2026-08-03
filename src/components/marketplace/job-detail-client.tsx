@@ -38,6 +38,7 @@ const APPLY_METHOD_LABELS: Record<string, string> = {
   message: "Via message",
   email: "Via email",
   external: "External link",
+  both: "Messages & email",
 };
 
 type Props = {
@@ -97,6 +98,8 @@ export function JobDetailClient({ job, labels }: Props) {
     "nl-NL",
     job.salaryPeriod,
   );
+
+  const workSchedule = parseWorkHours(job.workHours);
 
   return (
     <div className="grid gap-5 animate-in-up lg:grid-cols-5">
@@ -160,7 +163,12 @@ export function JobDetailClient({ job, labels }: Props) {
               <Badge variant="secondary">
                 {EMPLOYMENT_TYPE_LABELS[job.employmentType] ?? job.employmentType}
               </Badge>
-              {job.workHours ? (
+              {workSchedule ? (
+                <Badge variant="outline" className="gap-1">
+                  <Clock className="h-3.5 w-3.5" />
+                  {workSchedule.days.join(", ")} · {workSchedule.start}–{workSchedule.end}
+                </Badge>
+              ) : job.workHours ? (
                 <Badge variant="outline" className="gap-1">
                   <Clock className="h-3.5 w-3.5" />
                   {job.workHours}
@@ -193,6 +201,9 @@ export function JobDetailClient({ job, labels }: Props) {
               <section className="rounded-xl bg-muted/50 p-3 text-sm">
                 <span className="font-semibold">{labels.applyMethod}: </span>
                 {APPLY_METHOD_LABELS[job.applyMethod] ?? job.applyMethod}
+                {job.applyMethod === "both" && job.applyEmail ? (
+                  <span className="ms-1">· {job.applyEmail}</span>
+                ) : null}
               </section>
             </div>
           </CardContent>
@@ -334,4 +345,34 @@ export function JobDetailClient({ job, labels }: Props) {
       </div>
     </div>
   );
+}
+
+const DAY_SHORT: Record<string, string> = {
+  MON: "Mon",
+  TUE: "Tue",
+  WED: "Wed",
+  THU: "Thu",
+  FRI: "Fri",
+  SAT: "Sat",
+  SUN: "Sun",
+};
+
+function parseWorkHours(value: string | null): {
+  start: string;
+  end: string;
+  days: string[];
+} | null {
+  if (!value) return null;
+  try {
+    const parsed = JSON.parse(value) as {
+      start?: string;
+      end?: string;
+      days?: string[];
+    };
+    if (!parsed.start || !parsed.end) return null;
+    const days = (parsed.days ?? []).map((d) => DAY_SHORT[d] ?? d);
+    return { start: parsed.start, end: parsed.end, days };
+  } catch {
+    return null;
+  }
 }

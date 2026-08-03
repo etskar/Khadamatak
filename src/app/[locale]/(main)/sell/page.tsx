@@ -81,6 +81,15 @@ export default async function SellDashboardPage({
           pause: t("pause"),
           activate: t("activate"),
           delete: t("delete"),
+          share: t("share"),
+          linkCopied: t("linkCopied"),
+          searchPlaceholder: t("searchMyListings"),
+          allStatuses: t("allStatuses"),
+          statusActive: t("statusActive"),
+          statusPaused: t("statusPaused"),
+          statusDeleted: t("statusDeleted"),
+          items: t("items"),
+          noResults: t("noResults"),
         }}
       />
     </div>

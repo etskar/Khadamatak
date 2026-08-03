@@ -1170,6 +1170,54 @@
     "useMyLocation": "Mijn locatie",
     "locating": "Locatie bepalen…",
     "locationError": "Locatie niet beschikbaar",
-    "unverified": "Niet geverifieerd"
+    "unverified": "Niet geverifieerd",
+    "basicInfo": "Basisinformatie",
+    "salarySection": "Salaris",
+    "employmentSection": "Dienstverband",
+    "contactSection": "Contactmethode",
+    "locationSection": "Locatie",
+    "salaryPeriod": "Salarisperiode",
+    "workStart": "Starttijd",
+    "workEnd": "Eindtijd",
+    "workingDays": "Werkdagen",
+    "salaryPeriods": {
+      "hourly": "Per uur",
+      "daily": "Per dag",
+      "weekly": "Per week",
+      "monthly": "Per maand",
+      "yearly": "Per jaar",
+      "negotiable": "Onderhandelbaar"
+    },
+    "employmentTypes": {
+      "full_time": "Fulltime",
+      "part_time": "Parttime",
+      "contract": "Contract",
+      "internship": "Stage",
+      "freelance": "Freelance"
+    },
+    "days": {
+      "MON": "Ma",
+      "TUE": "Di",
+      "WED": "Wo",
+      "THU": "Do",
+      "FRI": "Vr",
+      "SAT": "Za",
+      "SUN": "Zo"
+    },
+    "contactMethods": {
+      "message": "Privéberichten",
+      "email": "E-mail",
+      "both": "Beide"
+    },
+    "bothHint": "Werkzoekenden kunnen via berichten én e-mail contact opnemen",
+    "searchMyListings": "Zoek in uw advertenties…",
+    "allStatuses": "Alle statussen",
+    "statusActive": "Actief",
+    "statusPaused": "Gepauzeerd",
+    "statusDeleted": "Verwijderd",
+    "items": "items",
+    "noResults": "Geen resultaten",
+    "linkCopied": "Link gekopieerd",
+    "mediaSection": "Media"
   }
 }

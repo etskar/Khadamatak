@@ -1170,6 +1170,54 @@
     "useMyLocation": "موقعي الحالي",
     "locating": "جاري تحديد الموقع…",
     "locationError": "تعذر تحديد موقعك",
-    "unverified": "حساب غير موثق"
+    "unverified": "حساب غير موثق",
+    "basicInfo": "المعلومات الأساسية",
+    "salarySection": "الراتب",
+    "employmentSection": "التوظيف",
+    "contactSection": "طريقة التواصل",
+    "locationSection": "الموقع",
+    "salaryPeriod": "فترة الراتب",
+    "workStart": "بداية العمل",
+    "workEnd": "نهاية العمل",
+    "workingDays": "أيام العمل",
+    "salaryPeriods": {
+      "hourly": "بالساعة",
+      "daily": "يومي",
+      "weekly": "أسبوعي",
+      "monthly": "شهري",
+      "yearly": "سنوي",
+      "negotiable": "قابل للتفاوض"
+    },
+    "employmentTypes": {
+      "full_time": "دوام كامل",
+      "part_time": "دوام جزئي",
+      "contract": "عقد",
+      "internship": "تدريب",
+      "freelance": "حر"
+    },
+    "days": {
+      "MON": "إث",
+      "TUE": "ث",
+      "WED": "أر",
+      "THU": "خ",
+      "FRI": "ج",
+      "SAT": "س",
+      "SUN": "أح"
+    },
+    "contactMethods": {
+      "message": "رسائل خاصة",
+      "email": "البريد الإلكتروني",
+      "both": "كلاهما"
+    },
+    "bothHint": "سيتمكن الباحثون عن عمل من التواصل عبر الرسائل والبريد معاً",
+    "searchMyListings": "ابحث في قوائمك…",
+    "allStatuses": "كل الحالات",
+    "statusActive": "نشط",
+    "statusPaused": "متوقف",
+    "statusDeleted": "محذوف",
+    "items": "عناصر",
+    "noResults": "لا توجد نتائج",
+    "linkCopied": "تم نسخ الرابط",
+    "mediaSection": "الوسائط"
   }
 }
