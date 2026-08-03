@@ -10,7 +10,7 @@ import { requireAdminPage } from "@/server/admin/page-guard";
 import { listTickets } from "@/server/admin/support";
 
 const TICKET_STATUSES = ["open", "assigned", "in_progress", "pending", "merged", "closed"];
-const TICKET_CATEGORIES = ["payments", "orders", "verification", "wallet", "technical", "marketplace", "abuse"];
+const TICKET_CATEGORIES = ["verification", "technical", "marketplace", "abuse", "other"];
 const TICKET_PRIORITIES = ["low", "medium", "high", "critical"];
 
 export async function generateMetadata({

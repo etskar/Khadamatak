@@ -21,7 +21,6 @@ import {
   adminApproveVerificationAction,
   deleteUserAccountAction,
 } from "@/server/actions/admin-actions";
-import { formatMoney } from "@/lib/money";
 
 export default async function AdminUsersPage({
   params,
@@ -92,7 +91,6 @@ export default async function AdminUsersPage({
               t("common.user"),
               t("common.status"),
               t("nav.verification"),
-              t("nav.wallets"),
               t("common.date"),
               t("common.actions"),
             ]}
@@ -134,14 +132,6 @@ export default async function AdminUsersPage({
                     ) : (
                       <span className="text-xs text-muted-foreground">—</span>
                     )}
-                  </TableCell>
-                  <TableCell>
-                    <p className="text-sm font-semibold tabular-nums">
-                      {formatMoney(user.wallet?.availableCents ?? 0, "EUR", localeFmt)}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {user.wallet?.walletId ?? "—"}
-                    </p>
                   </TableCell>
                   <TableCell>
                     <span className="text-sm text-muted-foreground">

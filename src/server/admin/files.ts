@@ -8,7 +8,6 @@ export async function getFilesOverview() {
     productMediaCount,
     serviceMediaCount,
     postMediaCount,
-    reviewsWithImages,
     verificationDocs,
     attachmentCount,
   ] = await Promise.all([
@@ -16,7 +15,6 @@ export async function getFilesOverview() {
     db.listingMedia.count({ where: { productId: { not: null } } }),
     db.listingMedia.count({ where: { serviceId: { not: null } } }),
     db.postMedia.count(),
-    db.review.count({ where: { imagesJson: { not: null } } }),
     db.identityVerification.count({ where: { governmentIdUrl: { not: null } } }),
     db.supportAttachment.count(),
   ]);
@@ -27,7 +25,6 @@ export async function getFilesOverview() {
       productImages: productMediaCount,
       serviceImages: serviceMediaCount,
       postImages: postMediaCount,
-      reviewsWithImages: reviewsWithImages,
       verificationDocuments: verificationDocs,
       supportAttachments: attachmentCount,
     },

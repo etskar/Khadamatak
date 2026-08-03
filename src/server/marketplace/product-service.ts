@@ -118,13 +118,6 @@ export async function getProductByPublicId(publicId: string, viewerId?: string |
           verification: true,
         },
       },
-      reviews: {
-        orderBy: { createdAt: "desc" },
-        take: 20,
-        include: {
-          author: { include: { profile: true } },
-        },
-      },
     },
   });
   if (!product || product.status === "deleted") return null;
@@ -266,6 +259,6 @@ export async function getSellerProducts(sellerId: string) {
   return db.product.findMany({
     where: { sellerId, status: { not: "deleted" } },
     orderBy: { createdAt: "desc" },
-    include: { media: true, category: true, _count: { select: { orders: true } } },
+    include: { media: true, category: true, _count: { select: { favorites: true } } },
   });
 }

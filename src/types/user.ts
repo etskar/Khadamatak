@@ -33,10 +33,10 @@ export type Permission =
   | "groups:write"
   | "messages:read"
   | "messages:write"
-  | "wallet:read"
-  | "wallet:write"
-  | "deals:read"
-  | "deals:write"
+  | "services:read"
+  | "services:write"
+  | "jobs:read"
+  | "jobs:write"
   | "admin:access"
   | "admin:users"
   | "admin:moderation"
@@ -48,26 +48,28 @@ export const ROLE_PERMISSIONS: Record<UserRole, readonly Permission[]> = {
     "feed:write",
     "products:read",
     "products:write",
+    "services:read",
+    "services:write",
+    "jobs:read",
+    "jobs:write",
     "groups:read",
     "groups:write",
     "messages:read",
     "messages:write",
-    "wallet:read",
-    "wallet:write",
-    "deals:read",
-    "deals:write",
   ],
   moderator: [
     "feed:read",
     "feed:write",
     "products:read",
     "products:write",
+    "services:read",
+    "services:write",
+    "jobs:read",
+    "jobs:write",
     "groups:read",
     "groups:write",
     "messages:read",
     "messages:write",
-    "wallet:read",
-    "deals:read",
     "admin:access",
     "admin:moderation",
   ],
@@ -76,14 +78,14 @@ export const ROLE_PERMISSIONS: Record<UserRole, readonly Permission[]> = {
     "feed:write",
     "products:read",
     "products:write",
+    "services:read",
+    "services:write",
+    "jobs:read",
+    "jobs:write",
     "groups:read",
     "groups:write",
     "messages:read",
     "messages:write",
-    "wallet:read",
-    "wallet:write",
-    "deals:read",
-    "deals:write",
     "admin:access",
     "admin:users",
     "admin:moderation",
@@ -94,14 +96,14 @@ export const ROLE_PERMISSIONS: Record<UserRole, readonly Permission[]> = {
     "feed:write",
     "products:read",
     "products:write",
+    "services:read",
+    "services:write",
+    "jobs:read",
+    "jobs:write",
     "groups:read",
     "groups:write",
     "messages:read",
     "messages:write",
-    "wallet:read",
-    "wallet:write",
-    "deals:read",
-    "deals:write",
     "admin:access",
     "admin:users",
     "admin:moderation",

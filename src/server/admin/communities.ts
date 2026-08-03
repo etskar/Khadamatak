@@ -44,7 +44,6 @@ export async function getGroupDetail(id: string) {
       posts: { include: { author: { include: { profile: true } } }, orderBy: { createdAt: "desc" } },
       products: true,
       services: true,
-      requests: true,
     },
   });
 }

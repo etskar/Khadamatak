@@ -30,6 +30,9 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "meta" });
+  const brandName =
+    siteConfig.nameByLocale[locale as keyof typeof siteConfig.nameByLocale] ??
+    siteConfig.name;
 
   return {
     title: {
@@ -37,7 +40,7 @@ export async function generateMetadata({
       template: t("titleTemplate"),
     },
     description: t("description"),
-    applicationName: siteConfig.name,
+    applicationName: brandName,
     metadataBase: new URL(siteConfig.url),
     alternates: {
       languages: {
@@ -47,18 +50,18 @@ export async function generateMetadata({
     },
     openGraph: {
       type: "website",
-      siteName: siteConfig.name,
+      siteName: brandName,
       title: t("title"),
       description: t("description"),
       locale: locale === "ar" ? "ar_SA" : "nl_NL",
       url: `${siteConfig.url}/${locale}`,
-      images: [`${siteConfig.url}/opengraph-image`],
+      images: [`${siteConfig.url}/-/opengraph-image`],
     },
     twitter: {
       card: "summary_large_image",
       title: t("title"),
       description: t("description"),
-      images: [`${siteConfig.url}/twitter-image`],
+      images: [`${siteConfig.url}/-/twitter-image`],
     },
     robots: {
       index: true,
@@ -87,6 +90,26 @@ export default async function LocaleLayout({
   setRequestLocale(locale);
   const messages = await getMessages();
   const dir = localeDirection[locale as AppLocale];
+  const brandName =
+    siteConfig.nameByLocale[locale as keyof typeof siteConfig.nameByLocale] ??
+    siteConfig.name;
+
+  const structuredData = [
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      name: brandName,
+      url: `${siteConfig.url}/${locale}`,
+      inLanguage: locale,
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      name: brandName,
+      url: siteConfig.url,
+      logo: `${siteConfig.url}/logo.png`,
+    },
+  ];
 
   return (
     <html
@@ -95,6 +118,12 @@ export default async function LocaleLayout({
       className={`${plusJakarta.variable} ${cairo.variable} h-full antialiased`}
       suppressHydrationWarning
     >
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+        />
+      </head>
       <body className="min-h-dvh bg-background text-foreground">
         <NextIntlClientProvider messages={messages}>
           <AuthSessionProvider>{children}</AuthSessionProvider>

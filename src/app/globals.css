@@ -199,6 +199,21 @@
     background: color-mix(in oklab, var(--primary) 28%, transparent);
   }
 
+  /* Prevent iOS auto-zoom when focusing inputs (zoom triggers on font-size < 16px) */
+  input,
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+
+  @media (min-width: 768px) {
+    input,
+    select,
+    textarea {
+      font-size: inherit !important;
+    }
+  }
+
   :focus-visible {
     outline: 2px solid var(--ring);
     outline-offset: 2px;

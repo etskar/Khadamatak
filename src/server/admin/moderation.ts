@@ -3,7 +3,7 @@ import { db } from "@/lib/db";
 import { writeAdminAudit } from "@/server/admin/guard";
 
 export async function listContent(input: {
-  kind: "post" | "comment" | "review";
+  kind: "post" | "comment";
   query?: string;
   page?: number;
   pageSize?: number;
@@ -30,45 +30,26 @@ export async function listContent(input: {
     return { items, total, page, pageSize };
   }
 
-  if (input.kind === "comment") {
-    const where: Record<string, unknown> = input.query ? { content: { contains: input.query } } : {};
-    const [items, total] = await Promise.all([
-      db.comment.findMany({
-        where,
-        orderBy: { createdAt: "desc" },
-        skip: (page - 1) * pageSize,
-        take: pageSize,
-        include: {
-          author: { include: { profile: { select: { displayName: true, username: true, avatarUrl: true } } } },
-          post: { select: { id: true, content: true } },
-        },
-      }),
-      db.comment.count({ where }),
-    ]);
-    return { items, total, page, pageSize };
-  }
-
   const where: Record<string, unknown> = input.query ? { content: { contains: input.query } } : {};
   const [items, total] = await Promise.all([
-    db.review.findMany({
+    db.comment.findMany({
       where,
       orderBy: { createdAt: "desc" },
       skip: (page - 1) * pageSize,
       take: pageSize,
       include: {
         author: { include: { profile: { select: { displayName: true, username: true, avatarUrl: true } } } },
-        subject: { include: { profile: { select: { displayName: true, username: true } } } },
-        order: { select: { publicId: true } },
+        post: { select: { id: true, content: true } },
       },
     }),
-    db.review.count({ where }),
+    db.comment.count({ where }),
   ]);
   return { items, total, page, pageSize };
 }
 
 export async function moderateContent(input: {
   adminId: string;
-  kind: "post" | "comment" | "review" | "group_post";
+  kind: "post" | "comment" | "group_post";
   id: string;
   action: "hide" | "restore" | "delete";
   note?: string;
@@ -76,7 +57,6 @@ export async function moderateContent(input: {
   const modelMap = {
     post: db.post,
     comment: db.comment,
-    review: db.review,
     group_post: db.groupPost,
   } as const;
 
@@ -100,7 +80,7 @@ export async function moderateContent(input: {
   await writeAdminAudit({
     adminId: input.adminId,
     action: `moderation.${input.kind}.${input.action}`,
-    entityType: input.kind === "post" ? "Post" : input.kind === "comment" ? "Comment" : input.kind === "review" ? "Review" : "GroupPost",
+    entityType: input.kind === "post" ? "Post" : input.kind === "comment" ? "Comment" : "GroupPost",
     entityId: input.id,
     newValue: { note: input.note },
   });

@@ -73,13 +73,6 @@ export default async function ProductDetailPage({
             ? product.category.nameAr
             : product.category.nameNl
           : null,
-        reviews: product.reviews.map((r) => ({
-          id: r.id,
-          rating: r.rating,
-          content: r.content,
-          author: r.author.profile?.displayName ?? "User",
-          createdAt: r.createdAt.toISOString(),
-        })),
         distanceLabel: distanceKm != null ? `${distanceKm.toFixed(1)} km` : null,
         isOwner: session?.user?.id === product.sellerId,
         publishedAt: product.publishedAt?.toISOString() ?? product.createdAt.toISOString(),
@@ -94,7 +87,6 @@ export default async function ProductDetailPage({
         startDeal: t("startDeal"),
         verified: t("verified"),
         views: t("views"),
-        reviews: t("reviews"),
         condition: t("condition"),
         location: t("location"),
         seller: t("seller"),

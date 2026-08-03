@@ -19,18 +19,12 @@ export const ADMIN_PERMISSION_CATEGORIES = [
   "users",
   "verification",
   "marketplace",
-  "orders",
-  "escrow",
-  "wallets",
-  "payments",
-  "disputes",
   "reports",
   "moderation",
   "communities",
   "support",
   "settings",
   "analytics",
-  "finance",
   "audit",
   "security",
   "fraud",
@@ -81,37 +75,6 @@ export const ADMIN_PERMISSIONS: AdminPermissionDef[] = [
   { key: "marketplace.feature", category: "marketplace", label: "Feature listings", labelAr: "تثبيت مميز للقوائم", labelNl: "Advertenties uitlichten" },
   { key: "marketplace.pin", category: "marketplace", label: "Pin listings", labelAr: "تثبيت القوائم", labelNl: "Advertenties vastpinnen" },
 
-  // Orders
-  { key: "orders.view", category: "orders", label: "View orders", labelAr: "عرض الطلبات", labelNl: "Bestellingen bekijken" },
-  { key: "orders.cancel", category: "orders", label: "Cancel orders", labelAr: "إلغاء الطلبات", labelNl: "Bestellingen annuleren" },
-  { key: "orders.refund", category: "orders", label: "Refund orders", labelAr: "استرداد الطلبات", labelNl: "Bestellingen terugbetalen" },
-  { key: "orders.complete", category: "orders", label: "Complete orders", labelAr: "إكمال الطلبات", labelNl: "Bestellingen voltooien" },
-  { key: "orders.force_release", category: "orders", label: "Force release escrow", labelAr: "تحرير الضمان إجباريًا", labelNl: "Escrow geforceerd vrijgeven" },
-  { key: "orders.force_refund", category: "orders", label: "Force refund", labelAr: "استرداد إجباري", labelNl: "Geforceerd terugbetalen" },
-
-  // Escrow
-  { key: "escrow.view", category: "escrow", label: "View escrows", labelAr: "عرض الضمانات", labelNl: "Escrows bekijken" },
-  { key: "escrow.release", category: "escrow", label: "Release funds", labelAr: "تحرير الأموال", labelNl: "Gelden vrijgeven" },
-  { key: "escrow.refund", category: "escrow", label: "Refund buyer", labelAr: "استرداد المشتري", labelNl: "Koper terugbetalen" },
-  { key: "escrow.freeze", category: "escrow", label: "Freeze escrow", labelAr: "تجميد الضمان", labelNl: "Escrow bevriezen" },
-  { key: "escrow.investigate", category: "escrow", label: "Investigate escrow", labelAr: "التحقيق في الضمان", labelNl: "Escrow onderzoeken" },
-
-  // Wallets
-  { key: "wallets.view", category: "wallets", label: "View wallets", labelAr: "عرض المحافظ", labelNl: "Portemonnees bekijken" },
-  { key: "wallets.freeze", category: "wallets", label: "Freeze wallets", labelAr: "تجميد المحافظ", labelNl: "Portemonnees bevriezen" },
-  { key: "wallets.unfreeze", category: "wallets", label: "Unfreeze wallets", labelAr: "إلغاء تجميد المحافظ", labelNl: "Portemonnees ontdooien" },
-  { key: "wallets.export", category: "wallets", label: "Export wallet history", labelAr: "تصدير سجل المحفظة", labelNl: "Portemonnee-geschiedenis exporteren" },
-
-  // Payments
-  { key: "payments.view", category: "payments", label: "View payments", labelAr: "عرض المدفوعات", labelNl: "Betalingen bekijken" },
-  { key: "payments.investigate", category: "payments", label: "Investigate payments", labelAr: "التحقيق في المدفوعات", labelNl: "Betalingen onderzoeken" },
-
-  // Disputes
-  { key: "disputes.view", category: "disputes", label: "View disputes", labelAr: "عرض النزاعات", labelNl: "Geschillen bekijken" },
-  { key: "disputes.manage", category: "disputes", label: "Manage disputes", labelAr: "إدارة النزاعات", labelNl: "Geschillen beheren" },
-  { key: "disputes.resolve", category: "disputes", label: "Resolve disputes", labelAr: "حسم النزاعات", labelNl: "Geschillen oplossen" },
-  { key: "disputes.chat", category: "disputes", label: "Chat in disputes", labelAr: "المراسلة في النزاعات", labelNl: "Chatten in geschillen" },
-
   // Reports
   { key: "reports.view", category: "reports", label: "View reports", labelAr: "عرض البلاغات", labelNl: "Meldingen bekijken" },
   { key: "reports.resolve", category: "reports", label: "Resolve reports", labelAr: "حسم البلاغات", labelNl: "Meldingen oplossen" },
@@ -144,10 +107,6 @@ export const ADMIN_PERMISSIONS: AdminPermissionDef[] = [
 
   // Analytics
   { key: "analytics.view", category: "analytics", label: "View analytics", labelAr: "عرض التحليلات", labelNl: "Analyses bekijken" },
-
-  // Finance
-  { key: "finance.view", category: "finance", label: "View finance", labelAr: "عرض المالية", labelNl: "Financiën bekijken" },
-  { key: "finance.export", category: "finance", label: "Export finance", labelAr: "تصدير المالية", labelNl: "Financiën exporteren" },
 
   // Audit
   { key: "audit.view", category: "audit", label: "View audit logs", labelAr: "عرض سجلات التدقيق", labelNl: "Auditlogs bekijken" },
@@ -238,40 +197,6 @@ export const DEFAULT_ADMIN_ROLES: AdminRoleDef[] = [
     ],
   },
   {
-    key: "finance_admin",
-    name: "Finance Admin",
-    nameAr: "مدير المالية",
-    nameNl: "Finance Admin",
-    description: "Finance, wallet, escrow, payment and dispute management.",
-    permissions: [
-      "dashboard.view",
-      "analytics.view",
-      "finance.view",
-      "finance.export",
-      "audit.view",
-      "wallets.view",
-      "wallets.freeze",
-      "wallets.unfreeze",
-      "wallets.export",
-      "payments.view",
-      "payments.investigate",
-      "escrow.view",
-      "escrow.release",
-      "escrow.refund",
-      "escrow.freeze",
-      "escrow.investigate",
-      "orders.view",
-      "orders.refund",
-      "orders.force_release",
-      "orders.force_refund",
-      "disputes.view",
-      "disputes.manage",
-      "disputes.resolve",
-      "disputes.chat",
-      "users.view",
-    ],
-  },
-  {
     key: "verification_admin",
     name: "Verification Admin",
     nameAr: "مدير التوثيق",
@@ -293,7 +218,7 @@ export const DEFAULT_ADMIN_ROLES: AdminRoleDef[] = [
     name: "Marketplace Admin",
     nameAr: "مدير السوق",
     nameNl: "Marktplaats Admin",
-    description: "Manages products, services, requests, deals and orders.",
+    description: "Manages products, services and listings.",
     permissions: [
       "dashboard.view",
       "marketplace.view",
@@ -304,11 +229,6 @@ export const DEFAULT_ADMIN_ROLES: AdminRoleDef[] = [
       "marketplace.delete",
       "marketplace.feature",
       "marketplace.pin",
-      "orders.view",
-      "orders.cancel",
-      "orders.complete",
-      "escrow.view",
-      "escrow.investigate",
       "moderation.view",
       "users.view",
     ],

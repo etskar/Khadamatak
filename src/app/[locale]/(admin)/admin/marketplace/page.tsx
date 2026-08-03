@@ -16,14 +16,12 @@ import {
 } from "@/server/actions/admin-actions";
 import { formatMoney } from "@/lib/money";
 
-const KINDS = ["product", "service", "request", "deal"] as const;
+const KINDS = ["product", "service"] as const;
 type Kind = (typeof KINDS)[number];
 
 const KIND_STATUSES: Record<Kind, string[]> = {
   product: ["active", "paused", "sold", "deleted", "draft"],
   service: ["active", "paused", "deleted", "draft"],
-  request: ["open", "in_progress", "closed", "cancelled"],
-  deal: ["proposed", "accepted", "rejected", "cancelled", "payment_pending", "in_escrow", "completed", "disputed"],
 };
 
 export async function generateMetadata({
@@ -47,7 +45,6 @@ export default async function AdminMarketplacePage({
   const sp = await searchParams;
   setRequestLocale(locale);
   const t = await getTranslations("admin");
-  const tAct = await getTranslations("admin.actions");
   const localeFmt = locale === "ar" ? "ar-EG" : "nl-NL";
 
   const { ctx, forbidden } = await requireAdminPage(locale, "marketplace.view");
@@ -83,11 +80,7 @@ export default async function AdminMarketplacePage({
             className="cursor-pointer text-sm capitalize"
           >
             <Link
-              href={
-                k === "product"
-                  ? "/admin/marketplace"
-                  : `/admin/marketplace?kind=${k}`
-              }
+              href={k === "product" ? "/admin/marketplace" : `/admin/marketplace?kind=${k}`}
               className="inline-flex items-center"
             >
               {t(`marketplace.kind.${k}`)}
@@ -109,97 +102,86 @@ export default async function AdminMarketplacePage({
       />
 
       <AdminTable headers={[t("common.title"), t("marketplace.seller"), t("common.price"), t("common.status"), t("marketplace.actions")]}>
-        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any -- union of listing shapes */}
-        {data.items.map((item: any) => {
-          const publicId = item.publicId;
+        {data.items.map((item) => {
+          const i = item as unknown as {
+            publicId: string;
+            title: string;
+            status: string;
+            priceCents?: number | null;
+            featured?: boolean;
+            pinned?: boolean;
+            seller?: { profile?: { displayName?: string | null; username?: string | null } | null } | null;
+            provider?: { profile?: { displayName?: string | null; username?: string | null } | null } | null;
+          };
           const sellerName =
-            (item.seller?.profile?.displayName ?? item.seller?.profile?.username) ||
-            (item.provider?.profile?.displayName ?? item.provider?.profile?.username) ||
-            (item.owner?.profile?.displayName ?? item.owner?.profile?.username) ||
-            (item.buyer?.profile?.displayName ?? item.buyer?.profile?.username) ||
+            (i.seller?.profile?.displayName ?? i.seller?.profile?.username) ||
+            (i.provider?.profile?.displayName ?? i.provider?.profile?.username) ||
             "—";
-          const price = item.priceCents ?? item.amountCents ?? item.budgetCents;
-          const isListing = kind === "product" || kind === "service" || kind === "request";
-          const isFlag = kind === "product" || kind === "service";
+          const priceCents = i.priceCents ?? 0;
+          const featured = i.featured ?? false;
+          const pinned = i.pinned ?? false;
+
           return (
-            <tr key={item.id}>
+            <tr key={i.publicId}>
               <TableCell>
-                <p className="max-w-64 truncate font-medium text-foreground">
-                  {item.title ?? item.terms}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  {item.createdAt.toLocaleDateString(localeFmt)}
-                </p>
+                <Link
+                  href={kind === "product" ? `/products/${i.publicId}` : `/services/${i.publicId}`}
+                  className="font-medium hover:underline"
+                >
+                  {i.title}
+                </Link>
+              </TableCell>
+              <TableCell>{sellerName}</TableCell>
+              <TableCell>
+                {formatMoney(priceCents, "EUR", localeFmt)}
               </TableCell>
               <TableCell>
-                <span className="flex items-center gap-1.5">
-                  <a
-                    href={`/admin/users/${item.sellerId ?? item.providerId ?? item.ownerId ?? item.buyerId ?? ""}`}
-                    className="text-brand-700 hover:underline dark:text-brand-300"
-                  >
-                    {sellerName}
-                  </a>
-                </span>
-              </TableCell>
-              <TableCell>
-                {price != null ? formatMoney(price, "EUR", localeFmt) : "—"}
-              </TableCell>
-              <TableCell>
-                <StatusBadge status={item.status} />
-                {item.featured ? (
-                  <Badge variant="warning" className="ms-1">
-                    {t("marketplace.featured")}
-                  </Badge>
-                ) : null}
-                {item.pinned ? (
-                  <Badge variant="warning" className="ms-1">
-                    {t("marketplace.pinned")}
-                  </Badge>
-                ) : null}
+                <StatusBadge status={i.status} />
+                {featured ? <Badge variant="success" className="ms-1">★</Badge> : null}
+                {pinned ? <Badge variant="outline" className="ms-1">📌</Badge> : null}
               </TableCell>
               <TableCell>
                 <div className="flex flex-wrap gap-1.5">
-                  {isListing && canManage ? (
+                  {canManage ? (
                     <>
-                      <AdminActionButton
-                        action={setListingStatusAction}
-                        label={tAct("hide")}
-                        fixedArgs={{ kind, publicId, action: "hide" }}
-                        confirm={false}
-                      />
-                      <AdminActionButton
-                        action={setListingStatusAction}
-                        label={tAct("restore")}
-                        fixedArgs={{ kind, publicId, action: "restore" }}
-                        confirm={false}
-                        variant="soft"
-                      />
-                      <AdminActionButton
-                        action={setListingStatusAction}
-                        label={tAct("delete")}
-                        fixedArgs={{ kind, publicId, action: "delete" }}
-                        title={tAct("delete")}
-                        danger
-                      />
+                      {i.status === "active" ? (
+                        <AdminActionButton
+                          action={setListingStatusAction}
+                          label={t("marketplace.hide")}
+                          fixedArgs={{ kind, publicId: i.publicId, action: "hide" }}
+                          variant="outline"
+                          size="sm"
+                        />
+                      ) : i.status !== "deleted" ? (
+                        <AdminActionButton
+                          action={setListingStatusAction}
+                          label={t("marketplace.restore")}
+                          fixedArgs={{ kind, publicId: i.publicId, action: "restore" }}
+                          variant="soft"
+                          size="sm"
+                        />
+                      ) : null}
+                      {i.status !== "deleted" ? (
+                        <AdminActionButton
+                          action={setListingStatusAction}
+                          label={t("marketplace.delete")}
+                          fixedArgs={{ kind, publicId: i.publicId, action: "delete" }}
+                          title={t("marketplace.delete")}
+                          variant="outline"
+                          danger
+                          size="sm"
+                        />
+                      ) : null}
                     </>
                   ) : null}
-                  {isFlag && canFeature ? (
-                    <>
-                      <AdminActionButton
-                        action={toggleListingFlagAction}
-                        label={tAct("feature")}
-                        fixedArgs={{ kind, publicId, flag: "featured" }}
-                        confirm={false}
-                        variant="soft"
-                      />
-                      <AdminActionButton
-                        action={toggleListingFlagAction}
-                        label={tAct("pin")}
-                        fixedArgs={{ kind, publicId, flag: "pinned" }}
-                        confirm={false}
-                        variant="soft"
-                      />
-                    </>
+                  {canFeature ? (
+                    <AdminActionButton
+                      action={toggleListingFlagAction}
+                      label={featured ? t("marketplace.unfeature") : t("marketplace.feature")}
+                      fixedArgs={{ kind, publicId: i.publicId, flag: "featured" }}
+                      variant="outline"
+                      size="sm"
+                    />
                   ) : null}
                 </div>
               </TableCell>

@@ -1,7 +1,6 @@
 "use server";
 
 import { AuthError } from "next-auth";
-import { redirect } from "next/navigation";
 import { signIn, signOut } from "@/lib/auth";
 import { registerUser } from "@/server/auth/register";
 import {
@@ -67,15 +66,13 @@ export async function loginAction(
   if (!rl.success) return { ok: false, error: "RATE_LIMITED" };
 
   try {
-    const result = await signIn("credentials", {
+    await signIn("credentials", {
       email,
       password,
       redirect: false,
     });
 
-    if (result && typeof result === "object" && "error" in result && result.error) {
-      return { ok: false, error: "INVALID_CREDENTIALS" };
-    }
+    return { ok: true, data: { callbackUrl } };
   } catch (e) {
     if (e instanceof AuthError) {
       return { ok: false, error: "INVALID_CREDENTIALS" };
@@ -84,8 +81,6 @@ export async function loginAction(
     if (e && typeof e === "object" && "digest" in e) throw e;
     return { ok: false, error: "LOGIN_FAILED" };
   }
-
-  redirect(callbackUrl.startsWith("/") ? callbackUrl : `/${locale}`);
 }
 
 export async function logoutAction(locale: string) {

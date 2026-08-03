@@ -32,7 +32,6 @@ type ProfileData = {
   verificationStatus: string;
   realName?: string | null;
   email?: string | null;
-  walletId?: string | null;
   userId?: string;
 };
 
@@ -162,12 +161,6 @@ export function ProfileView({
               </span>
             )}
           </div>
-
-          {isOwner && profile.walletId ? (
-            <p className="mt-3 text-xs text-muted-foreground">
-              {t("walletId")}: {profile.walletId}
-            </p>
-          ) : null}
         </div>
       </Card>
 

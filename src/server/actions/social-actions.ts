@@ -19,7 +19,6 @@ import { searchAll, clearSearchHistory } from "@/server/social/search-service";
 import {
   getOrCreateConversation,
   sendMessage,
-  sendPaymentCardToChat,
 } from "@/server/social/message-service";
 import { db } from "@/lib/db";
 import { siteConfig } from "@/config/site";
@@ -165,23 +164,5 @@ export async function sendMessageAction(
   });
   revalidatePath(`/messages/${conversationId}`);
   revalidatePath("/messages");
-  return { ok: true as const, message };
-}
-
-export async function sendPaymentToChatAction(input: {
-  conversationId: string;
-  kind: "payment_request" | "payment_link" | "qr" | "receipt";
-  payload: Record<string, unknown>;
-  content?: string;
-}) {
-  const user = await requireUser();
-  const message = await sendPaymentCardToChat({
-    conversationId: input.conversationId,
-    senderId: user.id,
-    kind: input.kind,
-    payload: input.payload,
-    content: input.content,
-  });
-  revalidatePath(`/messages/${input.conversationId}`);
   return { ok: true as const, message };
 }

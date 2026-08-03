@@ -50,16 +50,12 @@ export default async function ServiceDetailPage({
           verified: service.provider.verification?.status === "verified",
         },
         isOwner: session?.user?.id === service.providerId,
-        hasFixedPrice: service.priceCents != null && service.pricingType !== "quote",
       }}
       labels={{
-        book: t("bookNow"),
         contact: t("contactProvider"),
         save: t("save"),
-        offer: t("makeOffer"),
         verified: t("verified"),
-        reviews: t("reviews"),
-        customAmount: t("customAmount"),
+        loginRequired: t("loginRequired"),
       }}
     />
   );

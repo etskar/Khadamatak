@@ -7,7 +7,6 @@ type AuditInput = {
   action: string;
   entityType: string;
   entityId?: string | null;
-  transactionId?: string | null;
   ipAddress?: string | null;
   userAgent?: string | null;
   metadata?: Record<string, unknown>;
@@ -21,7 +20,6 @@ export async function writeAuditLog(input: AuditInput) {
       action: input.action,
       entityType: input.entityType,
       entityId: input.entityId ?? null,
-      transactionId: input.transactionId ?? null,
       ipAddress: input.ipAddress ?? null,
       userAgent: input.userAgent ?? null,
       metadataJson: input.metadata ? JSON.stringify(input.metadata) : null,

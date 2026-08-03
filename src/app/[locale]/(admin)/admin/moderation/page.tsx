@@ -13,7 +13,7 @@ import {
   togglePostCommentsLockAction,
 } from "@/server/actions/admin-actions";
 
-const KINDS = ["post", "comment", "review"] as const;
+const KINDS = ["post", "comment"] as const;
 type Kind = (typeof KINDS)[number];
 
 export async function generateMetadata({

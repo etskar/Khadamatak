@@ -12,13 +12,6 @@ export async function getProfileByUsername(username: string) {
           createdAt: true,
           verification: true,
           locale: true,
-          wallet: {
-            select: {
-              walletId: true,
-              walletUsername: true,
-              status: true,
-            },
-          },
         },
       },
     },
@@ -42,7 +35,6 @@ export async function getProfileByUserId(userId: string) {
           emailVerified: true,
           phoneVerifiedAt: true,
           verification: true,
-          wallet: true,
         },
       },
     },

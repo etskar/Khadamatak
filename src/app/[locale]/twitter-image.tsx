@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { ImageResponse } from "next/og";
+import { siteConfig } from "@/config/site";
 
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
@@ -9,7 +10,17 @@ const logoBase64 = `data:image/png;base64,${readFileSync(
   join(process.cwd(), "public", "logo.png"),
 ).toString("base64")}`;
 
-export default function TwitterImage() {
+export default async function TwitterImage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  const brandName =
+    siteConfig.nameByLocale[locale as keyof typeof siteConfig.nameByLocale] ??
+    siteConfig.name;
+  const tagline = siteConfig.description[locale as "ar" | "nl"] ?? "";
+
   return new ImageResponse(
     (
       <div
@@ -55,7 +66,7 @@ export default function TwitterImage() {
             letterSpacing: "-0.02em",
           }}
         >
-          Khadamatak
+          {brandName}
         </div>
         <div
           style={{
@@ -66,7 +77,7 @@ export default function TwitterImage() {
             lineHeight: 1.4,
           }}
         >
-          خدماتك بين يديك — Discover, connect & get it done
+          {tagline}
         </div>
       </div>
     ),

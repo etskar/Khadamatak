@@ -1,4 +1,7 @@
+"use client";
+
 import Image from "next/image";
+import { useLocale } from "next-intl";
 import { cn } from "@/lib/utils";
 import { Link } from "@/i18n/navigation";
 import { siteConfig } from "@/config/site";
@@ -22,12 +25,16 @@ export function Logo({
   href = "/",
   size = "md",
 }: LogoProps) {
+  const locale = useLocale();
+  const brandName =
+    siteConfig.nameByLocale[locale as keyof typeof siteConfig.nameByLocale] ??
+    siteConfig.name;
   const sizes = sizeMap[size];
 
   return (
     <Link
       href={href}
-      aria-label={siteConfig.name}
+      aria-label={brandName}
       className={cn("inline-flex items-center gap-2.5", className)}
     >
       <Image
@@ -39,9 +46,7 @@ export function Logo({
       />
       {showWordmark ? (
         <span className={cn("font-bold tracking-tight text-foreground", sizes.text)}>
-          <span className="text-brand-700 dark:text-brand-400">
-            {siteConfig.name}
-          </span>
+          <span className="text-brand-700 dark:text-brand-400">{brandName}</span>
         </span>
       ) : null}
     </Link>

@@ -65,17 +65,11 @@ export default async function GroupDetailPage({
       }))}
       products={products}
       services={services}
-      requests={group.requests.map((r) => ({
-        publicId: r.publicId,
-        title: r.title,
-        description: r.description,
-      }))}
       labels={{
         join: t("joinGroup"),
         posts: t("tabPosts"),
         products: t("tabProducts"),
         services: t("tabServices"),
-        requests: t("tabRequests"),
         members: t("tabMembers"),
         about: t("tabAbout"),
         writePost: t("writePost"),

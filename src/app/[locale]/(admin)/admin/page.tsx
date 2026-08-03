@@ -4,21 +4,19 @@ import {
   UserCheck,
   BadgeCheck,
   Store,
-  Handshake,
-  Lock,
-  Wallet,
-  TrendingUp,
-  Percent,
-  Scale,
+  Package,
+  Wrench,
   Headphones,
   Flag,
+  Users2,
+  MessageSquare,
+  MapPin,
 } from "lucide-react";
 import { PageHeader } from "@/components/shared/page-header";
 import { StatCard } from "@/components/admin/stat-card";
 import { AccessDenied } from "@/components/admin/access-denied";
 import { requireAdminPage } from "@/server/admin/page-guard";
 import { getDashboardStats } from "@/server/admin/stats";
-import { formatMoney } from "@/lib/money";
 
 export async function generateMetadata({
   params,
@@ -43,72 +41,67 @@ export default async function AdminDashboardPage({
   if (forbidden) return <AccessDenied />;
 
   const stats = await getDashboardStats();
+  const localeFmt = locale === "ar" ? "ar-EG" : "nl-NL";
 
   const cards = [
     {
       label: t("dashboard.totalUsers"),
-      value: stats.totalUsers.toLocaleString(locale === "ar" ? "ar-EG" : "nl-NL"),
+      value: stats.totalUsers.toLocaleString(localeFmt),
       icon: <Users className="h-5 w-5" />,
       hint: `${t("dashboard.onlineUsers")}: ${stats.onlineUsers}`,
     },
     {
       label: t("dashboard.verifiedUsers"),
-      value: stats.verifiedUsers.toLocaleString(locale === "ar" ? "ar-EG" : "nl-NL"),
+      value: stats.verifiedUsers.toLocaleString(localeFmt),
       icon: <BadgeCheck className="h-5 w-5" />,
       hint: `${t("dashboard.pendingVerifications")}: ${stats.pendingVerifications}`,
     },
     {
       label: t("dashboard.listings"),
-      value: stats.totalListings.toLocaleString(locale === "ar" ? "ar-EG" : "nl-NL"),
+      value: stats.totalListings.toLocaleString(localeFmt),
       icon: <Store className="h-5 w-5" />,
-      hint: `${stats.activeProducts} / ${stats.activeServices}`,
+      hint: `${t("dashboard.activeProducts")} / ${t("dashboard.activeServices")}`,
     },
     {
-      label: t("dashboard.activeDeals"),
-      value: stats.activeDeals.toLocaleString(locale === "ar" ? "ar-EG" : "nl-NL"),
-      icon: <Handshake className="h-5 w-5" />,
-      hint: `${t("dashboard.activeOrders")}: ${stats.activeOrders}`,
+      label: t("dashboard.activeProducts"),
+      value: stats.activeProducts.toLocaleString(localeFmt),
+      icon: <Package className="h-5 w-5" />,
     },
     {
-      label: t("dashboard.escrowBalance"),
-      value: formatMoney(stats.escrowBalanceCents, "EUR", locale === "ar" ? "ar-EG" : "nl-NL"),
-      icon: <Lock className="h-5 w-5" />,
+      label: t("dashboard.activeServices"),
+      value: stats.activeServices.toLocaleString(localeFmt),
+      icon: <Wrench className="h-5 w-5" />,
     },
     {
-      label: t("dashboard.walletBalance"),
-      value: formatMoney(stats.walletBalanceCents, "EUR", locale === "ar" ? "ar-EG" : "nl-NL"),
-      icon: <Wallet className="h-5 w-5" />,
+      label: t("dashboard.groups"),
+      value: stats.totalGroups.toLocaleString(localeFmt),
+      icon: <Users2 className="h-5 w-5" />,
+      hint: `${t("dashboard.activeMembers")}: ${stats.activeMembers}`,
     },
     {
-      label: t("dashboard.revenueToday"),
-      value: formatMoney(stats.revenueTodayCents, "EUR", locale === "ar" ? "ar-EG" : "nl-NL"),
-      icon: <TrendingUp className="h-5 w-5" />,
-      hint: `${t("dashboard.revenueMonth")}: ${formatMoney(stats.revenueMonthCents, "EUR", locale === "ar" ? "ar-EG" : "nl-NL")}`,
-    },
-    {
-      label: t("dashboard.commission"),
-      value: formatMoney(stats.commissionCents, "EUR", locale === "ar" ? "ar-EG" : "nl-NL"),
-      icon: <Percent className="h-5 w-5" />,
-    },
-    {
-      label: t("dashboard.openDisputes"),
-      value: stats.openDisputes.toLocaleString(locale === "ar" ? "ar-EG" : "nl-NL"),
-      icon: <Scale className="h-5 w-5" />,
+      label: t("dashboard.messages"),
+      value: stats.totalMessages.toLocaleString(localeFmt),
+      icon: <MessageSquare className="h-5 w-5" />,
     },
     {
       label: t("dashboard.supportTickets"),
-      value: stats.supportTickets.toLocaleString(locale === "ar" ? "ar-EG" : "nl-NL"),
+      value: stats.supportTickets.toLocaleString(localeFmt),
       icon: <Headphones className="h-5 w-5" />,
     },
     {
       label: t("dashboard.reportsWaiting"),
-      value: stats.reportsWaiting.toLocaleString(locale === "ar" ? "ar-EG" : "nl-NL"),
+      value: stats.reportsWaiting.toLocaleString(localeFmt),
       icon: <Flag className="h-5 w-5" />,
     },
     {
       label: t("dashboard.pendingVerifications"),
-      value: stats.pendingVerifications.toLocaleString(locale === "ar" ? "ar-EG" : "nl-NL"),
+      value: stats.pendingVerifications.toLocaleString(localeFmt),
       icon: <UserCheck className="h-5 w-5" />,
+    },
+    {
+      label: t("dashboard.mappedListings"),
+      value: stats.mappedListings.toLocaleString(localeFmt),
+      icon: <MapPin className="h-5 w-5" />,
     },
   ];
 

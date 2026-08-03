@@ -1,11 +1,11 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { Lock, Mail } from "lucide-react";
-import { signIn } from "next-auth/react";
-import { Link } from "@/i18n/navigation";
+import { signIn, useSession } from "next-auth/react";
+import { useRouter, Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -21,6 +21,21 @@ export function LoginForm({ googleEnabled }: { googleEnabled: boolean }) {
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") ?? `/${locale}`;
   const [state, action, pending] = useActionState(loginAction, initial);
+  const { update } = useSession();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (state?.ok) {
+      let active = true;
+      (async () => {
+        await update();
+        if (active) router.push(callbackUrl);
+      })();
+      return () => {
+        active = false;
+      };
+    }
+  }, [state, update, router, callbackUrl]);
 
   return (
     <div className="space-y-4">

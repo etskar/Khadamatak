@@ -2,9 +2,12 @@ import type { MetadataRoute } from "next";
 import { siteConfig } from "@/config/site";
 
 export default function manifest(): MetadataRoute.Manifest {
+  const brandName =
+    siteConfig.nameByLocale[siteConfig.defaultLocale] ?? siteConfig.name;
+
   return {
-    name: siteConfig.name,
-    short_name: siteConfig.name,
+    name: brandName,
+    short_name: brandName,
     description: siteConfig.description[siteConfig.defaultLocale],
     start_url: "/",
     display: "standalone",

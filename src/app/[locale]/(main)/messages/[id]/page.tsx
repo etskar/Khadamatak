@@ -30,7 +30,7 @@ export default async function ConversationPage({
       : data.conversation.userAId;
   const other = await db.user.findUnique({
     where: { id: otherId },
-    include: { profile: true, wallet: true },
+    include: { profile: true },
   });
 
   return (
@@ -39,7 +39,6 @@ export default async function ConversationPage({
       currentUserId={session.user.id}
       otherName={other?.profile?.displayName ?? "User"}
       otherAvatar={other?.profile?.avatarUrl}
-      otherWalletId={other?.wallet?.walletId}
       messages={data.messages.map((m) => ({
         id: m.id,
         type: m.type,

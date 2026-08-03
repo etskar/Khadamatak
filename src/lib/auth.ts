@@ -7,7 +7,6 @@ import { db } from "@/lib/db";
 import { verifyPassword } from "@/lib/crypto";
 import { requireAuthSecret } from "@/lib/env";
 import { type UserRole } from "@/types/user";
-import { ensureWalletForUser } from "@/server/finance/wallet-service";
 
 export type AppJWT = {
   id?: string;
@@ -100,13 +99,19 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (account?.provider === "google" && user.email) {
         const existing = await db.user.findUnique({
           where: { email: user.email.toLowerCase() },
-          include: { profile: true, wallet: true },
+          include: { profile: true },
         });
-        if (existing && !existing.wallet) {
+        if (existing && !existing.profile) {
           const username =
-            existing.profile?.username ??
             user.email.split("@")[0].replace(/[^a-z0-9_]/gi, "").slice(0, 20);
-          await ensureWalletForUser(existing.id, username);
+          await db.profile.create({
+            data: {
+              userId: existing.id,
+              username,
+              displayName: user.name ?? username,
+              avatarUrl: user.image,
+            },
+          });
         }
       }
       return true;
@@ -195,23 +200,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
       await db.identityVerification.create({
         data: { userId: user.id, status: "not_started" },
-      });
-
-      await ensureWalletForUser(user.id, username);
-
-      await db.bankingCapability.createMany({
-        data: [
-          "personal_iban",
-          "virtual_card",
-          "physical_card",
-          "bank_withdrawal",
-          "multi_currency",
-          "intl_transfer",
-        ].map((type) => ({
-          userId: user.id!,
-          type,
-          status: "not_available",
-        })),
       });
     },
   },

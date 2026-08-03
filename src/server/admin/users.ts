@@ -38,9 +38,8 @@ export async function searchUsers(input: {
       take: pageSize,
       include: {
         profile: { select: { username: true, displayName: true, avatarUrl: true, city: true, country: true } },
-        wallet: { select: { walletId: true, status: true, availableCents: true } },
         verification: { select: { status: true, submittedAt: true } },
-        _count: { select: { ordersAsBuyer: true, ordersAsSeller: true, dealsAsBuyer: true, dealsAsSeller: true, posts: true } },
+        _count: { select: { posts: true, products: true, services: true } },
       },
     }),
     db.user.count({ where }),
@@ -54,17 +53,12 @@ export async function getUserDetail(userId: string) {
     where: { id: userId },
     include: {
       profile: true,
-      wallet: true,
       verification: true,
       location: true,
       businessAccount: true,
       riskScore: true,
       _count: {
         select: {
-          ordersAsBuyer: true,
-          ordersAsSeller: true,
-          dealsAsBuyer: true,
-          dealsAsSeller: true,
           posts: true,
           reports: true,
           products: true,
@@ -103,19 +97,6 @@ export async function setUserAccountStatus(input: {
     where: { id: input.userId },
     data: { accountStatus: next, tokenVersion: { increment: 1 } },
   });
-
-  if (next === "banned" || next === "suspended") {
-    await db.wallet.updateMany({
-      where: { userId: input.userId, status: "active" },
-      data: { status: "suspended" },
-    });
-  }
-  if (next === "active") {
-    await db.wallet.updateMany({
-      where: { userId: input.userId, status: "suspended" },
-      data: { status: "active" },
-    });
-  }
 
   await db.notification.create({
     data: {
@@ -240,7 +221,6 @@ export async function exportUsers() {
   const users = await db.user.findMany({
     include: {
       profile: true,
-      wallet: true,
       verification: true,
     },
   });
@@ -257,9 +237,6 @@ export async function exportUsers() {
     displayName: u.profile?.displayName,
     city: u.profile?.city,
     country: u.profile?.country,
-    walletId: u.wallet?.walletId,
-    walletStatus: u.wallet?.status,
-    availableCents: u.wallet?.availableCents,
     verificationStatus: u.verification?.status,
   }));
 }

@@ -3,7 +3,6 @@ import { z } from "zod";
 import { db } from "@/lib/db";
 import { siteConfig } from "@/config/site";
 import { hashPassword, generateSecureToken, hashToken } from "@/lib/crypto";
-import { ensureWalletForUser } from "@/server/finance/wallet-service";
 import { slugifyUsername } from "@/lib/ids";
 import { rateLimit } from "@/lib/rate-limit";
 import { writeAuditLog } from "@/lib/audit";
@@ -72,25 +71,8 @@ export async function registerUser(
       },
     });
 
-    await tx.bankingCapability.createMany({
-      data: [
-        "personal_iban",
-        "virtual_card",
-        "physical_card",
-        "bank_withdrawal",
-        "multi_currency",
-        "intl_transfer",
-      ].map((type) => ({
-        userId: created.id,
-        type,
-        status: "not_available",
-      })),
-    });
-
     return created;
   });
-
-  await ensureWalletForUser(user.id, username);
 
   const rawToken = generateSecureToken();
   await db.emailVerificationToken.create({

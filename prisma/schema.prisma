@@ -28,7 +28,6 @@ model User {
   updatedAt         DateTime  @updatedAt
 
   profile           Profile?
-  wallet            Wallet?
   accounts          Account[]
   sessions          Session[]
   verification      IdentityVerification?
@@ -45,11 +44,6 @@ model User {
   messages          Message[]
   devices           TrustedDevice[]
   auditLogs         AuditLog[]     @relation("AuditActor")
-  paymentRequestsCreated PaymentRequest[] @relation("PaymentRequestFrom")
-  paymentRequestsReceived PaymentRequest[] @relation("PaymentRequestTo")
-  escrowAsBuyer     Escrow[]       @relation("EscrowBuyer")
-  escrowAsSeller    Escrow[]       @relation("EscrowSeller")
-  disputesOpened    Dispute[]      @relation("DisputeOpener")
   passwordResets    PasswordResetToken[]
   emailTokens       EmailVerificationToken[]
   otpCodes          OtpCode[]
@@ -57,22 +51,11 @@ model User {
   // Marketplace
   products          Product[]
   services          Service[]
-  marketRequests    MarketRequest[]        @relation("RequestOwner")
-  ordersAsBuyer     MarketOrder[]          @relation("OrderBuyer")
-  ordersAsSeller    MarketOrder[]          @relation("OrderSeller")
-  dealsAsBuyer      Deal[]                 @relation("DealBuyer")
-  dealsAsSeller     Deal[]                 @relation("DealSeller")
-  offersMade        Offer[]                @relation("OfferBuyer")
-  offersReceived    Offer[]                @relation("OfferSeller")
-  reviewsWritten    Review[]               @relation("ReviewAuthor")
-  reviewsReceived   Review[]               @relation("ReviewSubject")
   favorites         Favorite[]
   groupMemberships  GroupMember[]
   groupsCreated     CityGroup[]            @relation("GroupCreator")
   groupPosts        GroupPost[]
   location          UserLocation?
-  invoicesAsBuyer   Invoice[]              @relation("InvoiceBuyer")
-  invoicesAsSeller  Invoice[]              @relation("InvoiceSeller")
 
   supportTickets    SupportTicket[]
   broadcastDeliveries BroadcastDelivery[]
@@ -232,7 +215,7 @@ model Post {
   id           String   @id @default(cuid())
   authorId     String
   content      String
-  postType     String   @default("social") // social | marketplace | request
+  postType     String   @default("social") // social | marketplace
   visibility   String   @default("public") // public | followers | private
   likeCount    Int      @default(0)
   commentCount Int      @default(0)
@@ -241,7 +224,6 @@ model Post {
   commentsLocked Boolean @default(false)
   productId    String?
   serviceId    String?
-  requestId    String?
   groupId      String?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
@@ -257,7 +239,6 @@ model Post {
   reports   Report[]
   product   Product?     @relation(fields: [productId], references: [id], onDelete: SetNull)
   service   Service?     @relation(fields: [serviceId], references: [id], onDelete: SetNull)
-  request   MarketRequest? @relation(fields: [requestId], references: [id], onDelete: SetNull)
   group     CityGroup?   @relation(fields: [groupId], references: [id], onDelete: SetNull)
 
   @@index([authorId, createdAt])
@@ -438,251 +419,6 @@ model Message {
   @@index([conversationId, createdAt])
 }
 
-// ─── Unified Financial Architecture ───────────────────────────
-
-model Wallet {
-  id              String   @id @default(cuid())
-  userId          String   @unique
-  walletId        String   @unique // public KH-XXXXXXXX
-  walletUsername  String   @unique
-  currency        String   @default("EUR")
-  availableCents  Int      @default(0)
-  pendingCents    Int      @default(0)
-  frozenCents     Int      @default(0)
-  status          String   @default("active") // active | locked | suspended | closed
-  pinHash         String?
-  twoFactorEnabled Boolean @default(false)
-  version         Int      @default(0) // optimistic concurrency
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-
-  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  ledgerEntries LedgerEntry[]
-  transactionsFrom FinancialTransaction[] @relation("TxFromWallet")
-  transactionsTo   FinancialTransaction[] @relation("TxToWallet")
-
-  @@index([walletUsername])
-}
-
-/// Immutable financial transaction record — never deleted
-model FinancialTransaction {
-  id              String   @id @default(cuid())
-  reference       String   @unique // KH-TX-...
-  idempotencyKey  String   @unique
-  type            String // deposit | transfer | payment_request | escrow_lock | escrow_release | escrow_refund | fee | adjustment
-  status          String // pending | processing | completed | failed | cancelled | reversed
-  amountCents     Int
-  currency        String   @default("EUR")
-  fromWalletId    String?
-  toWalletId      String?
-  actorUserId     String?
-  counterpartyUserId String?
-  paymentMethod   String? // ideal | wallet | card_future | sepa_future | paypal_future | apple_pay_future | google_pay_future | bancontact_future
-  provider        String? // mollie | internal | future_banking
-  providerRef     String?
-  escrowId        String?
-  paymentRequestId String?
-  notes           String?
-  metadataJson    String?
-  failureReason   String?
-  completedAt     DateTime?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-
-  fromWallet Wallet? @relation("TxFromWallet", fields: [fromWalletId], references: [id])
-  toWallet   Wallet? @relation("TxToWallet", fields: [toWalletId], references: [id])
-  escrow     Escrow? @relation(fields: [escrowId], references: [id])
-  paymentRequest PaymentRequest? @relation(fields: [paymentRequestId], references: [id])
-  ledgerEntries LedgerEntry[]
-  auditLogs  AuditLog[]
-
-  @@index([status, createdAt])
-  @@index([fromWalletId])
-  @@index([toWalletId])
-  @@index([actorUserId])
-  @@index([type, createdAt])
-}
-
-/// Double-entry ledger — source of truth for balances
-model LedgerEntry {
-  id            String   @id @default(cuid())
-  transactionId String
-  walletId      String
-  direction     String // debit | credit
-  accountBucket String // available | pending | frozen | escrow_pool
-  amountCents   Int
-  balanceAfterCents Int
-  currency      String   @default("EUR")
-  description   String?
-  createdAt     DateTime @default(now())
-
-  transaction FinancialTransaction @relation(fields: [transactionId], references: [id], onDelete: Restrict)
-  wallet      Wallet               @relation(fields: [walletId], references: [id], onDelete: Restrict)
-
-  @@index([walletId, createdAt])
-  @@index([transactionId])
-}
-
-model PaymentRequest {
-  id              String   @id @default(cuid())
-  publicId        String   @unique
-  fromUserId      String
-  toUserId        String?
-  amountCents     Int
-  currency        String   @default("EUR")
-  description     String
-  status          String   @default("pending") // pending | paid | expired | cancelled
-  expiresAt       DateTime?
-  paidAt          DateTime?
-  paidTransactionId String?
-  shareToken      String   @unique
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-
-  fromUser     User @relation("PaymentRequestFrom", fields: [fromUserId], references: [id], onDelete: Cascade)
-  toUser       User? @relation("PaymentRequestTo", fields: [toUserId], references: [id], onDelete: SetNull)
-  transactions FinancialTransaction[]
-
-  @@index([fromUserId])
-  @@index([toUserId])
-  @@index([status])
-}
-
-model Escrow {
-  id              String   @id @default(cuid())
-  publicId        String   @unique
-  buyerId         String
-  sellerId        String
-  amountCents     Int
-  currency        String   @default("EUR")
-  status          String   @default("created")
-  // created | funded | delivered | completed | disputed | refunded | cancelled
-  description     String?
-  orderRef        String? // future marketplace order id
-  fundedAt        DateTime?
-  deliveredAt     DateTime?
-  completedAt     DateTime?
-  disputedAt      DateTime?
-  releasedAt      DateTime?
-  refundedAt      DateTime?
-  autoReleaseAt   DateTime?
-  metadataJson    String?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-
-  buyer        User @relation("EscrowBuyer", fields: [buyerId], references: [id], onDelete: Restrict)
-  seller       User @relation("EscrowSeller", fields: [sellerId], references: [id], onDelete: Restrict)
-  transactions FinancialTransaction[]
-  dispute      Dispute?
-  events       EscrowEvent[]
-  marketOrder  MarketOrder?
-  deal         Deal?
-
-  @@index([buyerId])
-  @@index([sellerId])
-  @@index([status])
-}
-
-model EscrowEvent {
-  id        String   @id @default(cuid())
-  escrowId  String
-  actorId   String?
-  type      String
-  message   String?
-  dataJson  String?
-  createdAt DateTime @default(now())
-  escrow    Escrow   @relation(fields: [escrowId], references: [id], onDelete: Cascade)
-
-  @@index([escrowId, createdAt])
-}
-
-model Dispute {
-  id           String   @id @default(cuid())
-  publicId     String   @unique
-  escrowId     String   @unique
-  openedById   String
-  reason       String
-  status       String   @default("open")
-  // open | under_review | resolved_refund | resolved_release | closed
-  resolution   String?
-  resolvedById String?
-  resolvedAt   DateTime?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-
-  escrow   Escrow          @relation(fields: [escrowId], references: [id], onDelete: Restrict)
-  openedBy User            @relation("DisputeOpener", fields: [openedById], references: [id], onDelete: Restrict)
-  messages DisputeMessage[]
-  evidence DisputeEvidence[]
-  events   DisputeEvent[]
-
-  @@index([status])
-}
-
-model DisputeMessage {
-  id        String   @id @default(cuid())
-  disputeId String
-  authorId  String
-  content   String
-  createdAt DateTime @default(now())
-  dispute   Dispute  @relation(fields: [disputeId], references: [id], onDelete: Cascade)
-
-  @@index([disputeId, createdAt])
-}
-
-model DisputeEvidence {
-  id        String   @id @default(cuid())
-  disputeId String
-  uploaderId String
-  fileUrl   String
-  fileName  String
-  mimeType  String?
-  createdAt DateTime @default(now())
-  dispute   Dispute  @relation(fields: [disputeId], references: [id], onDelete: Cascade)
-
-  @@index([disputeId])
-}
-
-model DisputeEvent {
-  id        String   @id @default(cuid())
-  disputeId String
-  actorId   String?
-  type      String
-  message   String?
-  createdAt DateTime @default(now())
-  dispute   Dispute  @relation(fields: [disputeId], references: [id], onDelete: Cascade)
-
-  @@index([disputeId, createdAt])
-}
-
-model PaymentProviderEvent {
-  id           String   @id @default(cuid())
-  provider     String
-  eventId      String?
-  eventType    String
-  payloadJson  String
-  processedAt  DateTime?
-  status       String   @default("received") // received | processed | failed | ignored
-  errorMessage String?
-  createdAt    DateTime @default(now())
-
-  @@index([provider, eventId])
-  @@index([status])
-}
-
-/// Future banking architecture placeholders
-model BankingCapability {
-  id          String   @id @default(cuid())
-  userId      String
-  type        String // personal_iban | virtual_card | physical_card | bank_withdrawal | multi_currency | intl_transfer
-  status      String   @default("not_available") // not_available | waitlist | active
-  metadataJson String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  @@unique([userId, type])
-}
-
 model AuditLog {
   id            String   @id @default(cuid())
   actorUserId   String?
@@ -690,7 +426,6 @@ model AuditLog {
   action        String
   entityType    String
   entityId      String?
-  transactionId String?
   ipAddress     String?
   userAgent     String?
   previousValueJson String?
@@ -700,26 +435,10 @@ model AuditLog {
 
   actor       User?                 @relation("AuditActor", fields: [actorUserId], references: [id], onDelete: SetNull)
   adminActor  AdminUser?            @relation("AdminAuditActor", fields: [actorAdminId], references: [id], onDelete: SetNull)
-  transaction FinancialTransaction? @relation(fields: [transactionId], references: [id], onDelete: SetNull)
 
   @@index([actorUserId, createdAt])
   @@index([actorAdminId, createdAt])
   @@index([entityType, entityId])
-  @@index([transactionId])
-}
-
-model IdempotencyRecord {
-  id           String   @id @default(cuid())
-  key          String   @unique
-  userId       String?
-  operation    String
-  requestHash  String
-  responseJson String?
-  status       String   @default("processing") // processing | completed | failed
-  createdAt    DateTime @default(now())
-  completedAt  DateTime?
-
-  @@index([userId, operation])
 }
 
 model RateLimitBucket {
@@ -738,7 +457,6 @@ model PlatformSettings {
   feeFixedCents         Int      @default(0)
   minFeeCents           Int      @default(0)
   currency              String   @default("EUR")
-  platformWalletUserId  String?
   timezone              String   @default("Europe/Amsterdam")
   languagesJson         String?  // ["ar","nl"]
   defaultLanguage       String   @default("ar")
@@ -747,8 +465,6 @@ model PlatformSettings {
   maintenanceMessageJson String?
   marketplaceRulesJson  String?
   verificationRulesJson String?
-  walletRulesJson       String?
-  escrowRulesJson       String?
   emailFromAddress      String?
   updatedAt             DateTime @updatedAt
 }
@@ -767,7 +483,6 @@ model Category {
   children  Category[] @relation("CategoryTree")
   products  Product[]
   services  Service[]
-  requests  MarketRequest[]
 
   @@index([kind, sortOrder])
 }
@@ -804,10 +519,6 @@ model Product {
   group     CityGroup?     @relation(fields: [groupId], references: [id], onDelete: SetNull)
   media     ListingMedia[]
   favorites Favorite[]
-  orders    MarketOrder[]
-  deals     Deal[]
-  offers    Offer[]
-  reviews   Review[]
   posts     Post[]
 
   @@index([sellerId, status])
@@ -852,10 +563,6 @@ model Service {
   group     CityGroup?     @relation(fields: [groupId], references: [id], onDelete: SetNull)
   media     ListingMedia[]
   favorites Favorite[]
-  orders    MarketOrder[]
-  deals     Deal[]
-  offers    Offer[]
-  reviews   Review[]
   posts     Post[]
 
   @@index([providerId, status])
@@ -874,213 +581,6 @@ model ListingMedia {
   product   Product? @relation(fields: [productId], references: [id], onDelete: Cascade)
   service   Service? @relation(fields: [serviceId], references: [id], onDelete: Cascade)
 
-  @@index([productId])
-  @@index([serviceId])
-}
-
-model MarketRequest {
-  id              String    @id @default(cuid())
-  publicId        String    @unique
-  ownerId         String
-  categoryId      String?
-  title           String
-  description     String
-  budgetCents     Int?
-  currency        String    @default("EUR")
-  status          String    @default("open") // open | in_progress | closed | cancelled
-  hiddenAt        DateTime?
-  startLocation   String?
-  destination     String?
-  startLat        Float?
-  startLng        Float?
-  destLat         Float?
-  destLng         Float?
-  neededAt        DateTime?
-  attachmentsJson String?
-  groupId         String?
-  viewsCount      Int       @default(0)
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-
-  owner    User      @relation("RequestOwner", fields: [ownerId], references: [id], onDelete: Cascade)
-  category Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
-  group    CityGroup? @relation(fields: [groupId], references: [id], onDelete: SetNull)
-  posts    Post[]
-  deals    Deal[]
-
-  @@index([ownerId, status])
-  @@index([status, createdAt])
-}
-
-model Offer {
-  id          String   @id @default(cuid())
-  publicId    String   @unique
-  buyerId     String
-  sellerId    String
-  productId   String?
-  serviceId   String?
-  amountCents Int
-  currency    String   @default("EUR")
-  message     String?
-  status      String   @default("pending") // pending | accepted | rejected | withdrawn | expired
-  expiresAt   DateTime?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  buyer   User     @relation("OfferBuyer", fields: [buyerId], references: [id], onDelete: Cascade)
-  seller  User     @relation("OfferSeller", fields: [sellerId], references: [id], onDelete: Cascade)
-  product Product? @relation(fields: [productId], references: [id], onDelete: Cascade)
-  service Service? @relation(fields: [serviceId], references: [id], onDelete: Cascade)
-  deal    Deal?
-
-  @@index([buyerId])
-  @@index([sellerId, status])
-}
-
-model Deal {
-  id             String   @id @default(cuid())
-  publicId       String   @unique
-  buyerId        String
-  sellerId       String
-  productId      String?
-  serviceId      String?
-  requestId      String?
-  offerId        String?  @unique
-  amountCents    Int
-  currency       String   @default("EUR")
-  terms          String?
-  status         String   @default("proposed")
-  // proposed | accepted | rejected | cancelled | payment_pending | in_escrow | completed | disputed
-  paymentStatus  String   @default("unpaid")
-  escrowId       String?  @unique
-  orderId        String?  @unique
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-  acceptedAt     DateTime?
-  completedAt    DateTime?
-
-  buyer   User          @relation("DealBuyer", fields: [buyerId], references: [id], onDelete: Restrict)
-  seller  User          @relation("DealSeller", fields: [sellerId], references: [id], onDelete: Restrict)
-  product Product?      @relation(fields: [productId], references: [id], onDelete: SetNull)
-  service Service?      @relation(fields: [serviceId], references: [id], onDelete: SetNull)
-  request MarketRequest? @relation(fields: [requestId], references: [id], onDelete: SetNull)
-  offer   Offer?        @relation(fields: [offerId], references: [id], onDelete: SetNull)
-  escrow  Escrow?       @relation(fields: [escrowId], references: [id], onDelete: SetNull)
-  order   MarketOrder?  @relation(fields: [orderId], references: [id], onDelete: SetNull)
-  events  DealEvent[]
-
-  @@index([buyerId, status])
-  @@index([sellerId, status])
-}
-
-model DealEvent {
-  id        String   @id @default(cuid())
-  dealId    String
-  actorId   String?
-  type      String
-  message   String?
-  createdAt DateTime @default(now())
-  deal      Deal     @relation(fields: [dealId], references: [id], onDelete: Cascade)
-
-  @@index([dealId, createdAt])
-}
-
-model MarketOrder {
-  id                 String    @id @default(cuid())
-  publicId           String    @unique
-  buyerId            String
-  sellerId           String
-  productId          String?
-  serviceId          String?
-  amountCents        Int
-  platformFeeCents   Int       @default(0)
-  sellerAmountCents  Int
-  currency           String    @default("EUR")
-  status             String    @default("pending_payment")
-  // pending_payment | payment_secured | processing | delivered | completed | cancelled | disputed | refunded
-  paymentStatus      String    @default("unpaid")
-  deliveryStatus     String    @default("not_started")
-  escrowId           String?   @unique
-  invoiceId          String?   @unique
-  notes              String?
-  createdAt          DateTime  @default(now())
-  updatedAt          DateTime  @updatedAt
-  paidAt             DateTime?
-  deliveredAt        DateTime?
-  completedAt        DateTime?
-  cancelledAt        DateTime?
-
-  buyer    User      @relation("OrderBuyer", fields: [buyerId], references: [id], onDelete: Restrict)
-  seller   User      @relation("OrderSeller", fields: [sellerId], references: [id], onDelete: Restrict)
-  product  Product?  @relation(fields: [productId], references: [id], onDelete: SetNull)
-  service  Service?  @relation(fields: [serviceId], references: [id], onDelete: SetNull)
-  escrow   Escrow?   @relation(fields: [escrowId], references: [id], onDelete: SetNull)
-  invoice  Invoice?
-  review   Review?
-  deal     Deal?
-  events   OrderEvent[]
-
-  @@index([buyerId, status])
-  @@index([sellerId, status])
-  @@index([status, createdAt])
-}
-
-model OrderEvent {
-  id        String   @id @default(cuid())
-  orderId   String
-  actorId   String?
-  type      String
-  message   String?
-  createdAt DateTime @default(now())
-  order     MarketOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
-
-  @@index([orderId, createdAt])
-}
-
-model Invoice {
-  id                String   @id @default(cuid())
-  invoiceNumber     String   @unique
-  orderId           String   @unique
-  buyerId           String
-  sellerId          String
-  itemTitle         String
-  amountCents       Int
-  platformFeeCents  Int
-  totalCents        Int
-  currency          String   @default("EUR")
-  paymentStatus     String   @default("paid")
-  issuedAt          DateTime @default(now())
-  metadataJson      String?
-
-  order  MarketOrder @relation(fields: [orderId], references: [id], onDelete: Restrict)
-  buyer  User        @relation("InvoiceBuyer", fields: [buyerId], references: [id], onDelete: Restrict)
-  seller User        @relation("InvoiceSeller", fields: [sellerId], references: [id], onDelete: Restrict)
-
-  @@index([buyerId])
-  @@index([sellerId])
-}
-
-model Review {
-  id           String   @id @default(cuid())
-  orderId      String   @unique
-  authorId     String
-  subjectId    String // seller/provider being reviewed
-  productId    String?
-  serviceId    String?
-  rating       Int // 1-5
-  content      String?
-  imagesJson   String?
-  hiddenAt     DateTime?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-
-  order   MarketOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  author  User        @relation("ReviewAuthor", fields: [authorId], references: [id], onDelete: Cascade)
-  subject User        @relation("ReviewSubject", fields: [subjectId], references: [id], onDelete: Cascade)
-  product Product?    @relation(fields: [productId], references: [id], onDelete: SetNull)
-  service Service?    @relation(fields: [serviceId], references: [id], onDelete: SetNull)
-
-  @@index([subjectId])
   @@index([productId])
   @@index([serviceId])
 }
@@ -1129,7 +629,6 @@ model CityGroup {
   groupPosts GroupPost[]
   products  Product[]
   services  Service[]
-  requests  MarketRequest[]
   favorites Favorite[]
 
   @@index([city])

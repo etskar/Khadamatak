@@ -17,10 +17,6 @@ import {
 import * as adminAuth from "@/server/admin/auth";
 import * as adminUsers from "@/server/admin/users";
 import * as adminMarketplace from "@/server/admin/marketplace";
-import * as adminOrders from "@/server/admin/orders";
-import * as adminEscrow from "@/server/admin/escrow";
-import * as adminWallets from "@/server/admin/wallets";
-import * as adminDisputes from "@/server/admin/disputes";
 import * as adminReports from "@/server/admin/reports";
 import * as adminModeration from "@/server/admin/moderation";
 import * as adminCommunities from "@/server/admin/communities";
@@ -216,7 +212,7 @@ export async function editUserAccountFlatAction(input: {
 // ─── Marketplace ──────────────────────────────────────────────
 
 export async function setListingStatusAction(input: {
-  kind: "product" | "service" | "request";
+  kind: "product" | "service";
   publicId: string;
   action: "hide" | "restore" | "delete" | "approve";
 }) {
@@ -235,117 +231,6 @@ export async function toggleListingFlagAction(input: {
   );
 }
 
-// ─── Orders ───────────────────────────────────────────────────
-
-export async function adminCompleteOrderAction(input: { publicId: string; note?: string }) {
-  return withPermission("orders.complete", async (ctx) =>
-    adminOrders.adminCompleteOrder({ adminId: ctx.admin.id, orderPublicId: input.publicId, note: input.note ?? "" }),
-  );
-}
-
-export async function adminCancelOrderAction(input: { publicId: string; note?: string }) {
-  return withPermission("orders.cancel", async (ctx) =>
-    adminOrders.adminCancelOrder({ adminId: ctx.admin.id, orderPublicId: input.publicId, note: input.note ?? "" }),
-  );
-}
-
-export async function adminForceRefundAction(input: { publicId: string; note?: string }) {
-  return withPermission("orders.force_refund", async (ctx) =>
-    adminOrders.adminForceRefund({ adminId: ctx.admin.id, orderPublicId: input.publicId, note: input.note ?? "" }),
-  );
-}
-
-export async function adminForceReleaseAction(input: { publicId: string; note?: string }) {
-  return withPermission("orders.force_release", async (ctx) =>
-    adminOrders.adminForceRelease({ adminId: ctx.admin.id, orderPublicId: input.publicId, note: input.note ?? "" }),
-  );
-}
-
-// ─── Escrow ───────────────────────────────────────────────────
-
-export async function adminReleaseEscrowAction(input: { publicId: string; note?: string }) {
-  return withPermission("escrow.release", async (ctx) =>
-    adminEscrow.adminReleaseEscrow({ adminId: ctx.admin.id, escrowPublicId: input.publicId, reason: input.note ?? "" }),
-  );
-}
-
-export async function adminRefundEscrowAction(input: { publicId: string; note?: string }) {
-  return withPermission("escrow.refund", async (ctx) =>
-    adminEscrow.adminRefundEscrow({ adminId: ctx.admin.id, escrowPublicId: input.publicId, reason: input.note ?? "" }),
-  );
-}
-
-export async function freezeEscrowAction(input: { publicId: string; reason?: string }) {
-  return withPermission("escrow.freeze", async (ctx) =>
-    adminEscrow.freezeEscrow({ adminId: ctx.admin.id, escrowPublicId: input.publicId, reason: input.reason ?? "Frozen by admin" }),
-  );
-}
-
-export async function unfreezeEscrowAction(input: { publicId: string }) {
-  return withPermission("escrow.freeze", async (ctx) =>
-    adminEscrow.unfreezeEscrow({ adminId: ctx.admin.id, escrowPublicId: input.publicId }),
-  );
-}
-
-export async function investigateEscrowAction(input: { publicId: string; note?: string }) {
-  return withPermission("escrow.investigate", async (ctx) =>
-    adminEscrow.investigateEscrow({ adminId: ctx.admin.id, escrowPublicId: input.publicId, note: input.note ?? "" }),
-  );
-}
-
-// ─── Wallets ──────────────────────────────────────────────────
-
-export async function setWalletStatusAction(input: {
-  userId: string;
-  action: "freeze" | "unfreeze";
-  reason?: string;
-}) {
-  return withPermission("wallets.freeze", async (ctx) =>
-    adminWallets.setWalletStatus({ adminId: ctx.admin.id, ...input }),
-  );
-}
-
-// ─── Disputes ─────────────────────────────────────────────────
-
-export async function postDisputeMessageAction(input: {
-  disputePublicId: string;
-  content: string;
-}) {
-  return withPermission("disputes.manage", async (ctx) =>
-    adminDisputes.postDisputeMessage({ adminId: ctx.admin.id, ...input }),
-  );
-}
-
-export async function adminResolveDisputeAction(input: {
-  disputePublicId: string;
-  decision: "refund" | "release";
-  resolution?: string;
-}) {
-  return withPermission("disputes.resolve", async (ctx) =>
-    adminDisputes.adminResolveDispute({
-      adminId: ctx.admin.id,
-      disputePublicId: input.disputePublicId,
-      decision: input.decision,
-      resolution: input.resolution ?? "Resolved by admin",
-    }),
-  );
-}
-
-export async function closeDisputeAction(input: { disputePublicId: string; note?: string }) {
-  return withPermission("disputes.resolve", async (ctx) =>
-    adminDisputes.closeDispute({ adminId: ctx.admin.id, disputePublicId: input.disputePublicId, note: input.note ?? "" }),
-  );
-}
-
-export async function requestDisputeEvidenceAction(input: {
-  disputePublicId: string;
-  message?: string;
-}) {
-  return withPermission("disputes.resolve", async (ctx) =>
-    adminDisputes.requestDisputeEvidence({ adminId: ctx.admin.id, disputePublicId: input.disputePublicId, note: input.message ?? "" }),
-  );
-}
-
 // ─── Reports ──────────────────────────────────────────────────
 
 export async function resolveReportAction(input: {
@@ -361,7 +246,7 @@ export async function resolveReportAction(input: {
 // ─── Moderation ───────────────────────────────────────────────
 
 export async function moderateContentAction(input: {
-  kind: "post" | "comment" | "review" | "group_post";
+  kind: "post" | "comment" | "group_post";
   id: string;
   action: "hide" | "restore" | "delete";
   note?: string;
@@ -460,8 +345,6 @@ export async function updatePlatformSettingsAction(input: {
     emailFromAddress?: string;
     marketplaceRulesJson?: string;
     verificationRulesJson?: string;
-    walletRulesJson?: string;
-    escrowRulesJson?: string;
   };
 }) {
   return withPermission("settings.manage", async (ctx) =>
@@ -1029,24 +912,4 @@ export async function exportUsersCsvAction(): Promise<AdminActionResult<{ csv: s
   return withPermission("users.export", async () => ({
     csv: adminUsers.toCsv(await adminUsers.exportUsers()),
   }));
-}
-
-export async function exportWalletCsvAction(
-  input: { userId: string },
-): Promise<AdminActionResult<{ csv: string }>> {
-  return withPermission("wallets.export", async () => {
-    const txs = await adminWallets.exportWalletHistory(input.userId);
-    const rows = txs.map((tx) => ({
-      id: tx.id,
-      publicId: (tx as unknown as { publicId?: string }).publicId ?? tx.id,
-      type: tx.type,
-      status: tx.status,
-      amountCents: tx.amountCents,
-      paymentMethod: tx.paymentMethod,
-      fromWalletId: tx.fromWalletId,
-      toWalletId: tx.toWalletId,
-      createdAt: tx.createdAt.toISOString(),
-    }));
-    return { csv: adminUsers.toCsv(rows) };
-  });
 }

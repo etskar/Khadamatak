@@ -2,7 +2,6 @@ import type { LucideIcon } from "lucide-react";
 import {
   Bell,
   Briefcase,
-  Handshake,
   Heart,
   Home,
   LayoutDashboard,
@@ -14,8 +13,6 @@ import {
   Store,
   Users,
   UserRound,
-  Wallet,
-  ClipboardList,
 } from "lucide-react";
 
 export type NavItem = {
@@ -57,13 +54,6 @@ export const mainNavItems: NavItem[] = [
     showInSidebar: true,
   },
   {
-    key: "requests",
-    href: "/requests",
-    icon: ClipboardList,
-    showInBottomNav: false,
-    showInSidebar: true,
-  },
-  {
     key: "groups",
     href: "/groups",
     icon: Users,
@@ -92,20 +82,6 @@ export const mainNavItems: NavItem[] = [
     showInSidebar: true,
   },
   {
-    key: "deals",
-    href: "/deals",
-    icon: Handshake,
-    showInBottomNav: false,
-    showInSidebar: true,
-  },
-  {
-    key: "orders",
-    href: "/orders",
-    icon: ClipboardList,
-    showInBottomNav: false,
-    showInSidebar: true,
-  },
-  {
     key: "sell",
     href: "/sell",
     icon: Store,
@@ -116,13 +92,6 @@ export const mainNavItems: NavItem[] = [
     key: "favorites",
     href: "/favorites",
     icon: Heart,
-    showInBottomNav: false,
-    showInSidebar: true,
-  },
-  {
-    key: "wallet",
-    href: "/wallet",
-    icon: Wallet,
     showInBottomNav: false,
     showInSidebar: true,
   },

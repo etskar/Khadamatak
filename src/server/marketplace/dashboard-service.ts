@@ -2,39 +2,16 @@ import "server-only";
 import { db } from "@/lib/db";
 
 export async function getSellerDashboard(userId: string) {
-  const [
-    products,
-    services,
-    ordersAsSeller,
-    reviews,
-    productViews,
-    serviceViews,
-  ] = await Promise.all([
+  const [products, services, productViews, serviceViews] = await Promise.all([
     db.product.findMany({
       where: { sellerId: userId, status: { not: "deleted" } },
-      include: { media: true, _count: { select: { orders: true, favorites: true } } },
+      include: { media: true, _count: { select: { favorites: true } } },
       orderBy: { createdAt: "desc" },
     }),
     db.service.findMany({
       where: { providerId: userId, status: { not: "deleted" } },
-      include: { media: true, _count: { select: { orders: true, favorites: true } } },
+      include: { media: true, _count: { select: { favorites: true } } },
       orderBy: { createdAt: "desc" },
-    }),
-    db.marketOrder.findMany({
-      where: { sellerId: userId },
-      orderBy: { createdAt: "desc" },
-      take: 50,
-      include: {
-        product: true,
-        service: true,
-        buyer: { include: { profile: true } },
-      },
-    }),
-    db.review.findMany({
-      where: { subjectId: userId },
-      orderBy: { createdAt: "desc" },
-      take: 20,
-      include: { author: { include: { profile: true } } },
     }),
     db.product.aggregate({
       where: { sellerId: userId },
@@ -46,25 +23,15 @@ export async function getSellerDashboard(userId: string) {
     }),
   ]);
 
-  const completed = ordersAsSeller.filter((o) => o.status === "completed");
-  const earningsCents = completed.reduce((s, o) => s + o.sellerAmountCents, 0);
-  const salesCount = completed.length;
-
   return {
     products,
     services,
-    orders: ordersAsSeller,
-    reviews,
     stats: {
       views:
         (productViews._sum.viewsCount ?? 0) + (serviceViews._sum.viewsCount ?? 0),
       favorites:
         (productViews._sum.favoritesCount ?? 0) +
         (serviceViews._sum.favoritesCount ?? 0),
-      orders: ordersAsSeller.length,
-      sales: salesCount,
-      earningsCents,
-      reviews: reviews.length,
       activeListings:
         products.filter((p) => p.status === "active").length +
         services.filter((s) => s.status === "active").length,
@@ -93,9 +60,6 @@ export async function ensureCategories() {
     { slug: "programming", nameAr: "برمجة", nameNl: "Programmeren", kind: "service", sortOrder: 7 },
     { slug: "home-services", nameAr: "خدمات منزلية", nameNl: "Huishoudelijke diensten", kind: "service", sortOrder: 8 },
     { slug: "consulting", nameAr: "استشارات", nameNl: "Consultancy", kind: "service", sortOrder: 9 },
-    { slug: "help", nameAr: "مساعدة", nameNl: "Hulp", kind: "request", sortOrder: 1 },
-    { slug: "moving", nameAr: "نقل عفش", nameNl: "Verhuizen", kind: "request", sortOrder: 2 },
-    { slug: "work", nameAr: "عمل", nameNl: "Werk", kind: "request", sortOrder: 3 },
   ];
 
   for (const c of cats) {

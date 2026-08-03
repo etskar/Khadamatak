@@ -126,19 +126,3 @@ export async function sendMessage(input: {
 
   return message;
 }
-
-export async function sendPaymentCardToChat(input: {
-  conversationId: string;
-  senderId: string;
-  kind: "payment_request" | "payment_link" | "qr" | "receipt";
-  payload: Record<string, unknown>;
-  content?: string;
-}) {
-  return sendMessage({
-    conversationId: input.conversationId,
-    senderId: input.senderId,
-    type: input.kind,
-    content: input.content,
-    payload: input.payload,
-  });
-}

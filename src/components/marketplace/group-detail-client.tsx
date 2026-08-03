@@ -17,7 +17,7 @@ import {
 import { toast } from "@/components/ui/toast";
 import { cn } from "@/lib/utils";
 
-type Tab = "posts" | "products" | "services" | "requests" | "members" | "about";
+type Tab = "posts" | "products" | "services" | "members" | "about";
 
 export function GroupDetailClient(props: {
   slug: string;
@@ -48,7 +48,6 @@ export function GroupDetailClient(props: {
     imageUrl: string | null;
     city: string | null;
   }[];
-  requests: { publicId: string; title: string; description: string }[];
   labels: Record<string, string>;
 }) {
   const [tab, setTab] = useState<Tab>("posts");
@@ -61,7 +60,6 @@ export function GroupDetailClient(props: {
     { key: "posts", label: props.labels.posts },
     { key: "products", label: props.labels.products },
     { key: "services", label: props.labels.services },
-    { key: "requests", label: props.labels.requests },
     { key: "members", label: props.labels.members },
     { key: "about", label: props.labels.about },
   ];
@@ -182,23 +180,6 @@ export function GroupDetailClient(props: {
               imageUrl={s.imageUrl}
               city={s.city}
             />
-          ))}
-        </div>
-      ) : null}
-
-      {tab === "requests" ? (
-        <div className="space-y-2">
-          {props.requests.map((r) => (
-            <Link key={r.publicId} href={`/requests/${r.publicId}`}>
-              <Card>
-                <CardContent className="p-4">
-                  <p className="font-semibold">{r.title}</p>
-                  <p className="line-clamp-2 text-sm text-muted-foreground">
-                    {r.description}
-                  </p>
-                </CardContent>
-              </Card>
-            </Link>
           ))}
         </div>
       ) : null}

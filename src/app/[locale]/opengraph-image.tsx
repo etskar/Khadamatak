@@ -10,7 +10,17 @@ const logoBase64 = `data:image/png;base64,${readFileSync(
   join(process.cwd(), "public", "logo.png"),
 ).toString("base64")}`;
 
-export default function OpenGraphImage() {
+export default async function OpenGraphImage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  const brandName =
+    siteConfig.nameByLocale[locale as keyof typeof siteConfig.nameByLocale] ??
+    siteConfig.name;
+  const tagline = siteConfig.description[locale as "ar" | "nl"] ?? "";
+
   return new ImageResponse(
     (
       <div
@@ -76,7 +86,7 @@ export default function OpenGraphImage() {
               letterSpacing: "-0.02em",
             }}
           >
-            Khadamatak
+            {brandName}
           </div>
           <div
             style={{
@@ -88,7 +98,7 @@ export default function OpenGraphImage() {
               lineHeight: 1.4,
             }}
           >
-            خدماتك بين يديك — Discover, connect & get it done
+            {tagline}
           </div>
         </div>
         <div

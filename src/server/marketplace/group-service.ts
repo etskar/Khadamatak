@@ -34,12 +34,6 @@ export async function getGroupBySlug(slug: string, userId?: string | null) {
         include: { media: true, provider: { include: { profile: true } } },
         orderBy: { createdAt: "desc" },
       },
-      requests: {
-        where: { status: "open" },
-        take: 12,
-        include: { owner: { include: { profile: true } } },
-        orderBy: { createdAt: "desc" },
-      },
       groupPosts: {
         where: { deletedAt: null },
         take: 30,

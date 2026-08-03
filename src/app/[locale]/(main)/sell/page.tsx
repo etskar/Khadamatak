@@ -5,7 +5,6 @@ import { getSellerDashboard } from "@/server/marketplace/dashboard-service";
 import { PageHeader } from "@/components/shared/page-header";
 import { Link } from "@/i18n/navigation";
 import { Card, CardContent } from "@/components/ui/card";
-import { formatMoney } from "@/lib/money";
 import { SellerListingsClient } from "@/components/marketplace/seller-listings-client";
 
 export default async function SellDashboardPage({
@@ -25,17 +24,7 @@ export default async function SellDashboardPage({
   const stats = [
     { label: t("statViews"), value: String(data.stats.views) },
     { label: t("statFavorites"), value: String(data.stats.favorites) },
-    { label: t("statOrders"), value: String(data.stats.orders) },
-    { label: t("statSales"), value: String(data.stats.sales) },
-    {
-      label: t("statEarnings"),
-      value: formatMoney(
-        data.stats.earningsCents,
-        "EUR",
-        locale === "ar" ? "ar" : "nl-NL",
-      ),
-    },
-    { label: t("statReviews"), value: String(data.stats.reviews) },
+    { label: t("statListings"), value: String(data.stats.activeListings) },
   ];
 
   return (
@@ -61,7 +50,7 @@ export default async function SellDashboardPage({
         }
       />
 
-      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
         {stats.map((s) => (
           <Card key={s.label}>
             <CardContent className="p-3">
@@ -79,7 +68,6 @@ export default async function SellDashboardPage({
           status: p.status,
           views: p.viewsCount,
           favorites: p.favoritesCount,
-          orders: p._count.orders,
         }))}
         services={data.services.map((s) => ({
           publicId: s.publicId,
@@ -87,7 +75,6 @@ export default async function SellDashboardPage({
           status: s.status,
           views: s.viewsCount,
           favorites: s.favoritesCount,
-          orders: s._count.orders,
         }))}
         labels={{
           products: t("products"),

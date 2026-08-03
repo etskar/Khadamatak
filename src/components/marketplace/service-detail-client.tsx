@@ -1,19 +1,15 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { useTranslations } from "next-intl";
 import { BadgeCheck, Heart, MessageCircle, Star } from "lucide-react";
 import { useRouter, Link } from "@/i18n/navigation";
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/toast";
 import {
-  bookServiceAction,
   contactSellerAction,
-  createOfferAction,
   toggleFavoriteAction,
 } from "@/server/actions/marketplace-actions";
 
@@ -43,14 +39,12 @@ export function ServiceDetailClient({
       verified: boolean;
     };
     isOwner: boolean;
-    hasFixedPrice: boolean;
   };
   labels: Record<string, string>;
 }) {
   const [pending, startTransition] = useTransition();
   const [favorited, setFavorited] = useState(service.favorited);
   const router = useRouter();
-  const tCommon = useTranslations("common");
 
   return (
     <div className="grid gap-5 animate-in-up lg:grid-cols-5">
@@ -110,71 +104,24 @@ export function ServiceDetailClient({
             </Link>
 
             {!service.isOwner ? (
-              <>
-                <form
-                  className="space-y-2"
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    const fd = new FormData(e.currentTarget);
-                    fd.set("servicePublicId", service.publicId);
-                    startTransition(async () => {
-                      try {
-                        const res = await bookServiceAction(fd);
-                        router.push(`/orders/${res.orderPublicId}`);
-                      } catch (err) {
-                        toast({
-                          title: err instanceof Error ? err.message : tCommon("error"),
-                          variant: "danger",
-                        });
-                      }
-                    });
-                  }}
-                >
-                  {!service.hasFixedPrice ? (
-                    <Input
-                      name="amount"
-                      type="number"
-                      step="0.01"
-                      label={labels.customAmount}
-                      required
-                    />
-                  ) : null}
-                  <Input name="notes" placeholder="..." />
-                  <Button type="submit" fullWidth size="lg" loading={pending}>
-                    {labels.book}
-                  </Button>
-                </form>
-                <Button
-                  fullWidth
-                  variant="outline"
-                  onClick={() =>
-                    startTransition(async () => {
+              <Button
+                fullWidth
+                size="lg"
+                loading={pending}
+                onClick={() =>
+                  startTransition(async () => {
+                    try {
                       const res = await contactSellerAction(service.provider.id);
                       router.push(`/messages/${res.conversationId}`);
-                    })
-                  }
-                >
-                  <MessageCircle className="h-4 w-4" />
-                  {labels.contact}
-                </Button>
-                <form
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    const fd = new FormData(e.currentTarget);
-                    fd.set("servicePublicId", service.publicId);
-                    startTransition(async () => {
-                      await createOfferAction(fd);
-                      router.push("/deals");
-                    });
-                  }}
-                  className="space-y-2"
-                >
-                  <Input name="amount" type="number" step="0.01" required />
-                  <Button type="submit" variant="soft" fullWidth loading={pending}>
-                    {labels.offer}
-                  </Button>
-                </form>
-              </>
+                    } catch {
+                      toast({ title: labels.loginRequired, variant: "warning" });
+                    }
+                  })
+                }
+              >
+                <MessageCircle className="h-4 w-4" />
+                {labels.contact}
+              </Button>
             ) : null}
 
             <Button

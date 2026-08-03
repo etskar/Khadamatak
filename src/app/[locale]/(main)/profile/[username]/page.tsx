@@ -43,7 +43,6 @@ export default async function PublicProfilePage({
         verificationStatus: profile.user.verification?.status ?? "not_started",
         realName: isOwner ? null : null,
         email: null,
-        walletId: profile.user.wallet?.walletId ?? null,
         userId: profile.userId,
       }}
       posts={posts.map((p) => ({

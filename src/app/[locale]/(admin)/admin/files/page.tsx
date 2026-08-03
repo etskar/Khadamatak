@@ -1,5 +1,5 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { FileText, FolderOpen, ImageIcon, FileArchive, FileCheck2, FileKey, Paperclip } from "lucide-react";
+import { FileText, FolderOpen, ImageIcon, FileCheck2, FileKey, Paperclip } from "lucide-react";
 import { PageHeader } from "@/components/shared/page-header";
 import { StatCard } from "@/components/admin/stat-card";
 import { AdminTable, TableCell } from "@/components/admin/admin-table";
@@ -38,7 +38,6 @@ export default async function AdminFilesPage({
     { label: t("files.productImages"), value: c.productImages.toLocaleString(localeFmt), icon: <FileText className="h-5 w-5" /> },
     { label: t("files.serviceImages"), value: c.serviceImages.toLocaleString(localeFmt), icon: <FileText className="h-5 w-5" /> },
     { label: t("files.postImages"), value: c.postImages.toLocaleString(localeFmt), icon: <FolderOpen className="h-5 w-5" /> },
-    { label: t("files.reviewImages"), value: c.reviewsWithImages.toLocaleString(localeFmt), icon: <FileArchive className="h-5 w-5" /> },
     { label: t("files.verificationDocs"), value: c.verificationDocuments.toLocaleString(localeFmt), icon: <FileCheck2 className="h-5 w-5" /> },
     { label: t("files.supportAttachments"), value: c.supportAttachments.toLocaleString(localeFmt), icon: <Paperclip className="h-5 w-5" /> },
   ];

@@ -21,7 +21,6 @@ export async function searchAll(input: {
       products: [],
       services: [],
       groups: [],
-      requests: [],
     };
   }
 
@@ -44,7 +43,7 @@ export async function searchAll(input: {
   const limit = input.limit ?? 12;
   const f = input.filters ?? {};
 
-  const [users, posts, products, services, groups, requests] = await Promise.all([
+  const [users, posts, products, services, groups] = await Promise.all([
     db.profile.findMany({
       where: {
         OR: [
@@ -135,25 +134,9 @@ export async function searchAll(input: {
       },
       take: limit,
     }),
-    db.marketRequest.findMany({
-      where: {
-        status: "open",
-        OR: [
-          { title: { contains: q } },
-          { description: { contains: q } },
-          { startLocation: { contains: q } },
-          { destination: { contains: q } },
-        ],
-      },
-      take: limit,
-      include: {
-        owner: { include: { profile: true } },
-        category: true,
-      },
-    }),
   ]);
 
-  return { users, posts, products, services, groups, requests };
+  return { users, posts, products, services, groups };
 }
 
 export async function getRecentSearches(userId: string) {

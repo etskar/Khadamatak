@@ -11,17 +11,13 @@ const intlMiddleware = createMiddleware(routing);
 const ADMIN_SESSION_COOKIE = "khadamatak_admin";
 
 const protectedPaths = [
-  "/wallet",
   "/messages",
   "/notifications",
   "/settings",
   "/verification",
   "/admin",
   "/sell",
-  "/orders",
-  "/deals",
   "/favorites",
-  "/requests/new",
 ];
 
 export default function proxy(request: NextRequest) {
@@ -77,6 +73,6 @@ export const config = {
   matcher: [
     "/",
     "/(ar|nl)/:path*",
-    "/((?!api|_next|_vercel|.*\\..*|apple-icon|opengraph-image|twitter-image).*)",
+    "/((?!-|api|_next|_vercel|.*\\..*|apple-icon|opengraph-image|twitter-image).*)",
   ],
 };

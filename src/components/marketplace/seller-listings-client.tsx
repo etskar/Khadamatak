@@ -18,7 +18,6 @@ export function SellerListingsClient({
     status: string;
     views: number;
     favorites: number;
-    orders: number;
   }[];
   services: {
     publicId: string;
@@ -26,7 +25,6 @@ export function SellerListingsClient({
     status: string;
     views: number;
     favorites: number;
-    orders: number;
   }[];
   labels: Record<string, string>;
 }) {
@@ -50,7 +48,7 @@ export function SellerListingsClient({
             {item.title}
           </Link>
           <p className="text-xs text-muted-foreground">
-            {item.views} views · {item.favorites} fav · {item.orders} orders
+            {item.views} views · {item.favorites} fav
           </p>
         </div>
         <div className="flex items-center gap-2">

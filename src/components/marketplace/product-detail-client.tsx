@@ -9,7 +9,6 @@ import {
   MapPin,
   MessageCircle,
   Share2,
-  Star,
 } from "lucide-react";
 import { useRouter } from "@/i18n/navigation";
 import { Link } from "@/i18n/navigation";
@@ -17,12 +16,9 @@ import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/toast";
 import {
-  buyProductAction,
   contactSellerAction,
-  createOfferAction,
   reportListingAction,
   toggleFavoriteAction,
 } from "@/server/actions/marketplace-actions";
@@ -51,13 +47,6 @@ type Props = {
       verified: boolean;
     };
     category: string | null;
-    reviews: {
-      id: string;
-      rating: number;
-      content: string | null;
-      author: string;
-      createdAt: string;
-    }[];
     distanceLabel: string | null;
     isOwner: boolean;
     publishedAt: string;
@@ -68,7 +57,6 @@ type Props = {
 export function ProductDetailClient({ product, labels }: Props) {
   const [active, setActive] = useState(0);
   const [favorited, setFavorited] = useState(product.favorited);
-  const [offerOpen, setOfferOpen] = useState(false);
   const [pending, startTransition] = useTransition();
   const router = useRouter();
   const tCommon = useTranslations("common");
@@ -160,30 +148,6 @@ export function ProductDetailClient({ product, labels }: Props) {
             </CardContent>
           </Card>
         ) : null}
-
-        <Card>
-          <CardContent className="space-y-3 p-5">
-            <h2 className="font-semibold">{labels.reviews}</h2>
-            {product.reviews.length === 0 ? (
-              <p className="text-sm text-muted-foreground">—</p>
-            ) : (
-              product.reviews.map((r) => (
-                <div key={r.id} className="border-b border-border/60 pb-3 last:border-0">
-                  <div className="flex items-center gap-2 text-sm font-semibold">
-                    {r.author}
-                    <span className="inline-flex items-center gap-0.5 text-warning">
-                      <Star className="h-3.5 w-3.5 fill-current" />
-                      {r.rating}
-                    </span>
-                  </div>
-                  {r.content ? (
-                    <p className="mt-1 text-sm text-muted-foreground">{r.content}</p>
-                  ) : null}
-                </div>
-              ))
-            )}
-          </CardContent>
-        </Card>
       </div>
 
       <div className="space-y-3 lg:col-span-2">
@@ -210,78 +174,24 @@ export function ProductDetailClient({ product, labels }: Props) {
             </Link>
 
             {!product.isOwner ? (
-              <>
-                <Button
-                  fullWidth
-                  size="lg"
-                  loading={pending}
-                  onClick={() =>
-                    startTransition(async () => {
-                      try {
-                        const res = await buyProductAction(product.publicId);
-                        toast({ title: tCommon("success"), variant: "success" });
-                        router.push(`/orders/${res.orderPublicId}`);
-                      } catch (e) {
-                        toast({
-                          title: e instanceof Error ? e.message : tCommon("error"),
-                          variant: "danger",
-                        });
-                      }
-                    })
-                  }
-                >
-                  {labels.buyNow}
-                </Button>
-                <Button
-                  fullWidth
-                  variant="outline"
-                  onClick={() =>
-                    startTransition(async () => {
-                      try {
-                        const res = await contactSellerAction(product.seller.id);
-                        router.push(`/messages/${res.conversationId}`);
-                      } catch {
-                        toast({ title: labels.loginRequired, variant: "warning" });
-                      }
-                    })
-                  }
-                >
-                  <MessageCircle className="h-4 w-4" />
-                  {labels.contact}
-                </Button>
-                <Button fullWidth variant="soft" onClick={() => setOfferOpen((v) => !v)}>
-                  {labels.offer}
-                </Button>
-                {offerOpen ? (
-                  <form
-                    className="space-y-2"
-                    onSubmit={(e) => {
-                      e.preventDefault();
-                      const fd = new FormData(e.currentTarget);
-                      fd.set("productPublicId", product.publicId);
-                      startTransition(async () => {
-                        try {
-                          await createOfferAction(fd);
-                          toast({ title: tCommon("success"), variant: "success" });
-                          setOfferOpen(false);
-                          router.push("/deals");
-                        } catch (err) {
-                          toast({
-                            title: err instanceof Error ? err.message : tCommon("error"),
-                            variant: "danger",
-                          });
-                        }
-                      });
-                    }}
-                  >
-                    <Input name="amount" type="number" step="0.01" placeholder="€" required />
-                    <Input name="message" placeholder="..." />
-                    <Button type="submit" loading={pending} fullWidth>
-                      {labels.offer}
-                    </Button>
-                  </form>
-                ) : null}
-              </>
+              <Button
+                fullWidth
+                size="lg"
+                loading={pending}
+                onClick={() =>
+                  startTransition(async () => {
+                    try {
+                      const res = await contactSellerAction(product.seller.id);
+                      router.push(`/messages/${res.conversationId}`);
+                    } catch {
+                      toast({ title: labels.loginRequired, variant: "warning" });
+                    }
+                  })
+                }
+              >
+                <MessageCircle className="h-4 w-4" />
+                {labels.contact}
+              </Button>
             ) : (
               <Link
                 href="/sell"

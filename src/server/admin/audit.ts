@@ -37,7 +37,6 @@ export async function listAuditLogs(input: {
       include: {
         adminActor: { select: { id: true, name: true, email: true } },
         actor: { select: { id: true, email: true } },
-        transaction: { select: { id: true, reference: true } },
       },
     }),
     db.auditLog.count({ where }),
@@ -51,7 +50,6 @@ export async function getAuditLog(id: string) {
     include: {
       adminActor: { select: { id: true, name: true, email: true } },
       actor: { include: { profile: { select: { displayName: true, username: true } } } },
-      transaction: true,
     },
   });
 }

@@ -3,7 +3,7 @@ import { db } from "@/lib/db";
 import { writeAdminAudit } from "@/server/admin/guard";
 
 export async function listMarketplaceItems(input: {
-  kind: "product" | "service" | "request" | "deal";
+  kind: "product" | "service";
   query?: string;
   status?: string;
   page?: number;
@@ -29,77 +29,47 @@ export async function listMarketplaceItems(input: {
     return { items, total, page, pageSize };
   }
 
-  if (input.kind === "service") {
-    const where: Record<string, unknown> = {};
-    if (input.query) where.OR = [{ title: { contains: input.query } }, { description: { contains: input.query } }];
-    if (input.status) where.status = input.status;
-    const [items, total] = await Promise.all([
-      db.service.findMany({
-        where,
-        orderBy: { createdAt: "desc" },
-        skip: (page - 1) * pageSize,
-        take: pageSize,
-        include: { provider: { include: { profile: { select: { displayName: true, username: true } } } }, media: true },
-      }),
-      db.service.count({ where }),
-    ]);
-    return { items, total, page, pageSize };
-  }
-
-  if (input.kind === "request") {
-    const where: Record<string, unknown> = {};
-    if (input.query) where.OR = [{ title: { contains: input.query } }, { description: { contains: input.query } }];
-    if (input.status) where.status = input.status;
-    const [items, total] = await Promise.all([
-      db.marketRequest.findMany({
-        where,
-        orderBy: { createdAt: "desc" },
-        skip: (page - 1) * pageSize,
-        take: pageSize,
-        include: { owner: { include: { profile: { select: { displayName: true, username: true } } } } },
-      }),
-      db.marketRequest.count({ where }),
-    ]);
-    return { items, total, page, pageSize };
-  }
-
   const where: Record<string, unknown> = {};
-  if (input.query) where.OR = [{ terms: { contains: input.query } }];
+  if (input.query) where.OR = [{ title: { contains: input.query } }, { description: { contains: input.query } }];
   if (input.status) where.status = input.status;
   const [items, total] = await Promise.all([
-    db.deal.findMany({
+    db.service.findMany({
       where,
       orderBy: { createdAt: "desc" },
       skip: (page - 1) * pageSize,
       take: pageSize,
-      include: {
-        buyer: { include: { profile: { select: { displayName: true, username: true } } } },
-        seller: { include: { profile: { select: { displayName: true, username: true } } } },
-        product: { select: { title: true } },
-        service: { select: { title: true } },
-      },
+      include: { provider: { include: { profile: { select: { displayName: true, username: true } } } }, media: true },
     }),
-    db.deal.count({ where }),
+    db.service.count({ where }),
   ]);
   return { items, total, page, pageSize };
 }
 
 export async function setListingStatus(input: {
   adminId: string;
-  kind: "product" | "service" | "request";
+  kind: "product" | "service";
   publicId: string;
   action: "hide" | "restore" | "delete" | "approve";
 }) {
   const modelMap = {
     product: db.product,
     service: db.service,
-    request: db.marketRequest,
   } as const;
 
-  const existing = await (
-    modelMap[input.kind] as unknown as { findUnique: (args: { where: { publicId: string } }) => Promise<{ id: string; status: string } | null> }
-  ).findUnique({
+  const model = modelMap[input.kind] as unknown as {
+    findUnique: (args: {
+      where: { publicId: string };
+      select?: Record<string, boolean>;
+    }) => Promise<Record<string, unknown> | null>;
+    update: (args: {
+      where: { id: string };
+      data: Record<string, unknown>;
+    }) => Promise<unknown>;
+  };
+
+  const existing = await model.findUnique({
     where: { publicId: input.publicId },
+    select: { id: true, status: true, featured: true, pinned: true },
   });
   if (!existing) throw new Error("NOT_FOUND");
 
@@ -109,18 +79,13 @@ export async function setListingStatus(input: {
   if (input.action === "delete") data = { status: "deleted", hiddenAt: new Date() };
   if (input.action === "approve") data = { hiddenAt: null, status: "active" };
 
-  await (
-    modelMap[input.kind] as unknown as { update: (args: { where: { id: string }; data: Record<string, unknown> }) => Promise<unknown> }
-  ).update({
-    where: { id: existing.id },
-    data,
-  });
+  await model.update({ where: { id: existing.id as string }, data });
 
   await writeAdminAudit({
     adminId: input.adminId,
     action: `marketplace.${input.kind}.${input.action}`,
-    entityType: input.kind === "request" ? "MarketRequest" : input.kind === "product" ? "Product" : "Service",
-    entityId: existing.id,
+    entityType: input.kind === "product" ? "Product" : "Service",
+    entityId: existing.id as string,
     previousValue: existing.status,
     newValue: data,
   });
@@ -137,25 +102,37 @@ export async function toggleListingFlag(input: {
     product: db.product,
     service: db.service,
   } as const;
-  const existing = await (
-    modelMap[input.kind] as unknown as { findUnique: (args: { where: { publicId: string } }) => Promise<{ id: string; [k: string]: unknown } | null> }
-  ).findUnique({
+
+  const model = modelMap[input.kind] as unknown as {
+    findUnique: (args: {
+      where: { publicId: string };
+      select?: Record<string, boolean>;
+    }) => Promise<Record<string, unknown> | null>;
+    update: (args: {
+      where: { id: string };
+      data: Record<string, unknown>;
+    }) => Promise<unknown>;
+  };
+
+  const existing = await model.findUnique({
     where: { publicId: input.publicId },
+    select: { id: true, featured: true, pinned: true },
   });
   if (!existing) throw new Error("NOT_FOUND");
-  const next = !Boolean(existing[input.flag]);
-  await (
-    modelMap[input.kind] as unknown as { update: (args: { where: { id: string }; data: Record<string, unknown> }) => Promise<unknown> }
-  ).update({
+
+  const value = !(existing[input.flag] as boolean);
+  await model.update({
     where: { id: existing.id as string },
-    data: { [input.flag]: next },
+    data: { [input.flag]: value },
   });
+
   await writeAdminAudit({
     adminId: input.adminId,
     action: `marketplace.${input.kind}.${input.flag}`,
     entityType: input.kind === "product" ? "Product" : "Service",
     entityId: existing.id as string,
-    newValue: { [input.flag]: next },
+    previousValue: existing[input.flag] as boolean,
+    newValue: value,
   });
-  return { ok: true, value: next };
+  return { ok: true };
 }

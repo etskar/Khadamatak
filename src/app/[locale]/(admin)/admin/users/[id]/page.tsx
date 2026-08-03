@@ -12,7 +12,6 @@ import { PageHeader } from "@/components/shared/page-header";
 import { AdminTable, TableCell } from "@/components/admin/admin-table";
 import { AdminActionButton } from "@/components/admin/admin-action-button";
 import { AdminResetPasswordButton } from "@/components/admin/admin-reset-password-button";
-import { AdminExportButton } from "@/components/admin/admin-export-button";
 import { StatusBadge } from "@/components/admin/status-badge";
 import { AccessDenied } from "@/components/admin/access-denied";
 import { requireAdminPage } from "@/server/admin/page-guard";
@@ -23,9 +22,7 @@ import {
   adminRejectVerificationAction,
   editUserAccountFlatAction,
   deleteUserAccountAction,
-  exportWalletCsvAction,
 } from "@/server/actions/admin-actions";
-import { formatMoney } from "@/lib/money";
 
 function Row({ label, value }: { label: string; value: React.ReactNode }) {
   return (
@@ -61,7 +58,6 @@ export default async function AdminUserDetailPage({
   const canDelete = ctx.permissions.has("users.delete");
   const canEdit = ctx.permissions.has("users.edit");
   const canReset = ctx.permissions.has("users.reset_password");
-  const canExportWallet = ctx.permissions.has("wallets.export");
 
   return (
     <div className="animate-in-up">
@@ -116,37 +112,6 @@ export default async function AdminUserDetailPage({
 
         <Card>
           <CardHeader>
-            <CardTitle>{t("nav.wallets")}</CardTitle>
-          </CardHeader>
-          <CardContent className="divide-y divide-border">
-            <Row label={t("nav.wallets")} value={user.wallet?.walletId ?? "—"} />
-            <Row
-              label={t("status.available")}
-              value={formatMoney(user.wallet?.availableCents ?? 0, "EUR", localeFmt)}
-            />
-            <Row
-              label={t("status.pending")}
-              value={formatMoney(user.wallet?.pendingCents ?? 0, "EUR", localeFmt)}
-            />
-            <Row
-              label={t("status.frozen")}
-              value={formatMoney(user.wallet?.frozenCents ?? 0, "EUR", localeFmt)}
-            />
-            <Row
-              label={t("common.status")}
-              value={
-                user.wallet ? (
-                  <StatusBadge status={user.wallet.status} />
-                ) : (
-                  "—"
-                )
-              }
-            />
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
             <CardTitle>{t("nav.verification")}</CardTitle>
           </CardHeader>
           <CardContent className="divide-y divide-border">
@@ -180,18 +145,12 @@ export default async function AdminUserDetailPage({
       <div className="mt-4 grid gap-4 lg:grid-cols-4">
         <Card>
           <CardHeader>
-            <CardTitle>{t("status.ordersAsBuyer")}</CardTitle>
+            <CardTitle>{t("status.listingsCount")}</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold tabular-nums">{user._count.ordersAsBuyer}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>{t("status.ordersAsSeller")}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold tabular-nums">{user._count.ordersAsSeller}</p>
+            <p className="text-2xl font-bold tabular-nums">
+              {user._count.products + user._count.services}
+            </p>
           </CardContent>
         </Card>
         <Card>
@@ -200,6 +159,14 @@ export default async function AdminUserDetailPage({
           </CardHeader>
           <CardContent>
             <p className="text-2xl font-bold tabular-nums">{user._count.posts}</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>{t("status.groupsCount")}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-2xl font-bold tabular-nums">{user._count.groupMemberships}</p>
           </CardContent>
         </Card>
         <Card>
@@ -269,13 +236,6 @@ export default async function AdminUserDetailPage({
             fixedArgs={{ userId: user.id }}
             title={tAct("delete")}
             danger
-          />
-        ) : null}
-        {canExportWallet && user.wallet ? (
-          <AdminExportButton
-            action={async () => exportWalletCsvAction({ userId: user.id })}
-            filename={`wallet-${user.wallet.walletId}.csv`}
-            label={tAct("exportData")}
           />
         ) : null}
       </div>

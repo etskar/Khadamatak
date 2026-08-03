@@ -96,11 +96,6 @@ export async function getServiceByPublicId(publicId: string, viewerId?: string |
       media: { orderBy: { sortOrder: "asc" } },
       category: true,
       provider: { include: { profile: true, verification: true } },
-      reviews: {
-        orderBy: { createdAt: "desc" },
-        take: 20,
-        include: { author: { include: { profile: true } } },
-      },
     },
   });
   if (!service || service.status === "deleted") return null;
@@ -212,6 +207,6 @@ export async function getProviderServices(providerId: string) {
   return db.service.findMany({
     where: { providerId, status: { not: "deleted" } },
     orderBy: { createdAt: "desc" },
-    include: { media: true, category: true, _count: { select: { orders: true } } },
+    include: { media: true, category: true, _count: { select: { favorites: true } } },
   });
 }

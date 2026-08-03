@@ -205,28 +205,6 @@ export function SearchClient({
               </div>
             )}
           </section>
-
-          <section>
-            <h3 className="mb-2 text-sm font-semibold">{t("requests")}</h3>
-            {result.requests.length === 0 ? (
-              <p className="text-sm text-muted-foreground">—</p>
-            ) : (
-              <div className="space-y-2">
-                {result.requests.map((r) => (
-                  <Link
-                    key={r.id}
-                    href={`/requests/${r.publicId}`}
-                    className="block rounded-xl border px-3 py-2 text-sm hover:bg-muted/40"
-                  >
-                    <p className="font-semibold">{r.title}</p>
-                    <p className="line-clamp-1 text-xs text-muted-foreground">
-                      {r.description}
-                    </p>
-                  </Link>
-                ))}
-              </div>
-            )}
-          </section>
         </div>
       ) : (
         !pending && (

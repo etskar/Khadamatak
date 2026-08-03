@@ -3,6 +3,7 @@
 import { useActionState, useEffect } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Lock, Mail, Phone, User } from "lucide-react";
+import { useSession } from "next-auth/react";
 import { useRouter } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,6 +21,7 @@ export function RegisterForm() {
   const locale = useLocale();
   const router = useRouter();
   const [state, action, pending] = useActionState(registerAction, initial);
+  const { update } = useSession();
 
   useEffect(() => {
     if (state?.ok) {
@@ -28,10 +30,13 @@ export function RegisterForm() {
         description: t("checkEmail"),
         variant: "success",
       });
-      router.push("/");
-      router.refresh();
+      (async () => {
+        await update();
+        router.push("/");
+        router.refresh();
+      })();
     }
-  }, [state, router, t]);
+  }, [state, router, t, update]);
 
   return (
     <form action={action} className="space-y-4" noValidate>
