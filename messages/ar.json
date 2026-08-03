@@ -1090,6 +1090,17 @@
     "filters": "الفلاتر",
     "category": "الفئة",
     "reset": "إعادة تعيين",
-    "viewDetails": "عرض التفاصيل"
+    "viewDetails": "عرض التفاصيل",
+    "chatPlaceholder": "اكتب رسالة…",
+    "attachImage": "صورة",
+    "attachVideo": "فيديو",
+    "attachVoice": "تسجيل صوتي",
+    "attachFile": "ملف",
+    "shareListing": "مشاركة إعلان",
+    "chooseListing": "اختر إعلانًا للمشاركة",
+    "listing": "إعلان",
+    "member": "عضو",
+    "emptyChat": "لا توجد رسائل بعد — كن أول من يرسل!",
+    "joinToChat": "انضم إلى المجموعة للمشاركة في الدردشة"
   }
 }

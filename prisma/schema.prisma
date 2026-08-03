@@ -702,14 +702,16 @@ model GroupMember {
 }
 
 model GroupPost {
-  id        String   @id @default(cuid())
-  groupId   String
-  authorId  String
-  content   String
-  mediaJson String?
-  hiddenAt  DateTime?
-  createdAt DateTime @default(now())
-  deletedAt DateTime?
+  id          String   @id @default(cuid())
+  groupId     String
+  authorId    String
+  content     String
+  type        String   @default("text") // text | media | voice | file | listing
+  mediaJson   String?
+  payloadJson String?
+  hiddenAt    DateTime?
+  createdAt   DateTime @default(now())
+  deletedAt   DateTime?
 
   group  CityGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
   author User      @relation(fields: [authorId], references: [id], onDelete: Cascade)

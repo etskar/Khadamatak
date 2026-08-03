@@ -126,7 +126,9 @@ export async function createGroupPost(input: {
   userId: string;
   slug: string;
   content: string;
+  type?: string;
   mediaJson?: string | null;
+  payloadJson?: string | null;
 }) {
   const group = await db.cityGroup.findUnique({ where: { slug: input.slug } });
   if (!group) throw new Error("GROUP_NOT_FOUND");
@@ -141,7 +143,9 @@ export async function createGroupPost(input: {
       groupId: group.id,
       authorId: input.userId,
       content: input.content.trim(),
+      type: input.type ?? "text",
       mediaJson: input.mediaJson ?? null,
+      payloadJson: input.payloadJson ?? null,
     },
     include: { author: { include: { profile: true } } },
   });

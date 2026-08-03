@@ -58,6 +58,7 @@ export default async function GroupDetailPage({
   return (
     <GroupDetailClient
       slug={group.slug}
+      currentUserId={session?.user?.id ?? null}
       name={locale === "ar" ? group.nameAr || group.name : group.nameNl || group.name}
       city={group.city}
       description={group.description}
@@ -73,7 +74,13 @@ export default async function GroupDetailPage({
       posts={group.groupPosts.map((p) => ({
         id: p.id,
         content: p.content,
+        type: p.type,
+        mediaJson: p.mediaJson,
+        payloadJson: p.payloadJson,
+        authorId: p.authorId,
         author: p.author.profile?.displayName ?? "User",
+        authorUsername: p.author.profile?.username ?? "",
+        authorAvatar: p.author.profile?.avatarUrl ?? null,
         createdAt: p.createdAt.toISOString(),
       }))}
       products={products}
@@ -90,6 +97,14 @@ export default async function GroupDetailPage({
         writePost: t("writePost"),
         publish: t("publish"),
         verifiedMembers: t("verifiedMembers"),
+        chatPlaceholder: t("chatPlaceholder"),
+        attachImage: t("attachImage"),
+        attachVideo: t("attachVideo"),
+        attachVoice: t("attachVoice"),
+        attachFile: t("attachFile"),
+        shareListing: t("shareListing"),
+        chooseListing: t("chooseListing"),
+        listing: t("listing"),
       }}
     />
   );

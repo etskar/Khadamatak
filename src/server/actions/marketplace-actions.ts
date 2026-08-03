@@ -34,6 +34,10 @@ async function saveMedia(file: File, folder: string) {
     "image/webp": "webp",
     "image/gif": "gif",
     "video/mp4": "mp4",
+    "audio/webm": "webm",
+    "audio/ogg": "ogg",
+    "audio/mpeg": "mp3",
+    "audio/mp4": "m4a",
   };
   const ext = mimeToExt[file.type];
   if (!ext) throw new Error("INVALID_FILE_TYPE");
@@ -41,9 +45,32 @@ async function saveMedia(file: File, folder: string) {
   const dir = path.join(process.cwd(), "public", "uploads", folder);
   await mkdir(dir, { recursive: true });
   await writeFile(path.join(dir, name), Buffer.from(await file.arrayBuffer()));
+  const isAudio = file.type.startsWith("audio/");
+  const isVideo = file.type.startsWith("video/");
   return {
     url: `/uploads/${folder}/${name}`,
-    type: (file.type.startsWith("video/") ? "video" : "image") as "image" | "video",
+    type: (isVideo ? "video" : isAudio ? "audio" : "image") as
+      | "image"
+      | "video"
+      | "audio",
+  };
+}
+
+async function saveAnyFile(file: File, folder: string) {
+  const max = 25 * 1024 * 1024;
+  if (file.size > max) throw new Error("FILE_TOO_LARGE");
+  const name = `${generateSecureToken(12)}-${file.name.replace(/[^a-zA-Z0-9._-]/g, "_").slice(0, 60)}`;
+  const dir = path.join(process.cwd(), "public", "uploads", folder);
+  await mkdir(dir, { recursive: true });
+  await writeFile(path.join(dir, name), Buffer.from(await file.arrayBuffer()));
+  return { url: `/uploads/${folder}/${name}`, name: file.name, size: file.size };
+}
+
+async function saveImageOrVideo(file: File, folder: string) {
+  const saved = await saveMedia(file, folder);
+  return {
+    url: saved.url,
+    type: (saved.type === "image" ? "image" : "video") as "image" | "video",
   };
 }
 
@@ -51,7 +78,8 @@ export async function createProductAction(formData: FormData) {
   const user = await requireUser();
   const media: { type: "image" | "video"; url: string }[] = [];
   for (const f of formData.getAll("media")) {
-    if (f instanceof File && f.size > 0) media.push(await saveMedia(f, "products"));
+    if (f instanceof File && f.size > 0)
+      media.push(await saveImageOrVideo(f, "products"));
   }
 
   const product = await createProduct({
@@ -79,7 +107,8 @@ export async function createServiceAction(formData: FormData) {
   const user = await requireUser();
   const media: { type: "image" | "video"; url: string }[] = [];
   for (const f of formData.getAll("media")) {
-    if (f instanceof File && f.size > 0) media.push(await saveMedia(f, "services"));
+    if (f instanceof File && f.size > 0)
+      media.push(await saveImageOrVideo(f, "services"));
   }
 
   const priceRaw = String(formData.get("price") ?? "").trim();
@@ -109,7 +138,7 @@ export async function createJobAction(formData: FormData) {
   const user = await requireUser();
   const media: { type: "image" | "video"; url: string }[] = [];
   for (const f of formData.getAll("media")) {
-    if (f instanceof File && f.size > 0) media.push(await saveMedia(f, "jobs"));
+    if (f instanceof File && f.size > 0) media.push(await saveImageOrVideo(f, "jobs"));
   }
 
   const salaryMinRaw = String(formData.get("salaryMin") ?? "").trim();
@@ -171,12 +200,40 @@ export async function joinGroupAction(slug: string) {
 
 export async function createGroupPostAction(formData: FormData) {
   const user = await requireUser();
+  const slug = String(formData.get("slug") ?? "");
+  const type = String(formData.get("type") ?? "text");
+  const content = String(formData.get("content") ?? "").trim();
+
+  const media: { type: "image" | "video" | "audio"; url: string }[] = [];
+  for (const f of formData.getAll("media")) {
+    if (f instanceof File && f.size > 0) media.push(await saveMedia(f, "groups"));
+  }
+
+  const file = formData.get("file");
+  let filePayload: { url: string; name: string; size: number } | null = null;
+  if (file instanceof File && file.size > 0) {
+    filePayload = await saveAnyFile(file, "groups");
+  }
+
+  const payload = {
+    ...(media.length ? { media } : {}),
+    ...(filePayload ? { file: filePayload } : {}),
+    ...(formData.get("payload")
+      ? JSON.parse(String(formData.get("payload")))
+      : {}),
+  };
+
   await createGroupPost({
     userId: user.id,
-    slug: String(formData.get("slug") ?? ""),
-    content: String(formData.get("content") ?? ""),
+    slug,
+    content: content || type,
+    type,
+    mediaJson: media.length || filePayload ? JSON.stringify(payload) : null,
+    payloadJson: formData.get("payload")
+      ? String(formData.get("payload"))
+      : null,
   });
-  revalidatePath(`/groups/${String(formData.get("slug") ?? "")}`);
+  revalidatePath(`/groups/${slug}`);
   return { ok: true as const };
 }
 

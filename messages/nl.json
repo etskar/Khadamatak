@@ -1090,6 +1090,17 @@
     "filters": "Filters",
     "category": "Categorie",
     "reset": "Reset",
-    "viewDetails": "Bekijk details"
+    "viewDetails": "Bekijk details",
+    "chatPlaceholder": "Typ een bericht…",
+    "attachImage": "Afbeelding",
+    "attachVideo": "Video",
+    "attachVoice": "Spraakopname",
+    "attachFile": "Bestand",
+    "shareListing": "Advertentie delen",
+    "chooseListing": "Kies een advertentie om te delen",
+    "listing": "Advertentie",
+    "member": "Lid",
+    "emptyChat": "Nog geen berichten — wees de eerste!",
+    "joinToChat": "Word lid om mee te chatten"
   }
 }
