@@ -300,7 +300,10 @@
       "notifications": "الإشعارات",
       "privacy": "الخصوصية والأمان",
       "about": "حول التطبيق",
-      "security": "الأمان"
+      "security": "الأمان",
+      "personal": "المعلومات الشخصية",
+      "profile": "الملف الشخصي",
+      "preferences": "التفضيلات"
     },
     "languageDescription": "اختر لغة الواجهة. يتم حفظ التفضيل في ملفك الشخصي.",
     "themeSystem": "تلقائي",
@@ -328,7 +331,17 @@
     "updatePassword": "تحديث كلمة المرور",
     "passwordChanged": "تم تغيير كلمة المرور",
     "passwordError": "تعذر تغيير كلمة المرور",
-    "confirmPassword": "تأكيد كلمة المرور"
+    "confirmPassword": "تأكيد كلمة المرور",
+    "username": "اسم المستخدم",
+    "email": "البريد الإلكتروني",
+    "phone": "رقم الهاتف",
+    "location": "الموقع",
+    "allCountries": "كل الدول",
+    "allCities": "كل المدن",
+    "languagesPlaceholder": "اختر اللغات…",
+    "workPlaceholder": "اختر أو اكتب مهنتك…",
+    "educationPlaceholder": "اختر أو اكتب مؤهلك…",
+    "hobbiesPlaceholder": "اختر هواياتك…"
   },
   "admin": {
     "title": "لوحة الإدارة",

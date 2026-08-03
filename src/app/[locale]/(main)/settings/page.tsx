@@ -35,8 +35,13 @@ export default async function SettingsPage({
       locale={locale}
       profile={{
         displayName: profile.displayName,
+        username: profile.username,
+        email: profile.user.email,
+        phone: profile.user.phone ?? "",
         bio: profile.bio ?? "",
-        country: profile.country ?? "",
+        avatarUrl: profile.avatarUrl,
+        coverUrl: profile.coverUrl,
+        country: profile.country ?? "NL",
         city: profile.city ?? "",
         work: profile.work ?? "",
         education: profile.education ?? "",
@@ -47,6 +52,7 @@ export default async function SettingsPage({
         contactPhone: profile.contactPhone ?? "",
         theme: profile.user.theme,
         notificationsOn: profile.user.notificationsOn,
+        verificationStatus: profile.user.verification?.status ?? "not_started",
       }}
       logoutAction={logoutAction.bind(null, locale)}
     />

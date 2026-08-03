@@ -300,7 +300,10 @@
       "notifications": "Meldingen",
       "privacy": "Privacy & beveiliging",
       "about": "Over de app",
-      "security": "Beveiliging"
+      "security": "Beveiliging",
+      "personal": "Persoonlijke gegevens",
+      "profile": "Profiel",
+      "preferences": "Voorkeuren"
     },
     "languageDescription": "Kies de interfacetaal. De voorkeur wordt in je profiel opgeslagen.",
     "themeSystem": "Systeem",
@@ -328,7 +331,17 @@
     "updatePassword": "Wachtwoord bijwerken",
     "passwordChanged": "Wachtwoord gewijzigd",
     "passwordError": "Wachtwoord wijzigen mislukt",
-    "confirmPassword": "Bevestig wachtwoord"
+    "confirmPassword": "Bevestig wachtwoord",
+    "username": "Gebruikersnaam",
+    "email": "E-mailadres",
+    "phone": "Telefoonnummer",
+    "location": "Locatie",
+    "allCountries": "Alle landen",
+    "allCities": "Alle steden",
+    "languagesPlaceholder": "Kies talen…",
+    "workPlaceholder": "Kies of typ uw beroep…",
+    "educationPlaceholder": "Kies of typ uw opleiding…",
+    "hobbiesPlaceholder": "Kies uw hobbies…"
   },
   "admin": {
     "title": "Beheerderspaneel",
