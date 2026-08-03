@@ -148,7 +148,10 @@
       "noComments": "Nog geen reacties",
       "reply": "Reageren"
     },
-    "published": "Geplaatst"
+    "published": "Geplaatst",
+    "whatToShare": "Wat wilt u delen?",
+    "photo": "Foto",
+    "feeling": "Gevoel"
   },
   "search": {
     "title": "Zoeken",

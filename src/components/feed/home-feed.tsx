@@ -8,12 +8,12 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { PostCardSkeleton } from "@/components/ui/skeleton";
 import { useUiStore } from "@/stores/ui-store";
 import { cn } from "@/lib/utils";
-import { CreatePostFab } from "./create-post-fab";
+import { CreatePostBox } from "./create-post-box";
 import { CreatePostSheet } from "./create-post-sheet";
 import { PostCard, type FeedPost } from "./post-card";
 import { fetchFeedAction } from "@/server/actions/social-actions";
 
-const tabs = ["forYou", "following", "discover"] as const;
+const tabs = ["forYou", "following"] as const;
 
 type HomeFeedProps = {
   initialItems: FeedPost[];
@@ -64,7 +64,9 @@ export function HomeFeed({
 
   return (
     <div className="feed-container animate-in-up">
-      <div className="mb-4 overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+      {isAuthenticated ? <CreatePostBox /> : null}
+
+      <div className="mt-3 mb-4 overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
         <div className="border-b border-border px-2 pt-2">
           <div className="flex gap-1">
             {tabs.map((tab) => (
@@ -116,12 +118,7 @@ export function HomeFeed({
         <div ref={sentinelRef} className="h-8" />
       </section>
 
-      {isAuthenticated ? (
-        <>
-          <CreatePostFab />
-          <CreatePostSheet />
-        </>
-      ) : null}
+      {isAuthenticated ? <CreatePostSheet /> : null}
     </div>
   );
 }

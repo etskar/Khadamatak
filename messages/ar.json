@@ -148,7 +148,10 @@
       "noComments": "لا توجد تعليقات بعد",
       "reply": "رد"
     },
-    "published": "تم النشر"
+    "published": "تم النشر",
+    "whatToShare": "ماذا تريد أن تشارك؟",
+    "photo": "صورة",
+    "feeling": "شعور/حالة"
   },
   "search": {
     "title": "البحث",
