@@ -58,7 +58,7 @@ export const mainNavItems: NavItem[] = [
     key: "jobs",
     href: "/jobs",
     icon: Building2,
-    showInBottomNav: false,
+    showInBottomNav: true,
     showInSidebar: true,
   },
   {
@@ -86,7 +86,7 @@ export const mainNavItems: NavItem[] = [
     key: "notifications",
     href: "/notifications",
     icon: Bell,
-    showInBottomNav: true,
+    showInBottomNav: false,
     showInSidebar: true,
   },
   {
@@ -133,6 +133,6 @@ export const bottomNavKeys = [
   "home",
   "search",
   "groups",
-  "notifications",
+  "jobs",
   "profile",
 ] as const;
