@@ -3,13 +3,14 @@
 import { useTranslations } from "next-intl";
 import { useLocale } from "next-intl";
 import { signOut, useSession } from "next-auth/react";
-import { Bell, LogOut, Menu, MessageCircle, Search } from "lucide-react";
-import { Link } from "@/i18n/navigation";
+import { ArrowLeft, ArrowRight, Bell, LogOut, Menu, MessageCircle, Search } from "lucide-react";
+import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import { Logo } from "@/components/shared/logo";
 import { IconButton } from "@/components/ui/icon-button";
 import { LanguageSwitcher } from "./language-switcher";
 import { useUiStore } from "@/stores/ui-store";
 import { cn } from "@/lib/utils";
+import type { AppLocale } from "@/i18n/routing";
 
 type TopNavProps = {
   className?: string;
@@ -18,10 +19,16 @@ type TopNavProps = {
 export function TopNav({ className }: TopNavProps) {
   const t = useTranslations("nav");
   const tHome = useTranslations("home");
+  const tCommon = useTranslations("common");
   const tA11y = useTranslations("a11y");
   const setMobileMenuOpen = useUiStore((s) => s.setMobileMenuOpen);
   const { data: session } = useSession();
-  const locale = useLocale();
+  const locale = useLocale() as AppLocale;
+  const pathname = usePathname();
+  const router = useRouter();
+  const isHome = pathname === "/";
+  const isRtl = locale === "ar";
+  const BackIcon = isRtl ? ArrowRight : ArrowLeft;
 
   return (
     <header
@@ -31,9 +38,18 @@ export function TopNav({ className }: TopNavProps) {
       )}
     >
       <div className="flex h-[var(--topnav-height)] items-center gap-3 px-3 sm:px-4 lg:px-6">
+        {!isHome ? (
+          <IconButton
+            label={tCommon("back")}
+            onClick={() => router.back()}
+          >
+            <BackIcon className="h-5 w-5" />
+          </IconButton>
+        ) : null}
+
         <IconButton
           label={tA11y("mainNavigation")}
-          className="lg:hidden"
+          className={cn(isHome ? "" : "lg:hidden")}
           onClick={() => setMobileMenuOpen(true)}
         >
           <Menu className="h-5 w-5" />
