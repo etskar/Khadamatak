@@ -1,4 +1,4 @@
-import "dotenv/config";
+﻿import "dotenv/config";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "../src/generated/prisma/client";
 import bcrypt from "bcryptjs";
@@ -72,10 +72,10 @@ async function main() {
 
   // Categories
   const cats = [
-    { slug: "electronics", nameAr: "إلكترونيات", nameNl: "Elektronica", kind: "product", sortOrder: 1 },
-    { slug: "furniture", nameAr: "أثاث", nameNl: "Meubels", kind: "product", sortOrder: 2 },
-    { slug: "cleaning", nameAr: "تنظيف", nameNl: "Schoonmaak", kind: "service", sortOrder: 1 },
-    { slug: "transport", nameAr: "نقل", nameNl: "Transport", kind: "service", sortOrder: 2 },
+    { slug: "electronics", nameAr: "Ø¥Ù„ÙƒØªØ±ÙˆÙ†ÙŠØ§Øª", nameNl: "Elektronica", kind: "product", sortOrder: 1 },
+    { slug: "furniture", nameAr: "Ø£Ø«Ø§Ø«", nameNl: "Meubels", kind: "product", sortOrder: 2 },
+    { slug: "cleaning", nameAr: "ØªÙ†Ø¸ÙŠÙ", nameNl: "Schoonmaak", kind: "service", sortOrder: 1 },
+    { slug: "transport", nameAr: "Ù†Ù‚Ù„", nameNl: "Transport", kind: "service", sortOrder: 2 },
   ];
   for (const c of cats) {
     await db.category.upsert({
@@ -92,10 +92,10 @@ async function main() {
   });
 
   const cities = [
-    { slug: "amsterdam", name: "Amsterdam", nameAr: "أمستردام", nameNl: "Amsterdam", lat: 52.3676, lng: 4.9041 },
-    { slug: "rotterdam", name: "Rotterdam", nameAr: "روتردام", nameNl: "Rotterdam", lat: 51.9244, lng: 4.4777 },
-    { slug: "utrecht", name: "Utrecht", nameAr: "أوتريخت", nameNl: "Utrecht", lat: 52.0907, lng: 5.1214 },
-    { slug: "groningen", name: "Groningen", nameAr: "خرونينغن", nameNl: "Groningen", lat: 53.2194, lng: 6.5665 },
+    { slug: "amsterdam", name: "Amsterdam", nameAr: "Ø£Ù…Ø³ØªØ±Ø¯Ø§Ù…", nameNl: "Amsterdam", lat: 52.3676, lng: 4.9041 },
+    { slug: "rotterdam", name: "Rotterdam", nameAr: "Ø±ÙˆØªØ±Ø¯Ø§Ù…", nameNl: "Rotterdam", lat: 51.9244, lng: 4.4777 },
+    { slug: "utrecht", name: "Utrecht", nameAr: "Ø£ÙˆØªØ±ÙŠØ®Øª", nameNl: "Utrecht", lat: 52.0907, lng: 5.1214 },
+    { slug: "groningen", name: "Groningen", nameAr: "Ø®Ø±ÙˆÙ†ÙŠÙ†ØºÙ†", nameNl: "Groningen", lat: 53.2194, lng: 6.5665 },
   ];
   for (const c of cities) {
     await db.cityGroup.upsert({
@@ -129,7 +129,7 @@ async function main() {
         publicId: "KH-PD-DEMO00001",
         sellerId: seller.id,
         categoryId: electronics.id,
-        title: "iPhone 13 — excellent condition",
+        title: "iPhone 13 â€” excellent condition",
         description: "Demo product for Khadamatak marketplace. Secure escrow checkout.",
         priceCents: 35000,
         condition: "like_new",
@@ -153,7 +153,7 @@ async function main() {
           publicId: "KH-SV-DEMO00001",
           providerId: seller.id,
           categoryId: cleaning.id,
-          title: "Home cleaning — Amsterdam",
+          title: "Home cleaning â€” Amsterdam",
           description: "Professional cleaning service. Book securely with escrow.",
           priceCents: 4500,
           pricingType: "fixed",
@@ -169,7 +169,7 @@ async function main() {
     }
   }
 
-  // ─── Admin platform (RBAC, settings, CMS, email templates) ───
+  // â”€â”€â”€ Admin platform (RBAC, settings, CMS, email templates) â”€â”€â”€
 
   // Permissions
   for (const p of await import("../src/types/admin").then((m) => m.ADMIN_PERMISSIONS)) {
@@ -213,13 +213,13 @@ async function main() {
     }
   }
 
-  // Default Super Admin user
+  // Default Super Admin user (both AdminUser + marketplace User)
   const superRole = await db.adminRole.findUnique({ where: { key: "super_admin" } });
   if (superRole) {
     await db.adminUser.upsert({
-      where: { email: "admin@khadamatak.com" },
+      where: { email: "aak@khadamatak.com" },
       create: {
-        email: "admin@khadamatak.com",
+        email: "aak@khadamatak.com",
         passwordHash,
         name: "Platform Admin",
         roleId: superRole.id,
@@ -227,6 +227,42 @@ async function main() {
       },
       update: { roleId: superRole.id },
     });
+
+    // Also create the marketplace User identity so the admin can log in
+    // through the normal login form (NextAuth authorize checks User table).
+    const adminUsername = "admin";
+    const existingUser = await db.user.findUnique({ where: { email: "aak@khadamatak.com" } });
+    if (!existingUser) {
+      await db.user.create({
+        data: {
+          email: "aak@khadamatak.com",
+          passwordHash,
+          role: "super_admin",
+          emailVerified: new Date(),
+          locale: "ar",
+          profile: {
+            create: {
+              username: adminUsername,
+              displayName: "Platform Admin",
+            },
+          },
+          verification: {
+            create: {
+              status: "verified",
+              emailConfirmed: true,
+              phoneConfirmed: true,
+              termsAcceptedAt: new Date(),
+            },
+          },
+        },
+      });
+    } else {
+      // Ensure password hash matches AdminUser so login works
+      await db.user.update({
+        where: { email: "aak@khadamatak.com" },
+        data: { passwordHash, role: "super_admin" },
+      });
+    }
   }
 
   // Feature flags
@@ -263,9 +299,9 @@ async function main() {
 
   // Email templates
   const emailTemplates = [
-    { key: "welcome", name: "Welcome", subject: { ar: "مرحبًا بك في خدماتك", nl: "Welkom bij Khadamatak" }, body: { ar: "مرحبًا {{name}}، يسعدنا انضمامك!", nl: "Hallo {{name}}, welkom bij Khadamatak!" } },
-    { key: "verification_approved", name: "Verification approved", subject: { ar: "تم توثيق حسابك", nl: "Uw account is geverifieerd" }, body: { ar: "تم توثيق حسابك بنجاح.", nl: "Uw account is succesvol geverifieerd." } },
-    { key: "password_reset", name: "Password reset", subject: { ar: "إعادة تعيين كلمة المرور", nl: "Wachtwoord resetten" }, body: { ar: "استخدم الرمز {{code}} لإعادة تعيين كلمة المرور.", nl: "Gebruik code {{code}} om uw wachtwoord te resetten." } },
+    { key: "welcome", name: "Welcome", subject: { ar: "Ù…Ø±Ø­Ø¨Ù‹Ø§ Ø¨Ùƒ ÙÙŠ Ø®Ø¯Ù…Ø§ØªÙƒ", nl: "Welkom bij Khadamatak" }, body: { ar: "Ù…Ø±Ø­Ø¨Ù‹Ø§ {{name}}ØŒ ÙŠØ³Ø¹Ø¯Ù†Ø§ Ø§Ù†Ø¶Ù…Ø§Ù…Ùƒ!", nl: "Hallo {{name}}, welkom bij Khadamatak!" } },
+    { key: "verification_approved", name: "Verification approved", subject: { ar: "ØªÙ… ØªÙˆØ«ÙŠÙ‚ Ø­Ø³Ø§Ø¨Ùƒ", nl: "Uw account is geverifieerd" }, body: { ar: "ØªÙ… ØªÙˆØ«ÙŠÙ‚ Ø­Ø³Ø§Ø¨Ùƒ Ø¨Ù†Ø¬Ø§Ø­.", nl: "Uw account is succesvol geverifieerd." } },
+    { key: "password_reset", name: "Password reset", subject: { ar: "Ø¥Ø¹Ø§Ø¯Ø© ØªØ¹ÙŠÙŠÙ† ÙƒÙ„Ù…Ø© Ø§Ù„Ù…Ø±ÙˆØ±", nl: "Wachtwoord resetten" }, body: { ar: "Ø§Ø³ØªØ®Ø¯Ù… Ø§Ù„Ø±Ù…Ø² {{code}} Ù„Ø¥Ø¹Ø§Ø¯Ø© ØªØ¹ÙŠÙŠÙ† ÙƒÙ„Ù…Ø© Ø§Ù„Ù…Ø±ÙˆØ±.", nl: "Gebruik code {{code}} om uw wachtwoord te resetten." } },
   ];
   for (const t of emailTemplates) {
     await db.emailTemplate.upsert({
@@ -284,10 +320,10 @@ async function main() {
 
   // CMS pages
   const cmsPages = [
-    { slug: "about", title: { ar: "عن خدماتك", nl: "Over Khadamatak" }, content: { ar: "منصة تجمع المجتمعات المحلية للبيع والشراء والخدمات.", nl: "Het platform voor lokale koop, verkoop en diensten." } },
-    { slug: "terms", title: { ar: "الشروط والأحكام", nl: "Algemene voorwaarden" }, content: { ar: "شروط استخدام منصة خدماتك.", nl: "Gebruiksvoorwaarden van Khadamatak." } },
-    { slug: "privacy", title: { ar: "سياسة الخصوصية", nl: "Privacybeleid" }, content: { ar: "كيف نحمي بياناتك.", nl: "Hoe wij uw gegevens beschermen." } },
-    { slug: "faq", title: { ar: "الأسئلة الشائعة", nl: "Veelgestelde vragen" }, content: { ar: "أجوبة على الأسئلة الشائعة.", nl: "Antwoorden op veelgestelde vragen." } },
+    { slug: "about", title: { ar: "Ø¹Ù† Ø®Ø¯Ù…Ø§ØªÙƒ", nl: "Over Khadamatak" }, content: { ar: "Ù…Ù†ØµØ© ØªØ¬Ù…Ø¹ Ø§Ù„Ù…Ø¬ØªÙ…Ø¹Ø§Øª Ø§Ù„Ù…Ø­Ù„ÙŠØ© Ù„Ù„Ø¨ÙŠØ¹ ÙˆØ§Ù„Ø´Ø±Ø§Ø¡ ÙˆØ§Ù„Ø®Ø¯Ù…Ø§Øª.", nl: "Het platform voor lokale koop, verkoop en diensten." } },
+    { slug: "terms", title: { ar: "Ø§Ù„Ø´Ø±ÙˆØ· ÙˆØ§Ù„Ø£Ø­ÙƒØ§Ù…", nl: "Algemene voorwaarden" }, content: { ar: "Ø´Ø±ÙˆØ· Ø§Ø³ØªØ®Ø¯Ø§Ù… Ù…Ù†ØµØ© Ø®Ø¯Ù…Ø§ØªÙƒ.", nl: "Gebruiksvoorwaarden van Khadamatak." } },
+    { slug: "privacy", title: { ar: "Ø³ÙŠØ§Ø³Ø© Ø§Ù„Ø®ØµÙˆØµÙŠØ©", nl: "Privacybeleid" }, content: { ar: "ÙƒÙŠÙ Ù†Ø­Ù…ÙŠ Ø¨ÙŠØ§Ù†Ø§ØªÙƒ.", nl: "Hoe wij uw gegevens beschermen." } },
+    { slug: "faq", title: { ar: "Ø§Ù„Ø£Ø³Ø¦Ù„Ø© Ø§Ù„Ø´Ø§Ø¦Ø¹Ø©", nl: "Veelgestelde vragen" }, content: { ar: "Ø£Ø¬ÙˆØ¨Ø© Ø¹Ù„Ù‰ Ø§Ù„Ø£Ø³Ø¦Ù„Ø© Ø§Ù„Ø´Ø§Ø¦Ø¹Ø©.", nl: "Antwoorden op veelgestelde vragen." } },
   ];
   for (const p of cmsPages) {
     const existing = await db.cmsPage.findUnique({ where: { slug: p.slug } });
@@ -300,10 +336,10 @@ async function main() {
 
   // CMS sections
   const sections = [
-    { key: "hero", heading: { ar: "اعمل واشترِ محليًا بأمان", nl: "Koop en verkoop lokaal, veilig" }, subheading: { ar: "تواصل، تفاوض، وتمتع بتجربة سوق محلية موثوقة", nl: "Verbind, onderhandel en geniet van een betrouwbare lokale marktplaats" }, ctaLabel: { ar: "ابدأ الآن", nl: "Start nu" }, ctaHref: "/marketplace", enabled: true, sortOrder: 1 },
-    { key: "how_it_works", heading: { ar: "كيف تعمل؟", nl: "Hoe werkt het?" }, subheading: { ar: "ثلاث خطوات بسيطة", nl: "Drie simpele stappen" }, ctaLabel: { ar: "اعرف المزيد", nl: "Lees meer" }, ctaHref: "/about", enabled: true, sortOrder: 2 },
-    { key: "features", heading: { ar: "مميزات المنصة", nl: "Platform functies" }, subheading: { ar: "كل ما تحتاجه في مكان واحد", nl: "Alles wat u nodig heeft op één plek" }, ctaHref: null, enabled: true, sortOrder: 3 },
-    { key: "app_download", heading: { ar: "حمّل التطبيق", nl: "Download de app" }, ctaLabel: { ar: "روابط التحميل", nl: "Download links" }, ctaHref: "/download", enabled: false, sortOrder: 4 },
+    { key: "hero", heading: { ar: "Ø§Ø¹Ù…Ù„ ÙˆØ§Ø´ØªØ±Ù Ù…Ø­Ù„ÙŠÙ‹Ø§ Ø¨Ø£Ù…Ø§Ù†", nl: "Koop en verkoop lokaal, veilig" }, subheading: { ar: "ØªÙˆØ§ØµÙ„ØŒ ØªÙØ§ÙˆØ¶ØŒ ÙˆØªÙ…ØªØ¹ Ø¨ØªØ¬Ø±Ø¨Ø© Ø³ÙˆÙ‚ Ù…Ø­Ù„ÙŠØ© Ù…ÙˆØ«ÙˆÙ‚Ø©", nl: "Verbind, onderhandel en geniet van een betrouwbare lokale marktplaats" }, ctaLabel: { ar: "Ø§Ø¨Ø¯Ø£ Ø§Ù„Ø¢Ù†", nl: "Start nu" }, ctaHref: "/marketplace", enabled: true, sortOrder: 1 },
+    { key: "how_it_works", heading: { ar: "ÙƒÙŠÙ ØªØ¹Ù…Ù„ØŸ", nl: "Hoe werkt het?" }, subheading: { ar: "Ø«Ù„Ø§Ø« Ø®Ø·ÙˆØ§Øª Ø¨Ø³ÙŠØ·Ø©", nl: "Drie simpele stappen" }, ctaLabel: { ar: "Ø§Ø¹Ø±Ù Ø§Ù„Ù…Ø²ÙŠØ¯", nl: "Lees meer" }, ctaHref: "/about", enabled: true, sortOrder: 2 },
+    { key: "features", heading: { ar: "Ù…Ù…ÙŠØ²Ø§Øª Ø§Ù„Ù…Ù†ØµØ©", nl: "Platform functies" }, subheading: { ar: "ÙƒÙ„ Ù…Ø§ ØªØ­ØªØ§Ø¬Ù‡ ÙÙŠ Ù…ÙƒØ§Ù† ÙˆØ§Ø­Ø¯", nl: "Alles wat u nodig heeft op Ã©Ã©n plek" }, ctaHref: null, enabled: true, sortOrder: 3 },
+    { key: "app_download", heading: { ar: "Ø­Ù…Ù‘Ù„ Ø§Ù„ØªØ·Ø¨ÙŠÙ‚", nl: "Download de app" }, ctaLabel: { ar: "Ø±ÙˆØ§Ø¨Ø· Ø§Ù„ØªØ­Ù…ÙŠÙ„", nl: "Download links" }, ctaHref: "/download", enabled: false, sortOrder: 4 },
   ];
   for (const s of sections) {
     await db.cmsSection.upsert({
@@ -330,10 +366,10 @@ async function main() {
 
   // CMS menu
   const menuItems = [
-    { placement: "footer", label: { ar: "عن المنصة", nl: "Over ons" }, href: "/about", sortOrder: 1 },
-    { placement: "footer", label: { ar: "الشروط", nl: "Voorwaarden" }, href: "/terms", sortOrder: 2 },
-    { placement: "footer", label: { ar: "الخصوصية", nl: "Privacy" }, href: "/privacy", sortOrder: 3 },
-    { placement: "footer", label: { ar: "الأسئلة الشائعة", nl: "FAQ" }, href: "/faq", sortOrder: 4 },
+    { placement: "footer", label: { ar: "Ø¹Ù† Ø§Ù„Ù…Ù†ØµØ©", nl: "Over ons" }, href: "/about", sortOrder: 1 },
+    { placement: "footer", label: { ar: "Ø§Ù„Ø´Ø±ÙˆØ·", nl: "Voorwaarden" }, href: "/terms", sortOrder: 2 },
+    { placement: "footer", label: { ar: "Ø§Ù„Ø®ØµÙˆØµÙŠØ©", nl: "Privacy" }, href: "/privacy", sortOrder: 3 },
+    { placement: "footer", label: { ar: "Ø§Ù„Ø£Ø³Ø¦Ù„Ø© Ø§Ù„Ø´Ø§Ø¦Ø¹Ø©", nl: "FAQ" }, href: "/faq", sortOrder: 4 },
   ];
   for (const m of menuItems) {
     const existing = await db.cmsMenuItem.findFirst({ where: { placement: m.placement, href: m.href } });
@@ -344,7 +380,7 @@ async function main() {
     }
   }
 
-  console.log("Seed complete. demo@khadamatak.com / Password123!  •  admin@khadamatak.com / Password123!");
+  console.log("Seed complete. demo@khadamatak.com / Password123!  â€¢  aak@khadamatak.com / Password123!");
 }
 
 main()
@@ -355,3 +391,4 @@ main()
   .finally(async () => {
     await db.$disconnect();
   });
+

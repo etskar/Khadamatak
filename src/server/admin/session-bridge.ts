@@ -37,10 +37,36 @@ export async function connectAdminSession(email: string) {
         : "moderator";
 
     if (["super_admin", "admin", "moderator"].includes(mappedRole)) {
-      await db.user.updateMany({
-        where: { email },
-        data: { role: mappedRole },
-      });
+      // Upsert the marketplace User so it mirrors the AdminUser identity.
+      // Password hash is synced so the admin CAN log in through the normal
+      // login page (NextAuth authorize() checks the User table).
+      const existingUser = await db.user.findUnique({ where: { email } });
+      if (existingUser) {
+        await db.user.update({
+          where: { email },
+          data: {
+            role: mappedRole,
+            passwordHash: adminUser.passwordHash,
+          },
+        });
+      } else {
+        // First-time bridge — create the marketplace identity
+        await db.user.create({
+          data: {
+            email,
+            passwordHash: adminUser.passwordHash,
+            role: mappedRole,
+            emailVerified: new Date(),
+            locale: "ar",
+            profile: {
+              create: {
+                username: email.split("@")[0].replace(/[^a-z0-9_]/gi, "").slice(0, 24),
+                displayName: adminUser.name,
+              },
+            },
+          },
+        });
+      }
     }
   } catch {
     // Best-effort bridge — never fail a sign-in
