@@ -2,6 +2,7 @@ import type { LucideIcon } from "lucide-react";
 import { Inbox } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "./button";
+import { Link } from "@/i18n/navigation";
 
 type EmptyStateProps = {
   icon?: LucideIcon;
@@ -9,7 +10,7 @@ type EmptyStateProps = {
   description?: string;
   actionLabel?: string;
   onAction?: () => void;
-  href?: string;
+  href?: `/${string}`;
   className?: string;
   children?: React.ReactNode;
 };
@@ -20,6 +21,7 @@ export function EmptyState({
   description,
   actionLabel,
   onAction,
+  href,
   className,
   children,
 }: EmptyStateProps) {
@@ -45,6 +47,10 @@ export function EmptyState({
         <Button className="mt-6" onClick={onAction}>
           {actionLabel}
         </Button>
+      ) : actionLabel && href ? (
+        <Link href={href} className="mt-6 inline-flex">
+          <Button>{actionLabel}</Button>
+        </Link>
       ) : null}
       {children}
     </div>

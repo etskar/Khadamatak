@@ -6,10 +6,8 @@ import { Sparkles } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PostCardSkeleton } from "@/components/ui/skeleton";
-import { useUiStore } from "@/stores/ui-store";
 import { cn } from "@/lib/utils";
 import { CreatePostBox } from "./create-post-box";
-import { CreatePostSheet } from "./create-post-sheet";
 import { PostCard, type FeedPost } from "./post-card";
 import { fetchFeedAction } from "@/server/actions/social-actions";
 
@@ -27,7 +25,6 @@ export function HomeFeed({
   isAuthenticated,
 }: HomeFeedProps) {
   const t = useTranslations("home");
-  const setCreatePostOpen = useUiStore((s) => s.setCreatePostOpen);
   const [activeTab, setActiveTab] = useState<(typeof tabs)[number]>("forYou");
   const [items, setItems] = useState<FeedPost[]>(initialItems);
   const [cursor, setCursor] = useState<string | null>(initialCursor);
@@ -106,9 +103,7 @@ export function HomeFeed({
             title={t("emptyTitle")}
             description={t("emptyDescription")}
             actionLabel={isAuthenticated ? t("createPost") : undefined}
-            onAction={
-              isAuthenticated ? () => setCreatePostOpen(true) : undefined
-            }
+            href={isAuthenticated ? "/create-post" : undefined}
           />
         ) : (
           items.map((post) => <PostCard key={post.id} post={post} />)
@@ -117,8 +112,6 @@ export function HomeFeed({
         {pending ? <PostCardSkeleton /> : null}
         <div ref={sentinelRef} className="h-8" />
       </section>
-
-      {isAuthenticated ? <CreatePostSheet /> : null}
     </div>
   );
 }
