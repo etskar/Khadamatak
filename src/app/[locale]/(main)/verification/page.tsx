@@ -36,9 +36,6 @@ export default async function VerificationPage({
     <VerificationClient
       status={user.verification?.status ?? "not_started"}
       rejectionReason={user.verification?.rejectionReason}
-      emailVerified={Boolean(user.emailVerified)}
-      phoneVerified={Boolean(user.phoneVerifiedAt)}
-      phone={user.phone ?? ""}
       fullName={user.realName ?? user.verification?.fullName ?? ""}
     />
   );

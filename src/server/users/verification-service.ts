@@ -29,8 +29,6 @@ export async function submitVerification(input: {
     include: { verification: true },
   });
   if (!user) throw new Error("USER_NOT_FOUND");
-  if (!user.emailVerified) throw new Error("EMAIL_NOT_VERIFIED");
-  if (!user.phoneVerifiedAt) throw new Error("PHONE_NOT_VERIFIED");
 
   const verification = await db.identityVerification.upsert({
     where: { userId: input.userId },
