@@ -2,8 +2,9 @@ import "server-only";
 import { db } from "@/lib/db";
 import { hashToken } from "@/lib/crypto";
 import { ADMIN_PERMISSIONS } from "@/types/admin";
-
-export const ADMIN_SESSION_COOKIE = "khadamatak_admin";
+import { revokeAllSessionsForAdmin } from "@/server/admin/auth";
+import { ADMIN_IDLE_TIMEOUT_MS } from "@/lib/admin-constants";
+export { ADMIN_SESSION_COOKIE } from "@/lib/admin-constants";
 
 export type AdminContext = {
   admin: {
@@ -51,9 +52,9 @@ export async function getAdminContext(token: string | null | undefined): Promise
   if (session.expiresAt < new Date()) return null;
   if (session.adminUser.status !== "active") return null;
 
-  // idle timeout: 12h without activity
+  // idle timeout
   const idleMs = Date.now() - session.lastSeenAt.getTime();
-  if (idleMs > 12 * 60 * 60 * 1000) {
+  if (idleMs > ADMIN_IDLE_TIMEOUT_MS) {
     await db.adminSession.update({
       where: { id: session.id },
       data: { status: "expired", revokedAt: new Date() },
@@ -265,7 +266,7 @@ export async function updateAdminUser(input: {
   status?: string;
   twoFactorEnabled?: boolean;
 }) {
-  return db.adminUser.update({
+  const result = await db.adminUser.update({
     where: { id: input.id },
     data: {
       name: input.name,
@@ -274,11 +275,22 @@ export async function updateAdminUser(input: {
       twoFactorEnabled: input.twoFactorEnabled,
     },
   });
+
+  // Revoke sessions when role, status or 2FA changes
+  if (input.roleId || input.status !== undefined || input.twoFactorEnabled !== undefined) {
+    await revokeAllSessionsForAdmin(input.id);
+  }
+
+  return result;
 }
 
 export async function resetAdminPassword(id: string, newPassword: string) {
   const { hashPassword } = await import("@/lib/crypto");
   if (newPassword.length < 8) throw new Error("WEAK_PASSWORD");
+
+  // Revoke all sessions first — password reset means re-authentication
+  await revokeAllSessionsForAdmin(id);
+
   return db.adminUser.update({
     where: { id },
     data: {
@@ -294,5 +306,6 @@ export async function deleteAdminUser(id: string) {
   const target = await db.adminUser.findUnique({ where: { id }, include: { role: true } });
   if (!target) throw new Error("ADMIN_NOT_FOUND");
   if (target.role.key === "super_admin") throw new Error("CANNOT_DELETE_SUPER_ADMIN");
+  await revokeAllSessionsForAdmin(id);
   return db.adminUser.delete({ where: { id } });
 }

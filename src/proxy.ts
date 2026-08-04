@@ -1,14 +1,9 @@
 import createMiddleware from "next-intl/middleware";
 import { NextResponse, type NextRequest } from "next/server";
 import { routing } from "./i18n/routing";
+import { ADMIN_SESSION_COOKIE } from "@/lib/admin-constants";
 
 const intlMiddleware = createMiddleware(routing);
-
-/**
- * Must stay in sync with src/server/admin/rbac.ts ADMIN_SESSION_COOKIE.
- * (Can't import it here — rbac.ts is server-only and pulls in Prisma.)
- */
-const ADMIN_SESSION_COOKIE = "khadamatak_admin";
 
 const protectedPaths = [
   "/messages",

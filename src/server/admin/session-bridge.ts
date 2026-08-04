@@ -1,9 +1,7 @@
 import "server-only";
 
-import { cookies } from "next/headers";
 import { db } from "@/lib/db";
-import { generateSecureToken, hashToken } from "@/lib/crypto";
-import { ADMIN_SESSION_COOKIE } from "@/server/admin/rbac";
+import { createAdminSession } from "@/server/admin/auth";
 
 /**
  * Best-effort admin‑panel bridge.
@@ -23,25 +21,11 @@ export async function connectAdminSession(email: string) {
     });
     if (!adminUser || adminUser.status !== "active") return;
 
-    // Create admin session cookie
-    const adminToken = generateSecureToken(32);
-    await db.adminSession.create({
-      data: {
-        adminUserId: adminUser.id,
-        tokenHash: hashToken(adminToken),
-        status: "active",
-        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
-        lastSeenAt: new Date(),
-      },
-    });
-
-    const cookieStore = await cookies();
-    cookieStore.set(ADMIN_SESSION_COOKIE, adminToken, {
-      httpOnly: true,
-      sameSite: "lax",
-      secure: process.env.NODE_ENV === "production",
-      path: "/",
-      maxAge: 24 * 60 * 60,
+    // Centralized session creation (sets the cookie automatically)
+    await createAdminSession({
+      adminUserId: adminUser.id,
+      status: "active",
+      setCookie: true,
     });
 
     // Sync marketplace role so admin nav links appear

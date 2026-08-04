@@ -1,4 +1,5 @@
 import "server-only";
+import { cookies } from "next/headers";
 import { db } from "@/lib/db";
 import { verifyPassword, hashToken, generateOtpCode } from "@/lib/crypto";
 import { rateLimit } from "@/lib/rate-limit";
@@ -10,9 +11,108 @@ import {
   type RequestInfo,
 } from "@/server/admin/request";
 import { generateTotpSecret, verifyTotp, buildTotpUri } from "@/lib/totp";
+import {
+  ADMIN_SESSION_COOKIE,
+  ADMIN_SESSION_MAX_AGE_MS,
+  ADMIN_MAX_SESSIONS,
+  ADMIN_CLEANUP_SAMPLE_RATE,
+  ADMIN_CLEANUP_AGE_MS,
+} from "@/lib/admin-constants";
 
-const SESSION_MAX_AGE_MS = 24 * 60 * 60 * 1000; // 24h absolute
 const MAX_FAILED_LOGINS = 5;
+
+// ─── Shared session factory ─────────────────────────────────────
+
+type CreateSessionParams = {
+  adminUserId: string;
+  status?: string; // "active" (default) | "pending_2fa"
+  ipAddress?: string | null;
+  userAgent?: string | null;
+  deviceHash?: string | null;
+  country?: string | null;
+  city?: string | null;
+  setCookie?: boolean; // true for bridge, false for adminLogin (action layer sets cookie)
+};
+
+/**
+ * Single entry point for admin session creation.  Every code path that
+ * creates an admin session must go through here.
+ */
+export async function createAdminSession(input: CreateSessionParams) {
+  const token = generateSecureToken(32);
+
+  // ── Concurrent-session limit ──
+  const activeCount = await db.adminSession.count({
+    where: { adminUserId: input.adminUserId, status: "active" },
+  });
+  if (activeCount >= ADMIN_MAX_SESSIONS) {
+    const oldest = await db.adminSession.findMany({
+      where: { adminUserId: input.adminUserId, status: "active" },
+      orderBy: { createdAt: "asc" },
+      take: activeCount - ADMIN_MAX_SESSIONS + 1,
+    });
+    if (oldest.length) {
+      await db.adminSession.updateMany({
+        where: { id: { in: oldest.map((s) => s.id) } },
+        data: { status: "revoked", revokedAt: new Date() },
+      });
+    }
+  }
+
+  // ── Create the session row ──
+  const session = await db.adminSession.create({
+    data: {
+      adminUserId: input.adminUserId,
+      tokenHash: hashToken(token),
+      status: input.status ?? "active",
+      ipAddress: input.ipAddress ?? null,
+      userAgent: input.userAgent ?? null,
+      deviceHash: input.deviceHash ?? null,
+      country: input.country ?? null,
+      city: input.city ?? null,
+      lastSeenAt: new Date(),
+      expiresAt: new Date(Date.now() + ADMIN_SESSION_MAX_AGE_MS),
+    },
+  });
+
+  // ── Set the browser cookie ──
+  if (input.setCookie !== false) {
+    const cookieStore = await cookies();
+    cookieStore.set(ADMIN_SESSION_COOKIE, token, {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+      path: "/",
+      maxAge: Math.floor(ADMIN_SESSION_MAX_AGE_MS / 1000),
+    });
+  }
+
+  // ── Background cleanup (sampled) ──
+  if (Math.random() < 1 / ADMIN_CLEANUP_SAMPLE_RATE) {
+    db.adminSession
+      .deleteMany({
+        where: {
+          status: { in: ["revoked", "expired"] },
+          revokedAt: { lt: new Date(Date.now() - ADMIN_CLEANUP_AGE_MS) },
+        },
+      })
+      .catch(() => {
+        /* fire‑and‑forget — never block a login */
+      });
+  }
+
+  return { token, sessionId: session.id };
+}
+
+// ─── Revoke helper (used by rbac for auto‑revocation) ───────────
+
+/** Revoke every active session for an admin.  Safe to call from rbac. */
+export async function revokeAllSessionsForAdmin(adminId: string) {
+  await db.adminSession.updateMany({
+    where: { adminUserId: adminId, status: "active" },
+    data: { status: "revoked", revokedAt: new Date() },
+  });
+}
 
 async function logLoginAttempt(input: {
   adminUserId?: string | null;
@@ -134,27 +234,20 @@ export async function adminLogin(input: {
     data: { failedLoginCount: 0, lockedUntil: null },
   });
 
-  const token = generateSecureToken(32);
-  const deviceHash = input.req.deviceHash ?? hashDevice(input.userAgent);
   const twoFactorEnabled = Boolean(
     admin.twoFactorEnabled && admin.twoFactorSecret,
   );
+  const deviceHash = input.req.deviceHash ?? hashDevice(input.userAgent);
 
-  const session = await db.adminSession.create({
-    data: {
-      adminUserId: admin.id,
-      tokenHash: hashToken(token),
-      // When 2FA is disabled the session is active immediately; when enabled
-      // it stays pending until the second factor is verified.
-      status: twoFactorEnabled ? "pending_2fa" : "active",
-      ipAddress: input.req.ipAddress,
-      userAgent: input.req.userAgent,
-      deviceHash,
-      country: input.req.country,
-      city: input.req.city,
-      lastSeenAt: new Date(),
-      expiresAt: new Date(Date.now() + SESSION_MAX_AGE_MS),
-    },
+  const session = await createAdminSession({
+    adminUserId: admin.id,
+    status: twoFactorEnabled ? "pending_2fa" : "active",
+    ipAddress: input.req.ipAddress,
+    userAgent: input.req.userAgent,
+    deviceHash,
+    country: input.req.country,
+    city: input.req.city,
+    setCookie: false, // the server-action layer sets the cookie
   });
 
   await logLoginAttempt({
@@ -164,7 +257,7 @@ export async function adminLogin(input: {
     req: input.req,
   });
 
-  return { ok: true as const, token, sessionId: session.id, totpRequired: twoFactorEnabled };
+  return { ok: true as const, token: session.token, sessionId: session.sessionId, totpRequired: twoFactorEnabled };
 }
 
 export async function resendLoginOtp(sessionToken: string, _req: RequestInfo) {
