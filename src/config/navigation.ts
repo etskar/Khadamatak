@@ -65,7 +65,7 @@ export const mainNavItems: NavItem[] = [
     key: "groups",
     href: "/groups",
     icon: Users,
-    showInBottomNav: false,
+    showInBottomNav: true,
     showInSidebar: true,
   },
   {
@@ -79,7 +79,7 @@ export const mainNavItems: NavItem[] = [
     key: "messages",
     href: "/messages",
     icon: MessageCircle,
-    showInBottomNav: true,
+    showInBottomNav: false,
     showInSidebar: true,
   },
   {
@@ -132,7 +132,7 @@ export const adminNavItems: NavItem[] = [
 export const bottomNavKeys = [
   "home",
   "search",
-  "messages",
+  "groups",
   "notifications",
   "profile",
 ] as const;
