@@ -60,6 +60,8 @@ export default async function ProfilePage({
         verificationStatus: profile.user.verification?.status ?? "not_started",
         realName: profile.user.realName,
         email: profile.user.email,
+        userId: profile.userId,
+        followCounts: profile.followCounts,
       }}
       posts={posts.map((p) => ({
         id: p.id,

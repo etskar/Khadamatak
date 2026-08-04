@@ -2,8 +2,8 @@ import "server-only";
 import { db } from "@/lib/db";
 import type { AppLocale } from "@/i18n/routing";
 
-export async function getProfileByUsername(username: string) {
-  return db.profile.findUnique({
+export async function getProfileByUsername(username: string, viewerId?: string | null) {
+  const profile = await db.profile.findUnique({
     where: { username: username.toLowerCase() },
     include: {
       user: {
@@ -12,14 +12,42 @@ export async function getProfileByUsername(username: string) {
           createdAt: true,
           verification: true,
           locale: true,
+          _count: {
+            select: {
+              followers: true,
+              following: true,
+            },
+          },
         },
       },
     },
   });
+  if (!profile) return null;
+
+  const followCounts = {
+    followers: profile.user._count.followers ?? 0,
+    following: profile.user._count.following ?? 0,
+  };
+  const { _count, ...userData } = profile.user;
+
+  let isFollowing = false;
+  if (viewerId) {
+    const follow = await db.follow.findUnique({
+      where: {
+        followerId_followingId: {
+          followerId: viewerId,
+          followingId: profile.userId,
+        },
+      },
+    });
+    isFollowing = Boolean(follow);
+  }
+
+  return { ...profile, user: userData, followCounts, isFollowing };
 }
 
 export async function getProfileByUserId(userId: string) {
-  return db.profile.findUnique({
+  const profile = await db.profile.findUnique({
     where: { userId },
     include: {
       user: {
@@ -35,10 +63,25 @@ export async function getProfileByUserId(userId: string) {
           emailVerified: true,
           phoneVerifiedAt: true,
           verification: true,
+          _count: {
+            select: {
+              followers: true,
+              following: true,
+            },
+          },
         },
       },
     },
   });
+  if (!profile) return null;
+
+  const followCounts = {
+    followers: profile.user._count.followers ?? 0,
+    following: profile.user._count.following ?? 0,
+  };
+  const { _count, ...userData } = profile.user;
+
+  return { ...profile, user: userData, followCounts };
 }
 
 export async function updateProfile(

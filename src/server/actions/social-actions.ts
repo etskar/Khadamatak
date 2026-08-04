@@ -15,6 +15,10 @@ import {
   toggleLike,
   toggleSave,
 } from "@/server/social/post-service";
+import {
+  followUser,
+  unfollowUser,
+} from "@/server/social/follow-service";
 import { searchAll, clearSearchHistory } from "@/server/social/search-service";
 import {
   getOrCreateConversation,
@@ -165,4 +169,20 @@ export async function sendMessageAction(
   revalidatePath(`/messages/${conversationId}`);
   revalidatePath("/messages");
   return { ok: true as const, message };
+}
+
+export async function followUserAction(targetUserId: string) {
+  const user = await requireUser();
+  await followUser(user.id, targetUserId);
+  revalidatePath("/profile");
+  revalidatePath(`/profile/${targetUserId}`);
+  return { ok: true as const };
+}
+
+export async function unfollowUserAction(targetUserId: string) {
+  const user = await requireUser();
+  await unfollowUser(user.id, targetUserId);
+  revalidatePath("/profile");
+  revalidatePath(`/profile/${targetUserId}`);
+  return { ok: true as const };
 }

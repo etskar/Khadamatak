@@ -8,10 +8,8 @@ import { Card } from "@/components/ui/card";
 import { PageHeader } from "@/components/shared/page-header";
 import { PrimaryAction } from "@/components/ui/primary-action";
 import { VerificationBadge } from "@/components/shared/verification-badge";
+import { FollowButton } from "@/components/profile/follow-button";
 import { PostCard, type FeedPost } from "@/components/feed/post-card";
-import { startConversationAction } from "@/server/actions/social-actions";
-import { useRouter } from "@/i18n/navigation";
-import { toast } from "@/components/ui/toast";
 
 type ProfileData = {
   displayName: string;
@@ -33,6 +31,8 @@ type ProfileData = {
   realName?: string | null;
   email?: string | null;
   userId?: string;
+  followCounts?: { followers: number; following: number };
+  isFollowing?: boolean;
 };
 
 export function ProfileView({
@@ -47,10 +47,7 @@ export function ProfileView({
   isOwner: boolean;
 }) {
   const t = useTranslations("profile");
-  const tNav = useTranslations("nav");
-  const tCommon = useTranslations("common");
   const [tab, setTab] = useState<"posts" | "about" | "photos" | "saved">("posts");
-  const router = useRouter();
 
   const hobbies = safeJsonArray(profile.hobbies);
   const languages = safeJsonArray(profile.languages);
@@ -87,20 +84,10 @@ export function ProfileView({
               )}
             </div>
           ) : profile.userId ? (
-            <button
-              type="button"
-              className="inline-flex h-9 items-center rounded-lg bg-primary px-3 text-xs font-semibold text-primary-foreground"
-              onClick={async () => {
-                try {
-                  const res = await startConversationAction(profile.userId!);
-                  router.push(`/messages/${res.conversationId}`);
-                } catch {
-                  toast({ title: tCommon("loginRequired"), variant: "warning" });
-                }
-              }}
-            >
-              {tNav("messages")}
-            </button>
+            <FollowButton
+              targetUserId={profile.userId}
+              isFollowing={profile.isFollowing ?? false}
+            />
           ) : null
         }
       />
@@ -135,6 +122,19 @@ export function ProfileView({
 
           {profile.bio ? (
             <p className="mt-4 text-sm leading-relaxed text-foreground">{profile.bio}</p>
+          ) : null}
+
+          {profile.followCounts ? (
+            <div className="mt-3 flex items-center gap-4 text-sm">
+              <span>
+                <strong>{profile.followCounts.following}</strong>{" "}
+                <span className="text-muted-foreground">{t("following")}</span>
+              </span>
+              <span>
+                <strong>{profile.followCounts.followers}</strong>{" "}
+                <span className="text-muted-foreground">{t("followers")}</span>
+              </span>
+            </div>
           ) : null}
 
           <div className="mt-3 flex flex-wrap gap-3 text-xs text-muted-foreground">

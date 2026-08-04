@@ -15,7 +15,7 @@ export default async function PublicProfilePage({
   const { locale, username } = await params;
   setRequestLocale(locale);
   const session = await auth();
-  const profile = await getProfileByUsername(username);
+  const profile = await getProfileByUsername(username, session?.user?.id);
   if (!profile) notFound();
 
   const isOwner = session?.user?.id === profile.userId;
@@ -44,6 +44,8 @@ export default async function PublicProfilePage({
         realName: isOwner ? null : null,
         email: null,
         userId: profile.userId,
+        followCounts: profile.followCounts,
+        isFollowing: profile.isFollowing,
       }}
       posts={posts.map((p) => ({
         id: p.id,
