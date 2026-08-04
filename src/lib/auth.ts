@@ -7,6 +7,7 @@ import { db } from "@/lib/db";
 import { verifyPassword } from "@/lib/crypto";
 import { requireAuthSecret } from "@/lib/env";
 import { type UserRole } from "@/types/user";
+import { googleConfigured } from "@/lib/google-configured";
 
 export type AppJWT = {
   id?: string;
@@ -18,6 +19,7 @@ export type AppJWT = {
   email?: string | null;
   picture?: string | null;
   tokenVersion?: number;
+  lastRefresh?: number;
 };
 
 declare module "next-auth" {
@@ -40,8 +42,7 @@ declare module "next-auth" {
   }
 }
 
-const googleConfigured =
-  Boolean(process.env.AUTH_GOOGLE_ID) && Boolean(process.env.AUTH_GOOGLE_SECRET);
+
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(db) as Adapter,
@@ -128,30 +129,49 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       }
 
       if (t.id) {
-        const dbUser = await db.user.findUnique({
-          where: { id: t.id },
-          include: {
-            profile: true,
-            verification: true,
-          },
-        });
-        if (dbUser) {
-          t.role = dbUser.role;
-          t.locale = dbUser.locale;
-          t.username = dbUser.profile?.username ?? null;
-          t.verificationStatus = dbUser.verification?.status ?? "not_started";
-          t.name = dbUser.profile?.displayName ?? t.name;
-          t.picture = dbUser.profile?.avatarUrl ?? t.picture;
-          t.email = dbUser.email;
+        const now = Date.now();
+        const isFirstLogin = Boolean(user?.id);
+        const isForced = trigger === "update" || trigger === "signUp";
+        const isStale = !t.lastRefresh || now - t.lastRefresh > 60_000;
 
-          // Force logout / revoke: if the DB tokenVersion is newer, drop the token
-          if ((t.tokenVersion ?? 0) < dbUser.tokenVersion) {
-            t.tokenVersion = dbUser.tokenVersion;
+        if (isFirstLogin || isForced || isStale) {
+          const dbUser = await db.user.findUnique({
+            where: { id: t.id },
+            include: {
+              profile: true,
+              verification: true,
+            },
+          });
+          if (dbUser) {
+            t.role = dbUser.role;
+            t.locale = dbUser.locale;
+            t.username = dbUser.profile?.username ?? null;
+            t.verificationStatus = dbUser.verification?.status ?? "not_started";
+            t.name = dbUser.profile?.displayName ?? t.name;
+            t.picture = dbUser.profile?.avatarUrl ?? t.picture;
+            t.email = dbUser.email;
+
+            if ((t.tokenVersion ?? 0) < dbUser.tokenVersion) {
+              t.tokenVersion = dbUser.tokenVersion;
+              t.id = undefined;
+              t.role = "user";
+              t.verificationStatus = "not_started";
+            } else {
+              t.tokenVersion = dbUser.tokenVersion;
+            }
+            t.lastRefresh = now;
+          }
+        } else {
+          // Lightweight revocation check — only hit the DB when we skipped the full refresh
+          const current = await db.user.findUnique({
+            where: { id: t.id },
+            select: { tokenVersion: true },
+          });
+          if (current && (t.tokenVersion ?? 0) < current.tokenVersion) {
+            t.tokenVersion = current.tokenVersion;
             t.id = undefined;
             t.role = "user";
             t.verificationStatus = "not_started";
-          } else {
-            t.tokenVersion = dbUser.tokenVersion;
           }
         }
       }

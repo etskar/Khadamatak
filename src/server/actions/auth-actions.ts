@@ -10,6 +10,7 @@ import {
   verifyEmailToken,
 } from "@/server/users/verification-service";
 import { rateLimit } from "@/lib/rate-limit";
+import { connectAdminSession } from "@/server/admin/session-bridge";
 
 export type ActionResult = {
   ok: boolean;
@@ -74,6 +75,9 @@ export async function loginAction(
       password,
       redirect: false,
     });
+
+    // Bridge to the admin panel when an active AdminUser exists
+    await connectAdminSession(email);
 
     return { ok: true, data: { callbackUrl } };
   } catch (e) {

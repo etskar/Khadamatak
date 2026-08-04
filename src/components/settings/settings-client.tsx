@@ -1,7 +1,7 @@
 ﻿"use client";
 
 import { useTransition, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { useSession } from "next-auth/react";
 import { Mail, Phone, User } from "lucide-react";
@@ -22,6 +22,7 @@ import {
   EDUCATION_SUGGESTIONS,
   OCCUPATION_SUGGESTIONS,
   HOBBY_SUGGESTIONS,
+  getLocalizedList,
 } from "@/lib/suggestions";
 import {
   changePasswordAction,
@@ -77,6 +78,8 @@ export function SettingsClient({ locale, profile, logoutAction }: Props) {
   const t = useTranslations("settings");
   const tNav = useTranslations("nav");
   const tCommon = useTranslations("common");
+  const userLocale = useLocale();
+  const [tab, setTab] = useState<"personal" | "profile" | "preferences" | "security">("personal");
   const [pending, startTransition] = useTransition();
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [country, setCountry] = useState(profile.country);
@@ -106,8 +109,28 @@ export function SettingsClient({ locale, profile, logoutAction }: Props) {
     <div className="mx-auto max-w-2xl space-y-5 animate-in-up">
       <PageHeader title={t("title")} description={t("subtitle")} />
 
+      {/* Tab navigation */}
+      <div className="flex gap-1 overflow-x-auto rounded-2xl border border-border bg-card p-1 no-scrollbar">
+        {(
+          ["personal", "profile", "preferences", "security"] as const
+        ).map((key) => (
+          <button
+            key={key}
+            type="button"
+            onClick={() => setTab(key)}
+            className={`shrink-0 rounded-xl px-4 py-2 text-sm font-semibold transition ${
+              tab === key
+                ? "bg-brand-50 text-brand-700 dark:bg-brand-800/30 dark:text-brand-200"
+                : "text-muted-foreground hover:bg-muted hover:text-foreground"
+            }`}
+          >
+            {t(`sections.${key}`)}
+          </button>
+        ))}
+      </div>
+
       {/* ─── Personal Information ─── */}
-      <Card>
+      {tab === "personal" ? (<Card>
         <CardHeader>
           <CardTitle>{t("sections.personal")}</CardTitle>
         </CardHeader>
@@ -139,9 +162,10 @@ export function SettingsClient({ locale, profile, logoutAction }: Props) {
           </form>
         </CardContent>
       </Card>
+      ) : null}
 
       {/* ─── Profile (avatar & cover) ─── */}
-      <Card>
+      {tab === "profile" ? (<Card>
         <CardHeader>
           <CardTitle>{t("sections.profile")}</CardTitle>
         </CardHeader>
@@ -194,9 +218,10 @@ export function SettingsClient({ locale, profile, logoutAction }: Props) {
           <VerificationBadge verified={profile.verificationStatus === "verified"} />
         </CardContent>
       </Card>
+      ) : null}
 
       {/* ─── Preferences ─── */}
-      <Card>
+      {tab === "preferences" ? (<Card>
         <CardHeader>
           <CardTitle>{t("sections.preferences")}</CardTitle>
         </CardHeader>
@@ -279,7 +304,7 @@ export function SettingsClient({ locale, profile, logoutAction }: Props) {
               <MultiSelectCombobox
                 label=""
                 name="languages"
-                options={LANGUAGE_SUGGESTIONS}
+                options={getLocalizedList(LANGUAGE_SUGGESTIONS, userLocale)}
                 values={languages}
                 onChange={setLanguages}
                 placeholder={t("languagesPlaceholder")}
@@ -290,7 +315,7 @@ export function SettingsClient({ locale, profile, logoutAction }: Props) {
               <AutocompleteInput
                 label={t("work")}
                 name="work"
-                options={OCCUPATION_SUGGESTIONS}
+                options={getLocalizedList(OCCUPATION_SUGGESTIONS, userLocale)}
                 value={work}
                 onChange={setWork}
                 placeholder={t("workPlaceholder")}
@@ -299,7 +324,7 @@ export function SettingsClient({ locale, profile, logoutAction }: Props) {
               <AutocompleteInput
                 label={t("education")}
                 name="education"
-                options={EDUCATION_SUGGESTIONS}
+                options={getLocalizedList(EDUCATION_SUGGESTIONS, userLocale)}
                 value={education}
                 onChange={setEducation}
                 placeholder={t("educationPlaceholder")}
@@ -312,7 +337,7 @@ export function SettingsClient({ locale, profile, logoutAction }: Props) {
               <MultiSelectCombobox
                 label=""
                 name="hobbies"
-                options={HOBBY_SUGGESTIONS}
+                options={getLocalizedList(HOBBY_SUGGESTIONS, userLocale)}
                 values={hobbies}
                 onChange={setHobbies}
                 placeholder={t("hobbiesPlaceholder")}
@@ -331,9 +356,10 @@ export function SettingsClient({ locale, profile, logoutAction }: Props) {
           </form>
         </CardContent>
       </Card>
+      ) : null}
 
       {/* ─── Security ─── */}
-      <Card>
+      {tab === "security" ? (<Card>
         <CardHeader>
           <CardTitle>{t("sections.security")}</CardTitle>
         </CardHeader>
@@ -371,6 +397,7 @@ export function SettingsClient({ locale, profile, logoutAction }: Props) {
           </form>
         </CardContent>
       </Card>
+      ) : null}
 
       <form action={logoutAction}>
         <Button type="submit" variant="danger" fullWidth>
