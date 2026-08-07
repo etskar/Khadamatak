@@ -12,9 +12,7 @@ import {
   submitVerification,
   verifyPhoneOtp,
 } from "@/server/users/verification-service";
-import { writeFile, mkdir } from "node:fs/promises";
-import path from "node:path";
-import { generateSecureToken } from "@/lib/crypto";
+import { uploadFile } from "@/server/storage/supabase-storage";
 
 async function requireUser() {
   const session = await auth();
@@ -101,14 +99,15 @@ export async function submitVerificationAction(formData: FormData) {
   let governmentIdUrl = String(formData.get("governmentIdUrl") ?? "");
   const file = formData.get("governmentId");
   if (file && file instanceof File && file.size > 0) {
-    governmentIdUrl = await saveUpload(file, "ids");
+    const result = await uploadFile(file, "ids");
+    governmentIdUrl = result.url;
   }
   if (!governmentIdUrl) throw new Error("ID_REQUIRED");
 
   let selfieUrl: string | undefined;
   const selfie = formData.get("selfie");
   if (selfie && selfie instanceof File && selfie.size > 0) {
-    selfieUrl = await saveUpload(selfie, "selfies");
+    selfieUrl = (await uploadFile(selfie, "selfies")).url;
   }
 
   await submitVerification({
@@ -134,7 +133,7 @@ export async function uploadAvatarAction(formData: FormData) {
   const user = await requireUser();
   const file = formData.get("file");
   if (!(file instanceof File) || file.size === 0) throw new Error("FILE_REQUIRED");
-  const url = await saveUpload(file, "avatars");
+  const { url } = await uploadFile(file, "avatars");
   await updateProfile(user.id, { avatarUrl: url });
   revalidatePath("/profile");
   return { ok: true as const, url };
@@ -144,7 +143,7 @@ export async function uploadCoverAction(formData: FormData) {
   const user = await requireUser();
   const file = formData.get("file");
   if (!(file instanceof File) || file.size === 0) throw new Error("FILE_REQUIRED");
-  const url = await saveUpload(file, "covers");
+  const { url } = await uploadFile(file, "covers");
   await updateProfile(user.id, { coverUrl: url });
   revalidatePath("/profile");
   return { ok: true as const, url };
@@ -154,29 +153,6 @@ export async function uploadPostMediaAction(formData: FormData) {
   await requireUser();
   const file = formData.get("file");
   if (!(file instanceof File) || file.size === 0) throw new Error("FILE_REQUIRED");
-  const type = file.type.startsWith("video/") ? "video" : "image";
-  const url = await saveUpload(file, "posts");
-  return { ok: true as const, url, type };
-}
-
-async function saveUpload(file: File, folder: string) {
-  const max = 8 * 1024 * 1024;
-  if (file.size > max) throw new Error("FILE_TOO_LARGE");
-  const mimeToExt: Record<string, string> = {
-    "image/jpeg": "jpg",
-    "image/png": "png",
-    "image/webp": "webp",
-    "image/gif": "gif",
-    "video/mp4": "mp4",
-    "application/pdf": "pdf",
-  };
-  const ext = mimeToExt[file.type];
-  if (!ext) throw new Error("INVALID_FILE_TYPE");
-
-  const name = `${generateSecureToken(12)}.${ext}`;
-  const dir = path.join(process.cwd(), "public", "uploads", folder);
-  await mkdir(dir, { recursive: true });
-  const buffer = Buffer.from(await file.arrayBuffer());
-  await writeFile(path.join(dir, name), buffer);
-  return `/uploads/${folder}/${name}`;
+  const result = await uploadFile(file, "posts");
+  return { ok: true as const, url: result.url, type: result.type };
 }

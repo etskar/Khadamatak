@@ -15,9 +15,7 @@ import { reportTarget } from "@/server/social/post-service";
 import { startConversationAction } from "@/server/actions/social-actions";
 import { geocodeAddress, reverseGeocode, getTravelInfo } from "@/server/geo/geocode";
 import { db } from "@/lib/db";
-import { writeFile, mkdir } from "node:fs/promises";
-import path from "node:path";
-import { generateSecureToken } from "@/lib/crypto";
+import { uploadFile, uploadAnyFile } from "@/server/storage/supabase-storage";
 
 async function requireUser() {
   const session = await auth();
@@ -26,52 +24,17 @@ async function requireUser() {
 }
 
 async function saveMedia(file: File, folder: string) {
-  const max = 10 * 1024 * 1024;
-  if (file.size > max) throw new Error("FILE_TOO_LARGE");
-  const mimeToExt: Record<string, string> = {
-    "image/jpeg": "jpg",
-    "image/png": "png",
-    "image/webp": "webp",
-    "image/gif": "gif",
-    "video/mp4": "mp4",
-    "audio/webm": "webm",
-    "audio/ogg": "ogg",
-    "audio/mpeg": "mp3",
-    "audio/mp4": "m4a",
-  };
-  const ext = mimeToExt[file.type];
-  if (!ext) throw new Error("INVALID_FILE_TYPE");
-  const name = `${generateSecureToken(12)}.${ext}`;
-  const dir = path.join(process.cwd(), "public", "uploads", folder);
-  await mkdir(dir, { recursive: true });
-  await writeFile(path.join(dir, name), Buffer.from(await file.arrayBuffer()));
-  const isAudio = file.type.startsWith("audio/");
-  const isVideo = file.type.startsWith("video/");
-  return {
-    url: `/uploads/${folder}/${name}`,
-    type: (isVideo ? "video" : isAudio ? "audio" : "image") as
-      | "image"
-      | "video"
-      | "audio",
-  };
+  const result = await uploadFile(file, folder);
+  return { url: result.url, type: (result.type === "other" ? "image" : result.type) as "image" | "video" | "audio" };
 }
 
 async function saveAnyFile(file: File, folder: string) {
-  const max = 25 * 1024 * 1024;
-  if (file.size > max) throw new Error("FILE_TOO_LARGE");
-  const name = `${generateSecureToken(12)}-${file.name.replace(/[^a-zA-Z0-9._-]/g, "_").slice(0, 60)}`;
-  const dir = path.join(process.cwd(), "public", "uploads", folder);
-  await mkdir(dir, { recursive: true });
-  await writeFile(path.join(dir, name), Buffer.from(await file.arrayBuffer()));
-  return { url: `/uploads/${folder}/${name}`, name: file.name, size: file.size };
+  return uploadAnyFile(file, folder);
 }
 
 async function saveImageOrVideo(file: File, folder: string) {
-  const saved = await saveMedia(file, folder);
-  return {
-    url: saved.url,
-    type: (saved.type === "image" ? "image" : "video") as "image" | "video",
-  };
+  const result = await uploadFile(file, folder);
+  return { url: result.url, type: result.type === "audio" ? "image" as const : result.type as "image" | "video" };
 }
 
 export async function createProductAction(formData: FormData) {

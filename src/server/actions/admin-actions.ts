@@ -916,26 +916,14 @@ export async function exportUsersCsvAction(): Promise<AdminActionResult<{ csv: s
 
 export async function uploadGroupCoverAction(formData: FormData): Promise<AdminActionResult<{ coverUrl: string | null }>> {
   return withPermission("communities.manage", async (ctx) => {
-    const { writeFile, mkdir } = await import("node:fs/promises");
-    const path = await import("node:path");
-    const { generateSecureToken } = await import("@/lib/crypto");
+    const { uploadFile } = await import("@/server/storage/supabase-storage");
     const groupId = String(formData.get("groupId") ?? "");
     const file = formData.get("file");
 
     let coverUrl: string | null = null;
     if (file instanceof File && file.size > 0) {
-      const max = 5 * 1024 * 1024;
-      if (file.size > max) throw new Error("FILE_TOO_LARGE");
-      const ext = file.type === "image/jpeg" ? "jpg" :
-        file.type === "image/png" ? "png" :
-        file.type === "image/webp" ? "webp" : null;
-      if (!ext) throw new Error("INVALID_FILE_TYPE");
-
-      const name = `${generateSecureToken(12)}.${ext}`;
-      const dir = path.join(process.cwd(), "public", "uploads", "groups");
-      await mkdir(dir, { recursive: true });
-      await writeFile(path.join(dir, name), Buffer.from(await file.arrayBuffer()));
-      coverUrl = `/uploads/groups/${name}`;
+      const result = await uploadFile(file, "groups");
+      coverUrl = result.url;
     }
 
     return adminCommunities.updateGroupCover({
