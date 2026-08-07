@@ -8,9 +8,11 @@ import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import { Logo } from "@/components/shared/logo";
 import { IconButton } from "@/components/ui/icon-button";
 import { LanguageSwitcher } from "./language-switcher";
+import { AccountMenu } from "./account-menu";
 import { useUiStore } from "@/stores/ui-store";
 import { cn } from "@/lib/utils";
 import type { AppLocale } from "@/i18n/routing";
+import { useState } from "react";
 
 type TopNavProps = {
   className?: string;
@@ -29,6 +31,7 @@ export function TopNav({ className }: TopNavProps) {
   const isHome = pathname === "/";
   const isRtl = locale === "ar";
   const BackIcon = isRtl ? ArrowRight : ArrowLeft;
+  const [accountOpen, setAccountOpen] = useState(false);
 
   return (
     <header
@@ -107,22 +110,26 @@ export function TopNav({ className }: TopNavProps) {
               >
                 <LogOut className="h-5 w-5" />
               </IconButton>
-              <Link
-                href="/profile"
-                className="ms-1 inline-flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-brand-500 to-brand-700 text-sm font-bold text-white shadow-sm ring-2 ring-card"
-                aria-label={t("profile")}
-              >
-                {session.user.image ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={session.user.image}
-                    alt=""
-                    className="h-full w-full object-cover"
-                  />
-                ) : (
-                  (session.user.name?.[0] ?? "K").toUpperCase()
-                )}
-              </Link>
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setAccountOpen(!accountOpen)}
+                  className="ms-1 inline-flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-brand-500 to-brand-700 text-sm font-bold text-white shadow-sm ring-2 ring-card"
+                  aria-label={t("profile")}
+                >
+                  {session.user.image ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={session.user.image}
+                      alt=""
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    (session.user.name?.[0] ?? "K").toUpperCase()
+                  )}
+                </button>
+                <AccountMenu open={accountOpen} onClose={() => setAccountOpen(false)} />
+              </div>
             </>
           ) : (
             <Link

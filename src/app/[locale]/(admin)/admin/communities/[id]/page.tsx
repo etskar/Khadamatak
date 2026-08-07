@@ -7,6 +7,7 @@ import { PageHeader } from "@/components/shared/page-header";
 import { AdminActionButton } from "@/components/admin/admin-action-button";
 import { AdminTable, TableCell } from "@/components/admin/admin-table";
 import { StatusBadge } from "@/components/admin/status-badge";
+import { GroupCoverUpload } from "@/components/admin/group-cover-upload";
 import { AccessDenied } from "@/components/admin/access-denied";
 import { requireAdminPage } from "@/server/admin/page-guard";
 import { getGroupDetail } from "@/server/admin/communities";
@@ -84,6 +85,15 @@ export default async function AdminGroupDetailPage({
               label={t("communities.createdAt")}
               value={group.createdAt.toLocaleDateString(localeFmt)}
             />
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>{t("communities.coverImage")}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <GroupCoverUpload groupId={group.id} coverUrl={group.coverUrl} />
           </CardContent>
         </Card>
       </div>

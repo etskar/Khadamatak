@@ -164,6 +164,17 @@
     "createPostPlaceholder": "Deel een update, dienst of aanbieding...",
     "createPostHint": "Publicatie-UI is klaar om later te koppelen.",
     "publish": "Publiceren",
+    "textPost": "Tekst",
+    "shareProduct": "Product delen",
+    "shareService": "Dienst delen",
+    "shareJob": "Vacature delen",
+    "shareGroup": "Groep delen",
+    "addLocation": "Locatie toevoegen",
+    "product": "Product",
+    "service": "Dienst",
+    "job": "Vacature",
+    "group": "Groep",
+    "text": "Tekst",
     "emptyTitle": "Begin je reis op Khadamatak",
     "emptyDescription": "De feed is klaar. Zodra er berichten zijn, verschijnen ze hier in premium kaarten.",
     "sections": {
@@ -738,7 +749,8 @@
       "role": "Rol",
       "joinedAt": "Toegetreden op",
       "actions": "Acties",
-      "ownerId": "Nieuwe eigenaar-ID"
+      "ownerId": "Nieuwe eigenaar-ID",
+      "coverImage": "Omslagfoto"
     },
     "support": {
       "subtitle": "Beheer inkomende supporttickets.",
@@ -1117,6 +1129,7 @@
     "tabAbout": "Over",
     "writePost": "Schrijf een bericht...",
     "members": "leden",
+    "posts": "berichten",
     "pause": "Pauzeren",
     "activate": "Activeren",
     "delete": "Verwijderen",

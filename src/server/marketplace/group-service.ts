@@ -6,9 +6,9 @@ import { isUserVerified } from "./guards";
 export async function listGroups() {
   return db.cityGroup.findMany({
     where: { status: "active" },
-    orderBy: { name: "asc" },
+    orderBy: { memberCount: "desc" },
     include: {
-      _count: { select: { members: true } },
+      _count: { select: { members: true, groupPosts: true } },
     },
   });
 }

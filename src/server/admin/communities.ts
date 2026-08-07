@@ -148,3 +148,28 @@ export async function removeGroupMember(input: {
   });
   return { ok: true };
 }
+
+export async function updateGroupCover(input: {
+  adminId: string;
+  groupId: string;
+  coverUrl: string | null;
+}) {
+  const group = await db.cityGroup.findUnique({ where: { id: input.groupId } });
+  if (!group) throw new Error("GROUP_NOT_FOUND");
+
+  const prev = group.coverUrl;
+  await db.cityGroup.update({
+    where: { id: input.groupId },
+    data: { coverUrl: input.coverUrl },
+  });
+
+  await writeAdminAudit({
+    adminId: input.adminId,
+    action: "community.update_cover",
+    entityType: "CityGroup",
+    entityId: input.groupId,
+    previousValue: prev,
+    newValue: input.coverUrl,
+  });
+  return { ok: true, coverUrl: input.coverUrl };
+}

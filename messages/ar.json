@@ -164,6 +164,17 @@
     "createPostPlaceholder": "شارك تحديثاً، خدمة، أو عرضاً...",
     "createPostHint": "واجهة النشر جاهزة للربط لاحقاً.",
     "publish": "نشر",
+    "textPost": "نص",
+    "shareProduct": "مشاركة منتج",
+    "shareService": "مشاركة خدمة",
+    "shareJob": "مشاركة وظيفة",
+    "shareGroup": "مشاركة مجموعة",
+    "addLocation": "إضافة موقع",
+    "product": "منتج",
+    "service": "خدمة",
+    "job": "وظيفة",
+    "group": "مجموعة",
+    "text": "نص",
     "emptyTitle": "ابدأ رحلتك على خدماتك",
     "emptyDescription": "الخلاصة جاهزة. عند توفر المنشورات ستظهر هنا بتصميم بطاقات احترافي.",
     "sections": {
@@ -738,7 +749,8 @@
       "role": "الدور",
       "joinedAt": "تاريخ الانضمام",
       "actions": "إجراءات",
-      "ownerId": "معرف المستخدم الجديد"
+      "ownerId": "معرف المستخدم الجديد",
+      "coverImage": "صورة الغلاف"
     },
     "support": {
       "subtitle": "إدارة تذاكر الدعم الواردة.",
@@ -1117,6 +1129,8 @@
     "tabAbout": "حول",
     "writePost": "اكتب منشوراً...",
     "members": "أعضاء",
+    "posts": "منشورات",
+    "posts": "منشورات",
     "pause": "إيقاف",
     "activate": "تفعيل",
     "delete": "حذف",

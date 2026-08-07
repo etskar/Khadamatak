@@ -6,7 +6,7 @@ import { useLocale } from "next-intl";
 import { signOut, useSession } from "next-auth/react";
 import { X, LogOut, Shield } from "lucide-react";
 import { Link, usePathname } from "@/i18n/navigation";
-import { adminNavItems, mainNavItems } from "@/config/navigation";
+import { adminNavItems, mainNavItems, bottomNavKeys } from "@/config/navigation";
 import { Logo } from "@/components/shared/logo";
 import { Button } from "@/components/ui/button";
 import { LanguageSwitcher } from "./language-switcher";
@@ -66,7 +66,7 @@ export function MobileDrawer() {
 
         <nav className="flex-1 space-y-1 overflow-y-auto p-3">
           {mainNavItems
-            .filter((item) => item.showInSidebar)
+            .filter((item) => item.showInSidebar && !bottomNavKeys.includes(item.key as never))
             .map((item) => {
               const Icon = item.icon;
               const active = isActivePath(pathname, item.href);
