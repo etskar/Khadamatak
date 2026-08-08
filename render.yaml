@@ -3,7 +3,7 @@ services:
     name: khadamatak
     runtime: node
     plan: starter
-    buildCommand: npm ci && npx prisma migrate deploy && npm run build
+    buildCommand: npm ci && npx prisma migrate deploy && npx prisma db seed && npm run build
     startCommand: npm run start
     healthCheckPath: /ar
     envVars:

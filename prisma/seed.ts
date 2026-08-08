@@ -72,10 +72,10 @@ async function main() {
 
   // Categories
   const cats = [
-    { slug: "electronics", nameAr: "Ø¥Ù„ÙƒØªØ±ÙˆÙ†ÙŠØ§Øª", nameNl: "Elektronica", kind: "product", sortOrder: 1 },
-    { slug: "furniture", nameAr: "Ø£Ø«Ø§Ø«", nameNl: "Meubels", kind: "product", sortOrder: 2 },
-    { slug: "cleaning", nameAr: "ØªÙ†Ø¸ÙŠÙ", nameNl: "Schoonmaak", kind: "service", sortOrder: 1 },
-    { slug: "transport", nameAr: "Ù†Ù‚Ù„", nameNl: "Transport", kind: "service", sortOrder: 2 },
+    { slug: "electronics", nameAr: "إلكترونيات", nameNl: "Elektronica", kind: "product", sortOrder: 1 },
+    { slug: "furniture", nameAr: "أثاث", nameNl: "Meubels", kind: "product", sortOrder: 2 },
+    { slug: "cleaning", nameAr: "تنظيف", nameNl: "Schoonmaak", kind: "service", sortOrder: 1 },
+    { slug: "transport", nameAr: "نقل", nameNl: "Transport", kind: "service", sortOrder: 2 },
   ];
   for (const c of cats) {
     await db.category.upsert({
@@ -91,30 +91,9 @@ async function main() {
     update: {},
   });
 
-  const cities = [
-    { slug: "amsterdam", name: "Amsterdam", nameAr: "Ø£Ù…Ø³ØªØ±Ø¯Ø§Ù…", nameNl: "Amsterdam", lat: 52.3676, lng: 4.9041 },
-    { slug: "rotterdam", name: "Rotterdam", nameAr: "Ø±ÙˆØªØ±Ø¯Ø§Ù…", nameNl: "Rotterdam", lat: 51.9244, lng: 4.4777 },
-    { slug: "utrecht", name: "Utrecht", nameAr: "Ø£ÙˆØªØ±ÙŠØ®Øª", nameNl: "Utrecht", lat: 52.0907, lng: 5.1214 },
-    { slug: "groningen", name: "Groningen", nameAr: "Ø®Ø±ÙˆÙ†ÙŠÙ†ØºÙ†", nameNl: "Groningen", lat: 53.2194, lng: 6.5665 },
-  ];
-  for (const c of cities) {
-    await db.cityGroup.upsert({
-      where: { slug: c.slug },
-      create: {
-        slug: c.slug,
-        name: c.name,
-        nameAr: c.nameAr,
-        nameNl: c.nameNl,
-        city: c.name,
-        country: "NL",
-        latitude: c.lat,
-        longitude: c.lng,
-        requiresVerification: true,
-        description: `${c.name} community`,
-      },
-      update: { latitude: c.lat, longitude: c.lng },
-    });
-  }
+  // Seed 33 Dutch city groups (idempotent upsert)
+  const { ensureDefaultCities } = await import("../src/server/marketplace/group-service");
+  await ensureDefaultCities();
 
   const seller = await db.user.findUnique({
     where: { email: "seller@khadamatak.com" },

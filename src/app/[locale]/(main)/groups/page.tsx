@@ -1,5 +1,5 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { listGroups, ensureDefaultCities } from "@/server/marketplace/group-service";
+import { listGroups } from "@/server/marketplace/group-service";
 import { PageHeader } from "@/components/shared/page-header";
 import { Link } from "@/i18n/navigation";
 import { MapPin, Users, MessageCircle, ShieldCheck } from "lucide-react";
@@ -12,7 +12,6 @@ export default async function GroupsPage({
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("marketplace");
-  await ensureDefaultCities();
   const groups = await listGroups();
 
   return (
